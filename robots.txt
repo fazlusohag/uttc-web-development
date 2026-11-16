@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://fazlusohag.github.io/uttc-web-development/sitemap.xml
