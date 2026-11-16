@@ -59,13 +59,15 @@
     .section-heading span{color:var(--green);font-weight:700}
     .section-heading h2{font-size:clamp(28px,4vw,39px);margin:8px 0}
     .section-heading p{color:var(--text)}
-    .course-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
-    .course-card{background:white;padding:27px 22px;border:1px solid #e8edf3;border-radius:13px;transition:.35s}
-    .course-card:hover{transform:translateY(-9px);box-shadow:0 15px 40px #142d4e12;border-color:#a9d6bd}
-    .course-icon{width:58px;height:58px;display:grid;place-items:center;background:#e9f3fd;border-radius:12px;font-size:29px;margin-bottom:18px}
-    .course-card h3{font-size:19px;margin-bottom:10px}
-    .course-card p{color:var(--text);font-size:14px;margin-bottom:17px}
-    .course-card a{color:var(--green);font-weight:700}
+    .course-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:stretch}
+    .course-card{position:relative;background:white;padding:28px 24px 25px;border:1px solid #e5ebf2;border-radius:16px;transition:transform .3s,box-shadow .3s,border-color .3s;display:flex;flex-direction:column;min-height:100%}
+    .course-card:hover{transform:translateY(-7px);box-shadow:0 16px 38px #142d4e18;border-color:#a9d6bd}
+    .course-icon{width:62px;height:62px;display:grid;place-items:center;background:linear-gradient(135deg,#e9f3fd,#e9f5ee);border-radius:15px;font-size:31px;margin-bottom:18px}
+    .course-tag{display:inline-flex;align-self:flex-start;background:#edf6f0;color:var(--green);padding:4px 11px;border-radius:30px;font-size:12px;font-weight:700;margin-bottom:11px}
+    .course-card h3{font-size:20px;line-height:1.35;margin-bottom:10px}
+    .course-card p{color:var(--text);font-size:14px;margin-bottom:20px;flex:1}
+    .course-card a{display:inline-flex;align-items:center;gap:7px;color:var(--green);font-weight:700;border-top:1px solid #edf0f4;padding-top:14px}
+    .course-card a:hover{color:var(--blue)}
     .about-grid{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:50px}
     .about-content h2{font-size:35px;margin:10px 0 18px}
     .about-content p{color:var(--text);margin-bottom:15px}
@@ -96,7 +98,7 @@
     .reveal{opacity:0;transform:translateY(25px);transition:.7s ease}
     .reveal.visible{opacity:1;transform:translateY(0)}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}}
-    @media(max-width:950px){.course-grid{grid-template-columns:repeat(2,1fr)}.nav-links{gap:12px}}
+    @media(max-width:950px){.course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nav-links{gap:12px}}
     @media(max-width:720px){
       .navbar{min-height:76px}
       .brand{gap:8px}
@@ -156,10 +158,36 @@
     <section class="section light" id="courses"><div class="container">
       <div class="section-heading"><span>OUR TRAINING PROGRAMS</span><h2>আমাদের প্রশিক্ষণ কোর্সসমূহ</h2><p>মৌলভীবাজারে দক্ষতা উন্নয়ন ও পেশাগত প্রশিক্ষণের জন্য আমাদের কোর্সগুলো সম্পর্কে জানুন।</p></div>
       <div class="course-grid">
-        <article class="course-card reveal"><div class="course-icon">🚗</div><h3>Motor Driving Training</h3><p>Auto ও Manual গাড়ি চালনা, ট্রাফিক নিয়ম, Road Signs এবং নিরাপদ ড্রাইভিং প্রশিক্ষণ।</p><a href="#contact">বিস্তারিত জানুন →</a></article>
-        <article class="course-card reveal"><div class="course-icon">💻</div><h3>Computer Office Application</h3><p>MS Word, Excel, PowerPoint, Internet ও আধুনিক অফিস ব্যবস্থাপনা প্রশিক্ষণ।</p><a href="#contact">বিস্তারিত জানুন →</a></article>
-        <article class="course-card reveal"><div class="course-icon">🌐</div><h3>Professional Freelancing</h3><p>ডিজিটাল দক্ষতা, অনলাইন কাজ ও Freelancing Marketplace সম্পর্কে প্রশিক্ষণ।</p><a href="#contact">বিস্তারিত জানুন →</a></article>
-        <article class="course-card reveal"><div class="course-icon">🎨</div><h3>Professional Graphic Design</h3><p>Creative Design, Graphic Design ও ডিজিটাল ডিজাইন দক্ষতা উন্নয়ন।</p><a href="#contact">বিস্তারিত জানুন →</a></article>
+        <article class="course-card reveal">
+          <div class="course-icon">🚗</div><span class="course-tag">জনপ্রিয় প্রশিক্ষণ</span>
+          <h3>Motor Driving Training</h3>
+          <p>Auto ও Manual গাড়ি চালনা, Road Signs, ট্রাফিক আইন, Parking এবং নিরাপদ ড্রাইভিংয়ের ব্যবহারিক প্রশিক্ষণ।</p>
+          <a href="driving-training-moulvibazar.html">কোর্সের বিস্তারিত দেখুন <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="course-card reveal">
+          <div class="course-icon">👩‍🦰</div><span class="course-tag">নারীদের জন্য</span>
+          <h3>Women Driving Training</h3>
+          <p>নারী শিক্ষার্থীদের জন্য ড্রাইভিংয়ের প্রয়োজনীয় তত্ত্বীয় ও ব্যবহারিক দক্ষতা অর্জনের প্রশিক্ষণ।</p>
+          <a href="women-driving-training-moulvibazar.html">কোর্সের বিস্তারিত দেখুন <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="course-card reveal">
+          <div class="course-icon">💻</div><span class="course-tag">ডিজিটাল দক্ষতা</span>
+          <h3>Computer Office Application</h3>
+          <p>MS Word, Excel, PowerPoint, Internet এবং আধুনিক অফিস অ্যাপ্লিকেশন ব্যবহারের প্রশিক্ষণ।</p>
+          <a href="computer-office-application-moulvibazar.html">কোর্সের বিস্তারিত দেখুন <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="course-card reveal">
+          <div class="course-icon">🌐</div><span class="course-tag">অনলাইন ক্যারিয়ার</span>
+          <h3>Professional Freelancing</h3>
+          <p>ডিজিটাল দক্ষতা, অনলাইন কাজের প্রস্তুতি এবং Freelancing Marketplace সম্পর্কে প্রশিক্ষণ।</p>
+          <a href="freelancing-course-moulvibazar.html">কোর্সের বিস্তারিত দেখুন <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="course-card reveal">
+          <div class="course-icon">🎨</div><span class="course-tag">সৃজনশীল দক্ষতা</span>
+          <h3>Professional Graphic Design</h3>
+          <p>Creative Design, Graphic Design tools এবং পেশাগত ডিজাইন দক্ষতা উন্নয়নের প্রশিক্ষণ।</p>
+          <a href="graphic-design-course-moulvibazar.html">কোর্সের বিস্তারিত দেখুন <span aria-hidden="true">→</span></a>
+        </article>
       </div>
     </div></section>
     <section class="section" id="about"><div class="container about-grid">
