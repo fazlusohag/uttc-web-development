@@ -2,160 +2,949 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>UTTC | উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র, মৌলভীবাজার</title>
+<title>UTTC Moulvibazar | Driving, Computer, Freelancing & Graphic Design Training</title>
 
-    <meta name="description" content="উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র, মৌলভীবাজার। দক্ষতা উন্নয়ন ও কর্মসংস্থানমুখী প্রশিক্ষণের নির্ভরযোগ্য প্রতিষ্ঠান।">
+<meta name="description" content="মৌলভীবাজারে ড্রাইভিং প্রশিক্ষণ, কম্পিউটার কোর্স, ফ্রিল্যান্সিং ও গ্রাফিক ডিজাইন প্রশিক্ষণের জন্য যোগাযোগ করুন উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র (UTTC)-এ।">
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#142D4E">
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f3f5f8;
-            color: #142d4e;
-            line-height: 1.7;
-        }
+<link rel="canonical" href="https://fazlusohag.github.io/uttc-web-development/">
 
-        header {
-            background: #142d4e;
-            color: white;
-            text-align: center;
-            padding: 25px 15px;
-        }
+<meta property="og:type" content="website">
+<meta property="og:title" content="UTTC Moulvibazar | Technical Training Centre">
+<meta property="og:description" content="দক্ষতা অর্জন করুন, গড়ুন আপনার উজ্জ্বল ভবিষ্যৎ।">
+<meta property="og:image" content="uttc-logo.png">
 
-        header h1 {
-            font-size: 28px;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-        nav {
-            background: #237a57;
-            padding: 12px;
-            text-align: center;
-        }
+<style>
+:root {
+  --navy:#142D4E;
+  --blue:#087FE5;
+  --green:#237A57;
+  --light:#F3F6FA;
+  --text:#526176;
+  --white:#fff;
+}
 
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin: 0 12px;
-            font-weight: bold;
-        }
+* {
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
-        .hero {
-            text-align: center;
-            padding: 70px 20px;
-            background: white;
-        }
+html {
+  scroll-behavior:smooth;
+  scroll-padding-top:90px;
+}
 
-        .hero h2 {
-            font-size: 32px;
-            margin-bottom: 15px;
-        }
+body {
+  font-family:'Hind Siliguri',sans-serif;
+  color:var(--navy);
+  line-height:1.7;
+  overflow-x:hidden;
+}
 
-        .hero p {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
+a {
+  text-decoration:none;
+  color:inherit;
+}
 
-        .button {
-            display: inline-block;
-            background: #237a57;
-            color: white;
-            padding: 12px 25px;
-            text-decoration: none;
-            border-radius: 5px;
-        }
+.container {
+  width:min(1160px,92%);
+  margin:auto;
+}
 
-        .about {
-            max-width: 900px;
-            margin: 35px auto;
-            padding: 25px;
-            text-align: center;
-        }
+.topbar {
+  background:var(--navy);
+  color:white;
+  padding:8px 0;
+  font-size:13px;
+}
 
-        footer {
-            background: #142d4e;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
+.topbar-inner {
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+}
 
-        @media (max-width: 600px) {
-            header h1 {
-                font-size: 22px;
-            }
+header {
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:white;
+  box-shadow:0 3px 20px #142d4e12;
+}
 
-            nav a {
-                display: inline-block;
-                margin: 5px;
-            }
+.navbar {
+  min-height:82px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
 
-            .hero h2 {
-                font-size: 25px;
-            }
-        }
-    </style>
+.brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.brand img {
+  width:62px;
+  height:62px;
+  object-fit:contain;
+}
+
+.brand-text strong {
+  display:block;
+  font-family:Inter,sans-serif;
+  font-size:22px;
+}
+
+.brand-text span {
+  display:block;
+  color:var(--green);
+  font-size:12px;
+  font-weight:600;
+}
+
+.nav-links {
+  display:flex;
+  align-items:center;
+  gap:22px;
+  list-style:none;
+  font-size:15px;
+  font-weight:600;
+}
+
+.nav-links a:hover {
+  color:var(--green);
+}
+
+.nav-cta {
+  background:var(--green);
+  color:white!important;
+  padding:10px 18px;
+  border-radius:7px;
+}
+
+.menu-btn {
+  display:none;
+  background:var(--navy);
+  color:white;
+  border:0;
+  border-radius:6px;
+  padding:8px 12px;
+  font-size:22px;
+  cursor:pointer;
+}
+
+/* Hero */
+
+.hero {
+  position:relative;
+  overflow:hidden;
+  padding:105px 0 100px;
+  background:
+    radial-gradient(circle at 90% 20%,#087fe51c,transparent 32%),
+    linear-gradient(120deg,#F1F6FC,#fff);
+}
+
+.hero-content {
+  max-width:800px;
+  animation:fadeUp 1s ease both;
+}
+
+.eyebrow {
+  display:inline-block;
+  background:#E7F4EC;
+  color:var(--green);
+  padding:7px 16px;
+  border-radius:30px;
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:22px;
+}
+
+.hero h1 {
+  font-size:clamp(36px,5vw,61px);
+  line-height:1.2;
+  margin-bottom:22px;
+}
+
+.hero h1 span {
+  color:var(--blue);
+}
+
+.hero p {
+  color:var(--text);
+  font-size:19px;
+  max-width:670px;
+  margin-bottom:30px;
+}
+
+.buttons {
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+}
+
+.btn {
+  display:inline-block;
+  padding:12px 25px;
+  border-radius:7px;
+  font-weight:700;
+  transition:.3s;
+}
+
+.btn-primary {
+  background:var(--green);
+  color:white;
+}
+
+.btn-primary:hover {
+  background:#185D40;
+  transform:translateY(-3px);
+}
+
+.btn-outline {
+  border:1px solid var(--navy);
+}
+
+.btn-outline:hover {
+  background:var(--navy);
+  color:white;
+}
+
+/* Highlights */
+
+.highlights {
+  margin-top:-30px;
+  position:relative;
+  z-index:2;
+}
+
+.highlight-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  background:white;
+  box-shadow:0 12px 40px #142d4e12;
+  border-radius:12px;
+  padding:25px;
+  gap:20px;
+}
+
+.highlight-item {
+  text-align:center;
+}
+
+.highlight-item strong {
+  display:block;
+  font-size:19px;
+}
+
+.highlight-item span {
+  color:var(--text);
+  font-size:14px;
+}
+
+/* Common */
+
+.section {
+  padding:85px 0;
+}
+
+.light {
+  background:var(--light);
+}
+
+.section-heading {
+  text-align:center;
+  max-width:700px;
+  margin:0 auto 45px;
+}
+
+.section-heading span {
+  color:var(--green);
+  font-weight:700;
+}
+
+.section-heading h2 {
+  font-size:clamp(28px,4vw,39px);
+  margin:8px 0;
+}
+
+.section-heading p {
+  color:var(--text);
+}
+
+/* Courses */
+
+.course-grid {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:22px;
+}
+
+.course-card {
+  background:white;
+  padding:27px 22px;
+  border:1px solid #e8edf3;
+  border-radius:13px;
+  transition:.35s;
+}
+
+.course-card:hover {
+  transform:translateY(-9px);
+  box-shadow:0 15px 40px #142d4e12;
+  border-color:#a9d6bd;
+}
+
+.course-icon {
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  background:#e9f3fd;
+  border-radius:12px;
+  font-size:29px;
+  margin-bottom:18px;
+}
+
+.course-card h3 {
+  font-size:19px;
+  margin-bottom:10px;
+}
+
+.course-card p {
+  color:var(--text);
+  font-size:14px;
+  margin-bottom:17px;
+}
+
+.course-card a {
+  color:var(--green);
+  font-weight:700;
+}
+
+/* About */
+
+.about-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:center;
+  gap:50px;
+}
+
+.about-content h2 {
+  font-size:35px;
+  margin:10px 0 18px;
+}
+
+.about-content p {
+  color:var(--text);
+  margin-bottom:15px;
+}
+
+.about-box {
+  background:linear-gradient(140deg,var(--navy),#20517A);
+  color:white;
+  text-align:center;
+  padding:50px 30px;
+  border-radius:18px;
+}
+
+.about-box strong {
+  display:block;
+  font-family:Inter,sans-serif;
+  font-size:75px;
+  color:#76C3FF;
+}
+
+.about-box h3 {
+  font-size:23px;
+}
+
+/* Special */
+
+.special-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:25px;
+}
+
+.special-card {
+  background:white;
+  padding:32px;
+  border-radius:14px;
+  border-left:4px solid var(--green);
+  box-shadow:0 10px 35px #142d4e0c;
+}
+
+.special-card h3 {
+  font-size:23px;
+  margin-bottom:12px;
+}
+
+.special-card p {
+  color:var(--text);
+  margin-bottom:20px;
+}
+
+/* CTA */
+
+.cta {
+  background:linear-gradient(115deg,#142D4E,#20517A);
+  color:white;
+  text-align:center;
+  padding:65px 25px;
+  border-radius:18px;
+}
+
+.cta h2 {
+  font-size:clamp(27px,4vw,38px);
+  margin-bottom:15px;
+}
+
+.cta p {
+  color:#d9e7f4;
+  margin-bottom:25px;
+}
+
+.cta .btn {
+  background:white;
+  color:var(--navy);
+}
+
+/* Contact */
+
+.contact-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+}
+
+.contact-card {
+  text-align:center;
+  border:1px solid #e8edf3;
+  padding:28px 18px;
+  border-radius:12px;
+}
+
+.contact-card .icon {
+  font-size:30px;
+  margin-bottom:10px;
+}
+
+.contact-card p {
+  color:var(--text);
+}
+
+/* Footer */
+
+footer {
+  background:#0D2038;
+  color:white;
+  padding:50px 0 20px;
+}
+
+.footer-grid {
+  display:grid;
+  grid-template-columns:1.5fr 1fr 1fr;
+  gap:35px;
+  margin-bottom:35px;
+}
+
+footer h3 {
+  margin-bottom:14px;
+}
+
+footer p,footer a {
+  color:#c7d4e3;
+  font-size:14px;
+}
+
+footer ul {
+  list-style:none;
+}
+
+footer li {
+  margin-bottom:8px;
+}
+
+.copyright {
+  border-top:1px solid #30445c;
+  padding-top:18px;
+  text-align:center;
+  font-size:13px;
+  color:#aabacc;
+}
+
+/* WhatsApp */
+
+.whatsapp {
+  position:fixed;
+  bottom:22px;
+  right:22px;
+  z-index:999;
+  background:#20B96B;
+  color:white;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-size:25px;
+  box-shadow:0 5px 20px #0003;
+}
+
+/* Animation */
+
+@keyframes fadeUp {
+  from {
+    opacity:0;
+    transform:translateY(25px);
+  }
+  to {
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.reveal {
+  opacity:0;
+  transform:translateY(25px);
+  transition:.7s ease;
+}
+
+.reveal.visible {
+  opacity:1;
+  transform:translateY(0);
+}
+
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after {
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+
+  .reveal {
+    opacity:1;
+    transform:none;
+  }
+}
+
+/* Mobile */
+
+@media(max-width:950px) {
+  .course-grid {
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .nav-links {
+    gap:12px;
+  }
+}
+
+@media(max-width:720px) {
+  .navbar {
+    min-height:72px;
+  }
+
+  .brand img {
+    width:50px;
+    height:50px;
+  }
+
+  .brand-text strong {
+    font-size:19px;
+  }
+
+  .brand-text span {
+    font-size:10px;
+  }
+
+  .menu-btn {
+    display:block;
+  }
+
+  .nav-links {
+    display:none;
+    position:absolute;
+    top:72px;
+    left:0;
+    right:0;
+    background:white;
+    padding:22px;
+    flex-direction:column;
+    align-items:stretch;
+    box-shadow:0 12px 30px #0001;
+  }
+
+  .nav-links.active {
+    display:flex;
+  }
+
+  .hero {
+    padding:70px 0;
+  }
+
+  .hero p {
+    font-size:17px;
+  }
+
+  .highlight-grid,
+  .about-grid,
+  .special-grid,
+  .contact-grid,
+  .footer-grid {
+    grid-template-columns:1fr;
+  }
+
+  .course-grid {
+    grid-template-columns:1fr;
+  }
+
+  .section {
+    padding:65px 0;
+  }
+}
+</style>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"EducationalOrganization",
+  "name":"Upazila Technical Training Centre",
+  "alternateName":"UTTC Moulvibazar",
+  "url":"https://fazlusohag.github.io/uttc-web-development/",
+  "telephone":"+8801727007417",
+  "description":"কারিগরি প্রশিক্ষণ ও দক্ষতা উন্নয়ন প্রতিষ্ঠান, মৌলভীবাজার, বাংলাদেশ।",
+  "address":{
+    "@type":"PostalAddress",
+    "addressLocality":"Moulvibazar",
+    "addressCountry":"BD"
+  }
+}
+</script>
 </head>
 
 <body>
 
-    <header>
-        <h1>UTTC</h1>
-        <p>উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র, মৌলভীবাজার</p>
-    </header>
+<div class="topbar">
+  <div class="container topbar-inner">
+    <span>📍 মৌলভীবাজার, বাংলাদেশ</span>
+    <span>☎ 01727-007417</span>
+  </div>
+</div>
 
-    <nav>
-        <a href="#">হোম</a>
-        <a href="#about">আমাদের সম্পর্কে</a>
-        <a href="#courses">কোর্সসমূহ</a>
-        <a href="#contact">যোগাযোগ</a>
-    </nav>
+<header>
+  <div class="container navbar">
 
-    <section class="hero">
-        <h2>Welcome to UTTC</h2>
+    <a href="#" class="brand">
+      <img src="uttc-logo.png" alt="UTTC Official Logo">
+      <div class="brand-text">
+        <strong>UTTC</strong>
+        <span>Technical Training Centre</span>
+      </div>
+    </a>
 
-        <p>
-            দক্ষতা অর্জন করুন, গড়ুন আপনার উজ্জ্বল ভবিষ্যৎ।
-        </p>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">☰</button>
 
-        <a href="#courses" class="button">
-            আমাদের কোর্সসমূহ
-        </a>
-    </section>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#">হোম</a></li>
+      <li><a href="#about">আমাদের সম্পর্কে</a></li>
+      <li><a href="#courses">কোর্সসমূহ</a></li>
+      <li><a href="#special">বিশেষ প্রশিক্ষণ</a></li>
+      <li><a href="#contact">যোগাযোগ</a></li>
+      <li><a href="#contact" class="nav-cta">ভর্তি তথ্য</a></li>
+    </ul>
 
-    <section class="about" id="about">
-        <h2>আমাদের সম্পর্কে</h2>
+  </div>
+</header>
 
-        <p>
-            উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র (UTTC),
-            মৌলভীবাজার একটি দক্ষতা উন্নয়ন ও
-            কর্মসংস্থানমুখী প্রশিক্ষণ প্রতিষ্ঠান।
-        </p>
-    </section>
+<main>
 
-    <section class="about" id="courses">
-        <h2>আমাদের প্রশিক্ষণ</h2>
-        <p>Motor Driving | Computer Application | Freelancing | Graphic Design</p>
-    </section>
+<section class="hero">
+  <div class="container hero-content">
 
-    <section class="about" id="contact">
-        <h2>যোগাযোগ</h2>
+    <span class="eyebrow">Welcome to UTTC Moulvibazar</span>
+
+    <h1>
+      দক্ষতা অর্জন করুন,<br>
+      গড়ুন আপনার <span>উজ্জ্বল ভবিষ্যৎ</span>
+    </h1>
+
+    <p>
+      উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র (UTTC), মৌলভীবাজার।
+      আধুনিক কারিগরি শিক্ষা ও দক্ষতা উন্নয়নের মাধ্যমে
+      কর্মজীবনের নতুন সম্ভাবনা তৈরি করুন।
+    </p>
+
+    <div class="buttons">
+      <a href="#courses" class="btn btn-primary">কোর্স দেখুন →</a>
+      <a href="#contact" class="btn btn-outline">যোগাযোগ করুন</a>
+    </div>
+
+  </div>
+</section>
+
+<section class="highlights">
+  <div class="container highlight-grid">
+    <div class="highlight-item">
+      <strong>প্রশিক্ষণমুখী শিক্ষা</strong>
+      <span>Practical Skill Development</span>
+    </div>
+    <div class="highlight-item">
+      <strong>আধুনিক প্রশিক্ষণ</strong>
+      <span>Modern Learning Environment</span>
+    </div>
+    <div class="highlight-item">
+      <strong>মৌলভীবাজার</strong>
+      <span>Your Local Training Centre</span>
+    </div>
+  </div>
+</section>
+
+<section class="section light" id="courses">
+  <div class="container">
+
+    <div class="section-heading">
+      <span>OUR TRAINING PROGRAMS</span>
+      <h2>আমাদের প্রশিক্ষণ কোর্সসমূহ</h2>
+      <p>মৌলভীবাজারে দক্ষতা উন্নয়ন ও পেশাগত প্রশিক্ষণের জন্য আমাদের কোর্সগুলো সম্পর্কে জানুন।</p>
+    </div>
+
+    <div class="course-grid">
+
+      <article class="course-card reveal">
+        <div class="course-icon">🚗</div>
+        <h3>Motor Driving Training</h3>
+        <p>Auto ও Manual গাড়ি চালনা, ট্রাফিক নিয়ম, Road Signs এবং নিরাপদ ড্রাইভিং প্রশিক্ষণ।</p>
+        <a href="#contact">বিস্তারিত জানুন →</a>
+      </article>
+
+      <article class="course-card reveal">
+        <div class="course-icon">💻</div>
+        <h3>Computer Office Application</h3>
+        <p>MS Word, Excel, PowerPoint, Internet ও আধুনিক অফিস ব্যবস্থাপনা প্রশিক্ষণ।</p>
+        <a href="#contact">বিস্তারিত জানুন →</a>
+      </article>
+
+      <article class="course-card reveal">
+        <div class="course-icon">🌐</div>
+        <h3>Professional Freelancing</h3>
+        <p>ডিজিটাল দক্ষতা, অনলাইন কাজ ও Freelancing Marketplace সম্পর্কে প্রশিক্ষণ।</p>
+        <a href="#contact">বিস্তারিত জানুন →</a>
+      </article>
+
+      <article class="course-card reveal">
+        <div class="course-icon">🎨</div>
+        <h3>Professional Graphic Design</h3>
+        <p>Creative Design, Graphic Design ও ডিজিটাল ডিজাইন দক্ষতা উন্নয়ন।</p>
+        <a href="#contact">বিস্তারিত জানুন →</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="container about-grid">
+
+    <div class="about-content reveal">
+      <span class="eyebrow">ABOUT UTTC</span>
+      <h2>উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র, মৌলভীবাজার</h2>
+
+      <p>
+        UTTC একটি কারিগরি ও দক্ষতা উন্নয়নমূলক প্রশিক্ষণ প্রতিষ্ঠান।
+        শিক্ষার্থীদের বাস্তবমুখী দক্ষতা অর্জন, আত্মনির্ভরশীলতা
+        এবং কর্মজীবনের প্রস্তুতিতে সহায়তা করাই আমাদের উদ্দেশ্য।
+      </p>
+
+      <p>
+        আমরা Motor Driving, Computer Application,
+        Freelancing এবং Graphic Design প্রশিক্ষণের মাধ্যমে
+        দক্ষতা উন্নয়নের সুযোগ তৈরি করতে কাজ করছি।
+      </p>
+
+      <a href="#courses" class="btn btn-primary">প্রশিক্ষণ দেখুন</a>
+    </div>
+
+    <div class="about-box reveal">
+      <strong>UTTC</strong>
+      <h3>Learn Skills. Build Your Future.</h3>
+      <p>দক্ষতা হোক আপনার ভবিষ্যতের শক্তি।</p>
+    </div>
+
+  </div>
+</section>
+
+<section class="section light" id="special">
+  <div class="container">
+
+    <div class="section-heading">
+      <span>OUR SPECIAL PROGRAMS</span>
+      <h2>বিশেষ প্রশিক্ষণ সুবিধা</h2>
+      <p>শিক্ষার্থীদের প্রয়োজন অনুযায়ী প্রশিক্ষণ ও দক্ষতা উন্নয়নের সুযোগ।</p>
+    </div>
+
+    <div class="special-grid">
+
+      <article class="special-card reveal">
+        <div class="course-icon">🚘</div>
+        <h3>Professional Driving Practice</h3>
+        <p>গাড়ি চালনার বাস্তব অনুশীলন, Parking, Reverse, Road Driving এবং নিরাপদ ড্রাইভিং দক্ষতা উন্নয়ন।</p>
+        <a href="tel:+8801727007417" class="btn btn-primary">যোগাযোগ করুন</a>
+      </article>
+
+      <article class="special-card reveal">
+        <div class="course-icon">👩‍🎓</div>
+        <h3>Women Driving Training</h3>
+        <p>নারী শিক্ষার্থীদের জন্য ড্রাইভিং প্রশিক্ষণ, প্রয়োজনীয় নিরাপত্তা ও ব্যবহারিক দক্ষতা অর্জনের সুযোগ সম্পর্কে জানুন।</p>
+        <a href="tel:+8801727007417" class="btn btn-primary">যোগাযোগ করুন</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta reveal">
+      <h2>আপনার দক্ষতা উন্নয়নের যাত্রা শুরু হোক আজই</h2>
+      <p>UTTC Moulvibazar-এর প্রশিক্ষণ ও ভর্তি সংক্রান্ত তথ্য জানতে যোগাযোগ করুন।</p>
+      <a href="tel:+8801727007417" class="btn">☎ 01727-007417</a>
+    </div>
+  </div>
+</section>
+
+<section class="section light" id="contact">
+  <div class="container">
+
+    <div class="section-heading">
+      <span>CONTACT US</span>
+      <h2>যোগাযোগ করুন</h2>
+      <p>কোর্স, প্রশিক্ষণ ও ভর্তি সংক্রান্ত তথ্যের জন্য UTTC-এর সঙ্গে যোগাযোগ করুন।</p>
+    </div>
+
+    <div class="contact-grid">
+
+      <div class="contact-card">
+        <div class="icon">📍</div>
+        <h3>ঠিকানা</h3>
         <p>মৌলভীবাজার, বাংলাদেশ</p>
-        <p>মোবাইল: 01727-007417</p>
-        <p>ওয়েবসাইট: uttc.online</p>
-    </section>
+      </div>
 
-    <footer>
-        <p>© 2026 UTTC. All Rights Reserved.</p>
-        <p>Upazila Technical Training Centre, Moulvibazar</p>
-    </footer>
+      <div class="contact-card">
+        <div class="icon">📞</div>
+        <h3>মোবাইল</h3>
+        <p><a href="tel:+8801727007417">01727-007417</a></p>
+      </div>
+
+      <div class="contact-card">
+        <div class="icon">🌐</div>
+        <h3>ওয়েবসাইট</h3>
+        <p><a href="https://uttc.online/">uttc.online</a></p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+
+    <div class="footer-grid">
+
+      <div>
+        <h3>UTTC Moulvibazar</h3>
+        <p>
+          উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র, মৌলভীবাজার।
+          দক্ষতা উন্নয়ন ও কর্মমুখী প্রশিক্ষণের মাধ্যমে
+          সুন্দর ভবিষ্যৎ গড়ার প্রত্যয়ে।
+        </p>
+      </div>
+
+      <div>
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="#about">আমাদের সম্পর্কে</a></li>
+          <li><a href="#courses">কোর্সসমূহ</a></li>
+          <li><a href="#special">বিশেষ প্রশিক্ষণ</a></li>
+          <li><a href="#contact">যোগাযোগ</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3>Our Courses</h3>
+        <ul>
+          <li><a href="#courses">Motor Driving</a></li>
+          <li><a href="#courses">Computer Application</a></li>
+          <li><a href="#courses">Freelancing</a></li>
+          <li><a href="#courses">Graphic Design</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="copyright">
+      © 2026 UTTC - Upazila Technical Training Centre, Moulvibazar. All Rights Reserved.
+    </div>
+
+  </div>
+</footer>
+
+<a class="whatsapp"
+   href="https://wa.me/8801727007417"
+   target="_blank"
+   rel="noopener"
+   aria-label="Contact UTTC on WhatsApp">☎</a>
+
+<script>
+const menuBtn = document.getElementById('menuBtn');
+const navLinks = document.getElementById('navLinks');
+
+menuBtn.addEventListener('click', function() {
+  navLinks.classList.toggle('active');
+
+  const open = navLinks.classList.contains('active');
+  menuBtn.textContent = open ? '✕' : '☰';
+  menuBtn.setAttribute('aria-expanded', open);
+});
+
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    navLinks.classList.remove('active');
+    menuBtn.textContent = '☰';
+    menuBtn.setAttribute('aria-expanded', 'false');
+  });
+});
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, {threshold:0.12});
+
+document.querySelectorAll('.reveal').forEach(item => {
+  observer.observe(item);
+});
+</script>
 
 </body>
 </html>
-
