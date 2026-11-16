@@ -45,9 +45,12 @@
     .approval-badge .approval-mark{display:inline-grid;place-items:center;width:27px;height:27px;flex:0 0 27px;background:#e7f4ec;color:var(--green);border-radius:50%;font-size:16px}
     .approval-badge strong{color:var(--green);white-space:nowrap}
     .approval-subtext{display:block;color:var(--text);font-size:13px;font-weight:500;margin-top:2px}
-    .approval-trust{background:#edf6f0;border-top:1px solid #d7eadf;border-bottom:1px solid #d7eadf;padding:18px 0;text-align:center}
-    .approval-trust strong{color:var(--green);font-size:18px;display:block}
-    .approval-trust span{color:var(--text);font-size:14px}
+    .approval-trust{background:#edf6f0;border-top:1px solid #d7eadf;border-bottom:1px solid #d7eadf;padding:20px 0;text-align:center}
+    .approval-trust .container{min-width:0}
+    .approval-trust strong{color:var(--green);font-size:clamp(15px,2.2vw,19px);line-height:1.5;display:block;max-width:100%;overflow-wrap:anywhere}
+    .approval-trust span{color:var(--text);font-size:14px;display:block;margin-top:5px}
+    .highlight-item{min-width:0;overflow-wrap:anywhere}
+    .highlight-item strong,.highlight-item span{overflow-wrap:anywhere}
     .eyebrow{display:inline-block;background:#E7F4EC;color:var(--green);padding:7px 16px;border-radius:30px;font-size:14px;font-weight:700;margin-bottom:22px}
     .hero h1{font-size:clamp(36px,5vw,61px);line-height:1.2;margin-bottom:22px}
     .hero h1 span{color:var(--blue)}
@@ -109,27 +112,46 @@
     .reveal.visible{opacity:1;transform:translateY(0)}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}}
     @media(max-width:950px){.course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nav-links{gap:12px}}
-    @media(max-width:720px){
-      .navbar{min-height:76px}
-      .brand{gap:8px}
+    @media(max-width:900px){
+      .navbar{min-height:76px;position:relative}
+      .brand{gap:8px;max-width:calc(100% - 64px)}
       .brand img{width:50px;height:50px}
       .brand-text strong{font-size:19px}
       .brand-text span{font-size:11px;max-width:220px}
       .menu-btn{display:block;flex-shrink:0}
-      .nav-links{display:none;position:absolute;top:76px;left:0;right:0;background:white;padding:22px;flex-direction:column;align-items:stretch;box-shadow:0 12px 30px #0001}
+      .nav-links{display:none;position:absolute;top:76px;left:0;right:0;background:#fff;padding:22px 20px 26px;flex-direction:column;align-items:stretch;gap:12px;box-shadow:0 12px 30px #0002;border-top:1px solid #edf0f4;z-index:1001}
       .nav-links.active{display:flex}
-      .nav-links{gap:12px;padding:22px 20px 26px}
-      .nav-links li{width:100%}
-      .nav-links li .nav-cta{display:block;width:100%;padding:13px 16px;border-radius:9px;font-size:16px;line-height:1.5}
-      .nav-links li:nth-child(5){margin-top:8px}
-      .nav-links li:nth-child(6),.nav-links li:nth-child(7){margin-top:0}
-      .hero{padding:55px 0 70px}
-      .approval-badge{font-size:13px;padding:9px 11px;gap:7px;line-height:1.5}
+      .nav-links li{width:100%;margin:0!important}
+      .nav-links li .nav-cta{display:block;width:100%;padding:13px 16px;border-radius:9px;font-size:16px;line-height:1.5;text-align:center}
+      .nav-links li:nth-child(5) .nav-cta{background:#142D4E;color:#fff!important}
+      .nav-links li:nth-child(6) .nav-cta{background:#087FE5;color:#fff!important}
+      .nav-links li:nth-child(7) .nav-cta{background:#237A57;color:#fff!important}
+      .hero{padding:48px 0 62px}
+      .hero-content{width:100%;min-width:0}
+      .hero h1{font-size:clamp(30px,7.2vw,46px);line-height:1.25;overflow-wrap:anywhere}
+      .approval-badge{display:flex;width:100%;font-size:13px;padding:10px 11px;gap:7px;line-height:1.55;align-items:flex-start}
+      .approval-badge>span:last-child{min-width:0;overflow-wrap:anywhere}
+      .approval-badge strong{white-space:normal}
       .approval-subtext{font-size:12px}
+      .approval-trust{padding:17px 0}
+      .approval-trust strong{font-size:16px;line-height:1.55}
+      .approval-trust span{font-size:13px;line-height:1.5}
       .hero p{font-size:17px}
-      .highlight-grid,.about-grid,.special-grid,.contact-grid,.footer-grid{grid-template-columns:1fr}
-      .course-grid{grid-template-columns:1fr}
-      .section{padding:65px 0}
+      .buttons{gap:10px}
+      .buttons .btn{max-width:100%;text-align:center}
+      .highlight-grid,.about-grid,.special-grid,.contact-grid,.footer-grid{grid-template-columns:minmax(0,1fr)}
+      .highlight-grid{padding:20px;gap:16px}
+      .highlight-item{width:100%;text-align:center}
+      .course-grid{grid-template-columns:minmax(0,1fr)}
+      .section{padding:58px 0}
+    }
+    @media(max-width:420px){
+      .container{width:min(100% - 30px,1160px)}
+      .brand-text span{max-width:185px;font-size:10px}
+      .hero h1{font-size:clamp(28px,8vw,36px)}
+      .approval-trust strong{font-size:15px}
+      .buttons{flex-direction:column;align-items:stretch}
+      .buttons .btn{width:100%}
     }
   </style>
   <script type="application/ld+json">
@@ -141,7 +163,7 @@
     "url":"https://fazlusohag.github.io/uttc-web-development/",
     "logo":"https://fazlusohag.github.io/uttc-web-development/uttc-logo.png",
     "telephone":"+8801727007417",
-    "description":"বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত প্রতিষ্ঠান। প্রতিষ্ঠান কোড 62065। মৌলভীবাজারে কারিগরি প্রশিক্ষণ ও দক্ষতা উন্নয়ন।",
+    "description":"গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত প্রতিষ্ঠান। প্রতিষ্ঠান কোড 62065। মৌলভীবাজারে কারিগরি প্রশিক্ষণ ও দক্ষতা উন্নয়ন।",
     "identifier":{"@type":"PropertyValue","propertyID":"BTEB Institution Code","value":"62065"},
     "address":{"@type":"PostalAddress","addressLocality":"Moulvibazar","addressCountry":"BD"}
   }
@@ -164,12 +186,12 @@
   <main>
     <section class="hero"><div class="container hero-content">
       <span class="eyebrow">Welcome to UTTC Moulvibazar</span>
-      <div class="approval-badge"><span class="approval-mark" aria-hidden="true">✓</span><span>বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত প্রতিষ্ঠান<span class="approval-subtext">প্রতিষ্ঠান কোড: <strong>62065</strong></span></span></div>
+      <div class="approval-badge"><span class="approval-mark" aria-hidden="true">✓</span><span>গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত প্রতিষ্ঠান<span class="approval-subtext">প্রতিষ্ঠান কোড: <strong>62065</strong></span></span></div>
       <h1>দক্ষতা অর্জন করুন,<br>গড়ুন আপনার <span>উজ্জ্বল ভবিষ্যৎ</span></h1>
       <p>উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র (UTTC), মৌলভীবাজার। আধুনিক কারিগরি শিক্ষা ও দক্ষতা উন্নয়নের মাধ্যমে কর্মজীবনের নতুন সম্ভাবনা তৈরি করুন।</p>
       <div class="buttons"><a href="#courses" class="btn btn-primary">কোর্স দেখুন →</a><a href="#contact" class="btn btn-outline">যোগাযোগ করুন</a></div>
     </div></section>
-    <section class="approval-trust" aria-label="BTEB approval information"><div class="container"><strong>সরকারি কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত প্রতিষ্ঠান</strong><span>প্রতিষ্ঠান কোড: 62065 · প্রশিক্ষণ নিন অনুমোদিত প্রতিষ্ঠানে</span></div></section>
+    <section class="approval-trust" aria-label="BTEB approval information"><div class="container"><strong>গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত প্রতিষ্ঠান</strong><span>প্রতিষ্ঠান কোড: 62065 · প্রশিক্ষণ নিন অনুমোদিত প্রতিষ্ঠানে</span></div></section>
     <section class="highlights"><div class="container highlight-grid">
       <div class="highlight-item"><strong>প্রশিক্ষণমুখী শিক্ষা</strong><span>Practical Skill Development</span></div>
       <div class="highlight-item"><strong>আধুনিক প্রশিক্ষণ</strong><span>Modern Learning Environment</span></div>
@@ -213,7 +235,7 @@
     <section class="section" id="about"><div class="container about-grid">
       <div class="about-content reveal"><span class="eyebrow">ABOUT UTTC</span><h2>উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র, মৌলভীবাজার</h2>
         <p>UTTC একটি কারিগরি ও দক্ষতা উন্নয়নমূলক প্রশিক্ষণ প্রতিষ্ঠান। শিক্ষার্থীদের বাস্তবমুখী দক্ষতা অর্জন, আত্মনির্ভরশীলতা এবং কর্মজীবনের প্রস্তুতিতে সহায়তা করাই আমাদের উদ্দেশ্য।</p>
-        <p><strong>প্রাতিষ্ঠানিক অনুমোদন:</strong> বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত প্রতিষ্ঠান। <strong>প্রতিষ্ঠান কোড: 62065</strong>।</p>
+        <p><strong>প্রাতিষ্ঠানিক অনুমোদন:</strong> গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত প্রতিষ্ঠান। <strong>প্রতিষ্ঠান কোড: 62065</strong>।</p>
         <p>আমরা Motor Driving, Computer Application, Freelancing এবং Graphic Design প্রশিক্ষণের মাধ্যমে দক্ষতা উন্নয়নের সুযোগ তৈরি করতে কাজ করছি।</p>
         <a href="#courses" class="btn btn-primary">প্রশিক্ষণ দেখুন</a>
       </div>
