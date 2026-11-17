@@ -5,7 +5,7 @@ declare(strict_types=1);
  * Reads the site's sitemap and builds a local searchable knowledge index.
  */
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit("CLI only\n"); }
-$site = rtrim(getenv('UTTC_SITE_URL') ?: 'https://uttc.online', '/');
+$site = rtrim(getenv('UTTC_SITE_URL') ?: 'https://uttc.edu.bd', '/');
 $sitemap = $site . '/sitemap.xml';
 function fetch_url(string $url): string {
     $ch=curl_init($url);
