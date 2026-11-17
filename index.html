@@ -282,6 +282,37 @@
     }
 
 
+
+    /* Navigation, hero typography and background polish — Nov 2026 */
+    @media(min-width:901px){
+      .navbar{min-height:96px;align-items:center;gap:22px;padding-top:12px;padding-bottom:12px}
+      .brand{flex:0 0 245px}
+      .brand-text strong{font-size:21px}
+      .nav-links{flex:1 1 auto;min-width:0;max-width:850px;justify-content:flex-end;flex-wrap:wrap;column-gap:13px;row-gap:8px;font-size:14px}
+      .nav-links li{flex:0 0 auto}
+      .nav-links a:not(.nav-cta){display:inline-block;padding:5px 0;white-space:nowrap}
+      .nav-links .nav-cta{padding:8px 12px;white-space:nowrap;font-size:13px}
+    }
+    .hero h1{line-height:1.42;letter-spacing:0;overflow-wrap:normal;text-wrap:pretty}
+    .hero h1 span{display:inline-block;line-height:1.42;padding-top:2px;padding-bottom:3px}
+    .hero-content{min-width:0}
+    .hero{background:
+      radial-gradient(ellipse at 88% 12%,rgba(8,127,229,.19),transparent 34%),
+      radial-gradient(ellipse at 7% 88%,rgba(35,122,87,.15),transparent 36%),
+      linear-gradient(128deg,#edf4fc 0%,#ffffff 48%,#eef8f2 100%)}
+    .light{background:linear-gradient(135deg,#f0f5fb 0%,#f8fbff 52%,#eff7f2 100%)}
+    .branches{background:linear-gradient(125deg,#edf4fb 0%,#f7fafc 48%,#edf7f1 100%)}
+    .approval-trust{background:linear-gradient(100deg,#eaf4ed,#f4f9fc 55%,#eaf3fb)}
+    @media(max-width:900px){
+      .nav-links{gap:10px}
+      .nav-links li a{overflow-wrap:anywhere}
+      .hero h1{line-height:1.48;letter-spacing:0}
+      .hero h1 span{line-height:1.48;padding-top:3px;padding-bottom:4px}
+    }
+    @media(max-width:420px){
+      .hero h1{line-height:1.5;font-size:clamp(27px,7.5vw,34px)}
+      .hero h1 span{line-height:1.5}
+    }
   </style>
   <script type="application/ld+json">
   {
