@@ -2,3 +2,8 @@ Options -Indexes
 <FilesMatch "^(knowledge\.json|config\.php|\.env|.*\.log)$">
   Require all denied
 </FilesMatch>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^runtime/ - [F,L]
+</IfModule>
