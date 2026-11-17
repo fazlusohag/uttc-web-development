@@ -68,7 +68,7 @@ function retrieve(string $question, array $pages, int $limit = 5): array {
 }
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') respond(405, ['ok'=>false,'error'=>'method_not_allowed']);
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$allowed = array_filter(array_map('trim', explode(',', envv('UTTC_ALLOWED_ORIGINS','https://uttc.online,https://www.uttc.online'))));
+$allowed = array_filter(array_map('trim', explode(',', envv('UTTC_ALLOWED_ORIGINS','https://uttc.edu.bd,https://www.uttc.edu.bd'))));
 if ($origin !== '' && !in_array($origin, $allowed, true) && !preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#', $origin)) {
     respond(403, ['ok'=>false,'error'=>'origin_not_allowed']);
 }
@@ -99,7 +99,7 @@ foreach ($smallTalk as $pattern) {
 }
 $matches = retrieve($question, $pages);
 if (!$matches || (int)$matches[0]['score'] < 2) {
-    respond(200, ['ok'=>true,'answer'=>'দুঃখিত, এই বিষয়ে UTTC-এর প্রকাশিত ওয়েবসাইটে নির্ভরযোগ্য তথ্য খুঁজে পাইনি। সঠিক তথ্যের জন্য UTTC অফিসে 01727-007417 নম্বরে যোগাযোগ করুন।','sources'=>[['title'=>'UTTC Contact','url'=>'https://uttc.online/contact-uttc-moulvibazar.html']]]);
+    respond(200, ['ok'=>true,'answer'=>'দুঃখিত, এই বিষয়ে UTTC-এর প্রকাশিত ওয়েবসাইটে নির্ভরযোগ্য তথ্য খুঁজে পাইনি। সঠিক তথ্যের জন্য UTTC অফিসে 01727-007417 নম্বরে যোগাযোগ করুন।','sources'=>[['title'=>'UTTC Contact','url'=>'https://uttc.edu.bd/contact-uttc-moulvibazar.html']]]);
 }
 $context = '';
 foreach ($matches as $n => $item) {
