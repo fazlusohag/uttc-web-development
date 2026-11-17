@@ -256,11 +256,14 @@
       -webkit-tap-highlight-color:transparent;
     }
     .btn:before,.nav-cta:before{content:none!important}
-    .btn-primary{
-      background-image:linear-gradient(110deg,transparent 34%,rgba(216,181,109,.42) 49%,transparent 64%),
+    /* Keep every CTA button on the same soft coffee-gold sweep as the header registration/login buttons */
+    .btn-primary,.nav-cta{
+      background-image:linear-gradient(110deg,transparent 34%,rgba(216,181,109,.48) 49%,transparent 64%),
                        linear-gradient(120deg,#237a57,#15966b);
     }
-    .nav-cta{background-image:linear-gradient(110deg,transparent 34%,rgba(216,181,109,.48) 49%,transparent 64%)}
+    .nav-links li:nth-child(5) .nav-cta{background-color:#142D4E;background-image:linear-gradient(110deg,transparent 34%,rgba(216,181,109,.48) 49%,transparent 64%)}
+    .nav-links li:nth-child(6) .nav-cta{background-color:#087FE5;background-image:linear-gradient(110deg,transparent 34%,rgba(216,181,109,.48) 49%,transparent 64%)}
+    .nav-links li:nth-child(7) .nav-cta{background-color:#237A57;background-image:linear-gradient(110deg,transparent 34%,rgba(216,181,109,.48) 49%,transparent 64%)}
     .btn-outline{background-image:linear-gradient(110deg,transparent 34%,rgba(111,151,125,.34) 49%,transparent 64%)}
     .btn:hover,.nav-cta:hover,.btn:focus-visible,.nav-cta:focus-visible{
       background-position:-135% 0,0 0;
@@ -273,7 +276,7 @@
       outline:none;
     }
     .btn-outline:hover,.btn-outline:focus-visible{background-color:#142d4e;color:#fff}
-    .btn-primary:hover,.btn-primary:focus-visible{background-image:linear-gradient(110deg,transparent 34%,rgba(216,181,109,.52) 49%,transparent 64%),linear-gradient(120deg,#185d40,#087f60)}
+    .btn-primary:hover,.btn-primary:focus-visible{background-image:linear-gradient(110deg,transparent 34%,rgba(216,181,109,.48) 49%,transparent 64%),linear-gradient(120deg,#185d40,#087f60)}
     .nav-cta:hover,.nav-cta:focus-visible{filter:brightness(1.15)}
     .btn:active,.nav-cta:active{transform:translateY(0) scale(.985);filter:brightness(1.02)}
     @media(prefers-reduced-motion:reduce){
