@@ -195,6 +195,36 @@
     @media(max-width:900px){.branch-grid{grid-template-columns:minmax(0,1fr)}.hero:before{width:220px;height:220px;right:-100px;top:20px}}
     @media(prefers-reduced-motion:reduce){.brand img,.whatsapp{animation:none!important}.reveal{will-change:auto}}
 
+
+    /* Homepage hero composition and spacing refinement */
+    .hero{padding:88px 0 92px}
+    .hero-layout{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(300px,.88fr);align-items:center;gap:36px}
+    .hero-content{max-width:100%;min-width:0}
+    .hero-visual{position:relative;min-height:390px;display:grid;place-items:center;isolation:isolate}
+    .hero-logo-card{width:270px;height:270px;border-radius:38px;background:linear-gradient(145deg,#fff,#edf5fb);border:1px solid #ffffff;box-shadow:0 28px 70px #142d4e20,inset 0 1px 0 #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;transform:rotate(2deg);animation:heroCardFloat 5.5s ease-in-out infinite}
+    .hero-logo-card img{width:174px;height:174px;object-fit:contain;filter:drop-shadow(0 12px 15px #142d4e20)}
+    .hero-logo-card span{font:800 12px Inter,sans-serif;letter-spacing:.16em;color:var(--navy)}
+    @keyframes heroCardFloat{0%,100%{transform:translateY(0) rotate(2deg)}50%{transform:translateY(-12px) rotate(-1deg)}}
+    .hero-orbit{position:absolute;border:1px solid #237a5730;border-radius:50%;z-index:-1;pointer-events:none}
+    .orbit-one{width:350px;height:350px;animation:orbitSpin 28s linear infinite}
+    .orbit-two{width:430px;height:430px;border-style:dashed;border-color:#087fe525;animation:orbitSpin 42s linear infinite reverse}
+    @keyframes orbitSpin{to{transform:rotate(360deg)}}
+    .hero-float{position:absolute;display:flex;align-items:center;gap:11px;padding:12px 16px;background:#ffffffed;border:1px solid #e5edf4;border-radius:15px;box-shadow:0 14px 35px #142d4e18;backdrop-filter:blur(10px);animation:floatChip 4.8s ease-in-out infinite}
+    .hero-float>span{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#e8f5ed;color:var(--green);font-size:19px;font-weight:800}
+    .hero-float strong,.hero-float small{display:block;line-height:1.35}
+    .hero-float strong{font:700 12px Inter,sans-serif;color:var(--navy)}
+    .hero-float small{font:500 10px Inter,sans-serif;color:var(--text);margin-top:3px}
+    .float-approved{top:38px;right:-2px}
+    .float-skills{bottom:42px;left:-8px;animation-delay:-2s}
+    @keyframes floatChip{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .highlights{margin-top:0;padding:24px 0 0}
+    .highlight-grid{border:1px solid #edf1f5}
+    .approval-trust{padding:24px 0}
+    .approval-trust strong{padding:0 8px}
+    @media(max-width:900px){.hero{padding:55px 0 65px}.hero-layout{grid-template-columns:minmax(0,1fr);gap:28px}.hero-visual{min-height:320px}.hero-logo-card{width:220px;height:220px;border-radius:30px}.hero-logo-card img{width:142px;height:142px}.orbit-one{width:285px;height:285px}.orbit-two{width:340px;height:340px}.float-approved{top:12px;right:0}.float-skills{bottom:12px;left:0}}
+    @media(max-width:420px){.hero-visual{min-height:280px}.hero-logo-card{width:190px;height:190px}.hero-logo-card img{width:120px;height:120px}.orbit-one{width:245px;height:245px}.orbit-two{width:285px;height:285px}.hero-float{padding:9px 11px}.hero-float strong{font-size:10px}.hero-float small{font-size:9px}.float-approved{right:-4px}.float-skills{left:-4px}}
+    @media(prefers-reduced-motion:reduce){.hero-logo-card,.hero-orbit,.hero-float{animation:none!important}}
+
     /* Reference-inspired luminous interaction effects */
     .nav-links a:not(.nav-cta){position:relative;isolation:isolate;padding:8px 11px;border-radius:10px;transition:color .25s ease,background .25s ease,box-shadow .25s ease,transform .25s ease}
     .nav-links a:not(.nav-cta):hover{color:#087fe5;background:linear-gradient(120deg,#eaf5ff,#effaf3);box-shadow:0 0 0 1px #087fe52b,0 0 18px #087fe52c,0 0 30px #237a5717;transform:translateY(-2px)}
@@ -246,13 +276,13 @@
     </div>
   </header>
   <main>
-    <section class="hero"><div class="container hero-content">
+    <section class="hero"><div class="container hero-layout"><div class="hero-content">
       <span class="eyebrow">Welcome to UTTC Moulvibazar</span>
       <div class="approval-badge"><span class="approval-mark" aria-hidden="true">✓</span><span>গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত প্রতিষ্ঠান<span class="approval-subtext">প্রতিষ্ঠান কোড: <strong>62065</strong></span></span></div>
       <h1>দক্ষতা অর্জন করুন,<br>গড়ুন আপনার <span>উজ্জ্বল ভবিষ্যৎ</span></h1>
       <p>উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র (UTTC), মৌলভীবাজার। আধুনিক কারিগরি শিক্ষা ও দক্ষতা উন্নয়নের মাধ্যমে কর্মজীবনের নতুন সম্ভাবনা তৈরি করুন।</p>
       <div class="buttons"><a href="#courses" class="btn btn-primary">কোর্স দেখুন →</a><a href="#contact" class="btn btn-outline">যোগাযোগ করুন</a></div>
-    </div></section>
+    </div><div class="hero-visual" aria-label="UTTC official identity"><div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><div class="hero-logo-card"><img src="./uttc-logo.png" alt="UTTC official logo" width="190" height="190"><span>UTTC · MOULVIBAZAR</span></div><div class="hero-float float-approved"><span>✓</span><div><strong>BTEB Approved</strong><small>Institution Code: 62065</small></div></div><div class="hero-float float-skills"><span>✦</span><div><strong>Skill Development</strong><small>Learn · Practice · Grow</small></div></div></div></div></section>
     <section class="approval-trust" aria-label="BTEB approval information"><div class="container"><strong>গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের বাংলাদেশ কারিগরি শিক্ষা বোর্ড (BTEB) অনুমোদিত প্রতিষ্ঠান</strong><span>প্রতিষ্ঠান কোড: 62065 · প্রশিক্ষণ নিন অনুমোদিত প্রতিষ্ঠানে</span></div></section>
     <section class="highlights"><div class="container highlight-grid">
       <div class="highlight-item"><strong>প্রশিক্ষণমুখী শিক্ষা</strong><span>Practical Skill Development</span></div>
