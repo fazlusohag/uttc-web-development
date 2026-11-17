@@ -575,7 +575,7 @@
           data.sources.slice(0,3).forEach((source,index)=>{
             try{
               const url=new URL(source.url,window.location.origin);
-              if(url.protocol!=='https:' || url.hostname!=='uttc.online') return;
+              if(url.protocol!=='https:' || !['uttc.edu.bd','www.uttc.edu.bd'].includes(url.hostname)) return;
               if(index) sourceBox.appendChild(document.createTextNode(' · '));
               const link=document.createElement('a');
               link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';
