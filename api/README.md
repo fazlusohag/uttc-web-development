@@ -15,8 +15,8 @@ PHP 8.1+, cURL, DOM, SimpleXML, mbstring, writable `api/` directory. Confirm ext
 2. Set environment variables in the hosting environment (never in browser JavaScript or Git):
    - `OPENAI_API_KEY`: create/manage in your OpenAI API project.
    - `OPENAI_MODEL`: a model available to that API project.
-   - `UTTC_SITE_URL=https://uttc.online`
-   - `UTTC_ALLOWED_ORIGINS=https://uttc.online,https://www.uttc.online`
+   - `UTTC_SITE_URL=https://uttc.edu.bd`
+   - `UTTC_ALLOWED_ORIGINS=https://uttc.edu.bd,https://www.uttc.edu.bd`
 3. Run once by SSH/cron: `php /home/ACCOUNT/public_html/api/sync-knowledge.php`
 4. Schedule the same command daily or weekly after confirming the correct absolute path.
 5. Confirm `api/knowledge.json` exists and is not directly downloadable; the included .htaccess denies direct access on Apache.
