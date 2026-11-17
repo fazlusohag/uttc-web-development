@@ -219,6 +219,9 @@
     .uttc-ai-form input{min-width:0;flex:1;border:1px solid #dce3e9;border-radius:24px;padding:11px 14px;font:inherit;font-size:13px;outline:none}
     .uttc-ai-form input:focus{border-color:#237a57;box-shadow:0 0 0 3px #237a5718}
     .uttc-ai-form button{width:42px;height:42px;flex:0 0 42px;border:0;border-radius:50%;background:#237a57;color:#fff;font-size:20px;cursor:pointer}
+    .uttc-ai-sources{font-size:12px;margin-top:10px;padding-top:8px;border-top:1px solid #e8edf3;color:#64748b}
+    .uttc-ai-sources a{color:#237a57;text-decoration:underline;margin-right:4px}
+    .uttc-ai-panel button:disabled{opacity:.55;cursor:wait}
     .uttc-ai-foot{text-align:center;padding:0 8px 9px;color:#8a95a3;font-size:10px;background:#fff}
     @media(max-width:480px){.uttc-ai-launch{right:16px;bottom:109px}.uttc-ai-panel{right:12px;bottom:148px;width:calc(100vw - 24px);height:min(500px,calc(100dvh - 170px))}.whatsapp{right:16px;bottom:16px}}
     @keyframes uttcAiPulse{0%,100%{box-shadow:0 6px 22px #142d4e35,0 0 0 0 #237a5744}50%{box-shadow:0 6px 22px #142d4e35,0 0 0 12px #237a5700}}\n    @media(prefers-reduced-motion:reduce){.uttc-ai-launch{transition:none;animation:none}}
@@ -551,8 +554,43 @@
       if(!question) return;
       addAiMessage(question,'user');
       aiInput.value='';
-      const pending=addAiMessage('আপনার প্রশ্নটি গ্রহণ করা হয়েছে। AI সেবা চালুর সার্ভার সংযোগ এখনো প্রস্তুত করা হচ্ছে। আপাতত UTTC অফিসে 01727-007417 নম্বরে যোগাযোগ করুন।','bot');
-      // The secure /api/assistant endpoint will replace this setup notice once deployed.
+      const pending=addAiMessage('আপনার প্রশ্নের উত্তর খুঁজছি…','bot');
+      const sendButton=aiForm.querySelector('button[type="submit"]');
+      if(sendButton) sendButton.disabled=true;
+      try{
+        const response=await fetch('/api/assistant.php',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Accept':'application/json'},
+          body:JSON.stringify({message:question})
+        });
+        const data=await response.json();
+        if(!response.ok || !data.ok) throw new Error(data.message||'এই মুহূর্তে উত্তর পাওয়া যাচ্ছে না।');
+        pending.textContent=data.answer||'দুঃখিত, উত্তর তৈরি করা যায়নি।';
+        if(Array.isArray(data.sources)&&data.sources.length){
+          const sourceBox=document.createElement('div');
+          sourceBox.className='uttc-ai-sources';
+          const label=document.createElement('small');
+          label.textContent='তথ্যসূত্র: ';
+          sourceBox.appendChild(label);
+          data.sources.slice(0,3).forEach((source,index)=>{
+            try{
+              const url=new URL(source.url,window.location.origin);
+              if(url.protocol!=='https:' || url.hostname!=='uttc.online') return;
+              if(index) sourceBox.appendChild(document.createTextNode(' · '));
+              const link=document.createElement('a');
+              link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';
+              link.textContent=source.title||'UTTC ওয়েবসাইট';
+              sourceBox.appendChild(link);
+            }catch(_){}
+          });
+          if(sourceBox.querySelector('a')) pending.appendChild(sourceBox);
+        }
+      }catch(error){
+        pending.textContent=error.message||'দুঃখিত, সংযোগে সমস্যা হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন অথবা UTTC অফিসে 01727-007417 নম্বরে যোগাযোগ করুন।';
+      }finally{
+        if(sendButton) sendButton.disabled=false;
+        aiMessages.scrollTop=aiMessages.scrollHeight;
+      }
     });
 
     const menuBtn=document.getElementById('menuBtn');
