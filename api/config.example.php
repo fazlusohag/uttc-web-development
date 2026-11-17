@@ -5,8 +5,8 @@
  *
  * OPENAI_API_KEY       = secret OpenAI API key
  * OPENAI_MODEL         = API model enabled for your OpenAI project
- * UTTC_SITE_URL        = https://uttc.online
- * UTTC_ALLOWED_ORIGINS = https://uttc.online,https://www.uttc.online
+ * UTTC_SITE_URL        = https://uttc.edu.bd
+ * UTTC_ALLOWED_ORIGINS = https://uttc.edu.bd,https://www.uttc.edu.bd
  *
  * Keep this file public-safe; never commit secrets.
  */
