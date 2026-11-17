@@ -195,6 +195,26 @@
     @media(max-width:900px){.branch-grid{grid-template-columns:minmax(0,1fr)}.hero:before{width:220px;height:220px;right:-100px;top:20px}}
     @media(prefers-reduced-motion:reduce){.brand img,.whatsapp{animation:none!important}.reveal{will-change:auto}}
 
+    /* Reference-inspired luminous interaction effects */
+    .nav-links a:not(.nav-cta){position:relative;isolation:isolate;padding:8px 11px;border-radius:10px;transition:color .25s ease,background .25s ease,box-shadow .25s ease,transform .25s ease}
+    .nav-links a:not(.nav-cta):hover{color:#087fe5;background:linear-gradient(120deg,#eaf5ff,#effaf3);box-shadow:0 0 0 1px #087fe52b,0 0 18px #087fe52c,0 0 30px #237a5717;transform:translateY(-2px)}
+    .nav-cta{position:relative;overflow:hidden;isolation:isolate;box-shadow:0 5px 14px #142d4e20}
+    .nav-cta:before,.btn:before{content:"";position:absolute;inset:-2px;background:linear-gradient(110deg,transparent 20%,#ffffff80 48%,transparent 72%);transform:translateX(-130%);transition:transform .65s ease;z-index:-1}
+    .nav-cta:hover:before,.btn:hover:before{transform:translateX(130%)}
+    .nav-cta:hover{transform:translateY(-3px);box-shadow:0 0 0 1px #ffffff65,0 0 18px #087fe55c,0 8px 24px #142d4e25}
+    .btn{position:relative;overflow:hidden;isolation:isolate}
+    .btn:hover{box-shadow:0 0 0 1px #237a5740,0 0 22px #237a5740,0 10px 24px #142d4e20}
+    .course-card a,.branch-card a,.contact-card a,footer a{transition:color .22s ease,text-shadow .22s ease}
+    .course-card a:hover,.branch-card a:hover,.contact-card a:hover,footer a:hover{color:#087fe5;text-shadow:0 0 12px #087fe550}
+    .whatsapp{width:66px;height:66px;border:2px solid #ffffff;background:radial-gradient(circle at 30% 25%,#55e99a,#20b96b 58%,#0d9b55);box-shadow:0 8px 24px #0003,0 0 0 0 #20b96b55;animation:whatsappPop 2.2s ease-in-out infinite;transition:transform .25s ease,filter .25s ease}
+    .whatsapp:hover{transform:scale(1.13) rotate(-7deg);filter:brightness(1.08);animation-play-state:paused}
+    .whatsapp svg{width:35px;height:35px;fill:#fff;filter:drop-shadow(0 2px 2px #087a4540)}
+    @keyframes whatsappPop{0%,100%{transform:scale(1);box-shadow:0 8px 24px #0003,0 0 0 0 #20b96b55}12%{transform:scale(1.09)}24%{transform:scale(1)}52%{box-shadow:0 8px 24px #0003,0 0 0 13px #20b96b00}}
+    .brand img{transform-origin:center;will-change:transform}
+    @media(max-width:900px){.nav-links a:not(.nav-cta){display:block;padding:11px 14px}.whatsapp{width:60px;height:60px;right:17px;bottom:17px}}
+    @media(prefers-reduced-motion:reduce){.nav-links a,.nav-cta,.btn,.whatsapp{animation:none!important;transition:none!important}.nav-links a:hover,.nav-cta:hover,.btn:hover,.whatsapp:hover{transform:none}}
+
+
   </style>
   <script type="application/ld+json">
   {
@@ -315,7 +335,7 @@
     </div>
     <div class="copyright">© 2026 UTTC - Upazila Technical Training Centre, Moulvibazar. All Rights Reserved.</div>
   </div></footer>
-  <a class="whatsapp" href="https://wa.me/8801727007417" target="_blank" rel="noopener" aria-label="Contact UTTC on WhatsApp">☎</a>
+  <a class="whatsapp" href="https://wa.me/8801727007417" target="_blank" rel="noopener" aria-label="Contact UTTC on WhatsApp"><svg viewBox="0 0 32 32" role="img" aria-hidden="true"><path d="M16.02 3C8.86 3 3.04 8.78 3.04 15.9c0 2.27.6 4.49 1.75 6.45L3 29l6.85-1.78a13.1 13.1 0 0 0 6.17 1.55h.01c7.15 0 12.97-5.79 12.97-12.91 0-3.45-1.35-6.69-3.8-9.12A12.9 12.9 0 0 0 16.02 3zm0 23.57c-1.91 0-3.79-.51-5.43-1.48l-.39-.23-4.06 1.05 1.08-3.94-.25-.4a10.65 10.65 0 0 1-1.64-5.67c0-5.89 4.81-10.68 10.7-10.68 2.85 0 5.53 1.11 7.55 3.13a10.6 10.6 0 0 1 3.13 7.55c0 5.89-4.8 10.67-10.69 10.67zm5.87-7.99c-.32-.16-1.9-.94-2.2-1.05-.3-.11-.51-.16-.73.16-.21.32-.84 1.05-1.03 1.27-.19.21-.38.24-.7.08-.32-.16-1.36-.5-2.59-1.59-.96-.85-1.61-1.9-1.8-2.22-.19-.32-.02-.49.14-.65.14-.14.32-.38.48-.57.16-.19.21-.32.32-.54.11-.21.05-.4-.03-.56-.08-.16-.73-1.75-1-2.39-.26-.62-.53-.54-.73-.55h-.62c-.21 0-.56.08-.86.4-.3.32-1.13 1.1-1.13 2.68s1.16 3.11 1.32 3.33c.16.21 2.28 3.47 5.52 4.87.77.33 1.37.53 1.84.68.77.24 1.47.21 2.02.13.62-.09 1.9-.78 2.17-1.53.27-.75.27-1.4.19-1.53-.08-.13-.29-.21-.61-.37z"/></svg></a>
   <script>
     const menuBtn=document.getElementById('menuBtn');
     const navLinks=document.getElementById('navLinks');
