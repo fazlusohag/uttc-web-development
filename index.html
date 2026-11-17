@@ -153,6 +153,48 @@
       .buttons{flex-direction:column;align-items:stretch}
       .buttons .btn{width:100%}
     }
+
+    /* UTTC Premium 2026 visual layer */
+    :root{--gold:#D8B56D;--mint:#DDF3E7;--shadow:0 22px 60px rgba(12,35,62,.12)}
+    body{background:#fff}
+    .brand img{animation:logoFloat 4.5s ease-in-out infinite;filter:drop-shadow(0 8px 12px #142d4e18)}
+    @keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+    .hero{isolation:isolate;background:radial-gradient(ellipse at 85% 18%,rgba(8,127,229,.18),transparent 32%),radial-gradient(ellipse at 5% 90%,rgba(35,122,87,.13),transparent 34%),linear-gradient(125deg,#f3f7fc 0%,#fff 52%,#f1f8f4 100%)}
+    .hero:before,.hero:after{content:"";position:absolute;border-radius:50%;pointer-events:none;z-index:-1}
+    .hero:before{width:330px;height:330px;right:-90px;top:35px;border:1px solid rgba(35,122,87,.16);box-shadow:0 0 0 28px rgba(35,122,87,.035),0 0 0 58px rgba(8,127,229,.025)}
+    .hero:after{width:12px;height:12px;right:18%;bottom:20%;background:var(--gold);box-shadow:0 0 0 12px rgba(216,181,109,.15),-120px -150px 0 2px #237a5740}
+    .approval-badge{border-radius:14px;box-shadow:0 12px 32px rgba(20,45,78,.10);line-height:1.65}
+    .approval-badge strong{white-space:normal;overflow-wrap:anywhere}
+    .approval-subtext{margin-top:5px}
+    .btn,.nav-cta,.course-card,.special-card,.contact-card,.branch-card{transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease,background .28s ease}
+    .btn-primary{background:linear-gradient(120deg,#237a57,#15966b);box-shadow:0 9px 22px rgba(35,122,87,.2)}
+    .btn-primary:hover{background:linear-gradient(120deg,#185d40,#087f60);box-shadow:0 15px 28px rgba(35,122,87,.28)}
+    .course-card{border-radius:22px;box-shadow:0 8px 28px rgba(20,45,78,.045);overflow:hidden}
+    .course-card:before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,#237a57,#087fe5,#d8b56d);opacity:0;transition:opacity .28s}
+    .course-card:hover{transform:translateY(-10px) scale(1.012);box-shadow:var(--shadow);border-color:#b6d9c5}
+    .course-card:hover:before{opacity:1}
+    .course-icon{border-radius:19px;box-shadow:inset 0 0 0 1px #fff,0 8px 20px #142d4e0b;transition:transform .35s}
+    .course-card:hover .course-icon{transform:translateY(-4px) rotate(-5deg) scale(1.06)}
+    .special-card,.contact-card{border-radius:20px;box-shadow:0 10px 30px rgba(20,45,78,.06)}
+    .special-card:hover,.contact-card:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+    .section-heading span{letter-spacing:.08em}
+    .about-box{position:relative;overflow:hidden;box-shadow:0 24px 55px rgba(20,45,78,.18);background:radial-gradient(circle at 85% 15%,#ffffff24,transparent 28%),linear-gradient(140deg,#142d4e,#20517a 70%,#237a57)}
+    .about-box:after{content:"";position:absolute;width:190px;height:190px;border:1px solid #ffffff35;border-radius:50%;right:-65px;bottom:-80px;box-shadow:0 0 0 22px #ffffff0c,0 0 0 48px #ffffff08}
+    .branches{background:linear-gradient(135deg,#f2f6fb,#f5faf7)}
+    .branch-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+    .branch-card{background:#fff;border:1px solid #e5ebf2;border-radius:22px;padding:30px;box-shadow:0 12px 35px rgba(20,45,78,.06);position:relative;overflow:hidden}
+    .branch-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(#237a57,#087fe5)}
+    .branch-card:hover{transform:translateY(-7px);box-shadow:var(--shadow);border-color:#b8d9c6}
+    .branch-icon{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#e7f3fd,#e5f5eb);font-size:26px;margin-bottom:14px}
+    .branch-card h3{font-size:23px;margin-bottom:8px}
+    .branch-card p{color:var(--text);margin-bottom:8px}
+    .branch-card a{color:var(--green);font-weight:700}
+    .whatsapp{animation:whatsappPulse 2.6s infinite}
+    @keyframes whatsappPulse{0%,100%{box-shadow:0 5px 20px #0003,0 0 0 0 #20b96b44}50%{box-shadow:0 5px 20px #0003,0 0 0 12px #20b96b00}}
+    .reveal{will-change:transform,opacity}
+    @media(max-width:900px){.branch-grid{grid-template-columns:minmax(0,1fr)}.hero:before{width:220px;height:220px;right:-100px;top:20px}}
+    @media(prefers-reduced-motion:reduce){.brand img,.whatsapp{animation:none!important}.reveal{will-change:auto}}
+
   </style>
   <script type="application/ld+json">
   {
@@ -179,7 +221,7 @@
       </a>
       <button class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">☰</button>
       <ul class="nav-links" id="navLinks">
-        <li><a href="#">হোম</a></li><li><a href="#about">আমাদের সম্পর্কে</a></li><li><a href="#courses">কোর্সসমূহ</a></li><li><a href="#special">বিশেষ প্রশিক্ষণ</a></li><li><a href="https://www.uttcoffice.edu.bd/" target="_blank" rel="noopener" class="nav-cta">রেজাল্ট দেখুন</a></li><li><a href="https://www.uttcoffice.edu.bd/" target="_blank" rel="noopener" class="nav-cta">Student Login</a></li><li><a href="https://www.uttcoffice.edu.bd/id_create.php" target="_blank" rel="noopener" class="nav-cta">ভর্তি তথ্য</a></li>
+        <li><a href="#">হোম</a></li><li><a href="#about">আমাদের সম্পর্কে</a></li><li><a href="#courses">কোর্সসমূহ</a></li><li><a href="#special">বিশেষ প্রশিক্ষণ</a></li><li><a href="https://www.uttcoffice.edu.bd/" target="_blank" rel="noopener" class="nav-cta">রেজাল্ট দেখুন</a></li><li><a href="https://www.uttcoffice.edu.bd/" target="_blank" rel="noopener" class="nav-cta">Student Login</a></li><li><a href="https://www.uttcoffice.edu.bd/id_create.php" target="_blank" rel="noopener" class="nav-cta">ভর্তি তথ্য</a></li><li><a href="#branches">ব্রাঞ্চসমূহ</a></li>
       </ul>
     </div>
   </header>
@@ -248,11 +290,18 @@
         <article class="special-card reveal"><div class="course-icon">👩‍🎓</div><h3>Women Driving Training</h3><p>নারী শিক্ষার্থীদের জন্য ড্রাইভিং প্রশিক্ষণ, প্রয়োজনীয় নিরাপত্তা ও ব্যবহারিক দক্ষতা অর্জনের সুযোগ সম্পর্কে জানুন।</p><a href="women-driving-training-moulvibazar.html" class="btn btn-primary">বিস্তারিত দেখুন <span aria-hidden="true">→</span></a></article>
       </div>
     </div></section>
+    <section class="section branches" id="branches"><div class="container">
+      <div class="section-heading"><span>OUR BRANCHES</span><h2>আপনার কাছের UTTC ব্রাঞ্চে ভর্তি হোন</h2><p>মৌলভীবাজার প্রধান ব্রাঞ্চ অথবা সরকার বাজার ব্রাঞ্চ—আপনার সুবিধামতো যেকোনো শাখায় যোগাযোগ করে ভর্তি হতে পারবেন।</p></div>
+      <div class="branch-grid">
+        <article class="branch-card reveal"><div class="branch-icon" aria-hidden="true">📍</div><span class="course-tag">প্রধান শাখা</span><h3>মৌলভীবাজার প্রধান ব্রাঞ্চ</h3><p>সিহাব হাউজ, ২য় তলা, হিলালপুর, মৌলভীবাজার সদর, মৌলভীবাজার।</p><p><strong>ফোন:</strong> <a href="tel:+8801727007417">01727-007417</a> · <a href="tel:+8801771911211">01771-911211</a></p><a href="https://www.google.com/maps/search/?api=1&query=Shihab+House+Hilalpur+Moulvibazar+Bangladesh" target="_blank" rel="noopener">ম্যাপে অবস্থান দেখুন ↗</a></article>
+        <article class="branch-card reveal"><div class="branch-icon" aria-hidden="true">📍</div><span class="course-tag">সরকার বাজার শাখা</span><h3>সরকার বাজার ব্রাঞ্চ</h3><p>আব্দুল কাদির সুপার মার্কেট, সিলেট রোড, সরকার বাজার, মৌলভীবাজার সদর।</p><p><strong>ফোন:</strong> <a href="tel:+8801727007418">01727-007418</a></p><a href="https://www.google.com/maps/search/?api=1&query=Abdul+Kadir+Super+Market+Sarkar+Bazar+Moulvibazar+Bangladesh" target="_blank" rel="noopener">ম্যাপে অবস্থান দেখুন ↗</a></article>
+      </div>
+    </div></section>
     <section class="section"><div class="container"><div class="cta reveal"><h2>আপনার দক্ষতা উন্নয়নের যাত্রা শুরু হোক আজই</h2><p>UTTC Moulvibazar-এর প্রশিক্ষণ ও ভর্তি সংক্রান্ত তথ্য জানতে যোগাযোগ করুন।</p><a href="tel:+8801727007417" class="btn">☎ 01727-007417</a></div></div></section>
     <section class="section light" id="contact"><div class="container">
       <div class="section-heading"><span>CONTACT US</span><h2>যোগাযোগ করুন</h2><p>কোর্স, প্রশিক্ষণ ও ভর্তি সংক্রান্ত তথ্যের জন্য UTTC-এর সঙ্গে যোগাযোগ করুন।</p></div>
       <div class="contact-grid">
-        <div class="contact-card"><div class="icon">📍</div><h3>ঠিকানা</h3><p>হিলালপুর, জুগিডর পয়েন্ট, মৌলভীবাজার, বাংলাদেশ</p></div>
+        <div class="contact-card"><div class="icon">📍</div><h3>প্রধান অফিস</h3><p>সিহাব হাউজ, ২য় তলা, হিলালপুর, মৌলভীবাজার সদর</p></div>
         <div class="contact-card"><div class="icon">📞</div><h3>মোবাইল</h3><p><a href="tel:+8801727007417">01727-007417</a></p></div>
         <div class="contact-card"><div class="icon">🌐</div><h3>ওয়েবসাইট</h3><p><a href="https://uttc.edu.bd/">uttc.edu.bd</a></p></div>
       </div>
@@ -261,7 +310,7 @@
   <footer><div class="container">
     <div class="footer-grid">
       <div><h3>UTTC Moulvibazar</h3><p>উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র, মৌলভীবাজার। দক্ষতা উন্নয়ন ও কর্মমুখী প্রশিক্ষণের মাধ্যমে সুন্দর ভবিষ্যৎ গড়ার প্রত্যয়ে।</p></div>
-      <div><h3>Quick Links</h3><ul><li><a href="#about">আমাদের সম্পর্কে</a></li><li><a href="#courses">কোর্সসমূহ</a></li><li><a href="#special">বিশেষ প্রশিক্ষণ</a></li><li><a href="#contact">যোগাযোগ</a></li></ul></div>
+      <div><h3>Quick Links</h3><ul><li><a href="#about">আমাদের সম্পর্কে</a></li><li><a href="#courses">কোর্সসমূহ</a></li><li><a href="#special">বিশেষ প্রশিক্ষণ</a></li><li><a href="#contact">যোগাযোগ</a></li><li><a href="#branches">ব্রাঞ্চসমূহ</a></li></ul></div>
       <div><h3>Our Courses</h3><ul><li><a href="#courses">Motor Driving</a></li><li><a href="#courses">Computer Application</a></li><li><a href="#courses">Freelancing</a></li><li><a href="#courses">Graphic Design</a></li></ul></div>
     </div>
     <div class="copyright">© 2026 UTTC - Upazila Technical Training Centre, Moulvibazar. All Rights Reserved.</div>
