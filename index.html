@@ -245,6 +245,43 @@
     @media(prefers-reduced-motion:reduce){.nav-links a,.nav-cta,.btn,.whatsapp{animation:none!important;transition:none!important}.nav-links a:hover,.nav-cta:hover,.btn:hover,.whatsapp:hover{transform:none}}
 
 
+    /* Refined reference-style button lighting: visible sweep + luminous hover */
+    .btn,.nav-cta{
+      position:relative;isolation:isolate;overflow:hidden;
+      background-repeat:no-repeat;
+      background-size:260% 100%,100% 100%;
+      background-position:135% 0,0 0;
+      transition:transform .28s ease,box-shadow .28s ease,filter .28s ease,
+                 background-position .75s cubic-bezier(.2,.7,.2,1),background-color .28s ease;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .btn:before,.nav-cta:before{content:none!important}
+    .btn-primary{
+      background-image:linear-gradient(110deg,transparent 34%,rgba(255,255,255,.58) 49%,transparent 64%),
+                       linear-gradient(120deg,#237a57,#15966b);
+    }
+    .nav-cta{background-image:linear-gradient(110deg,transparent 34%,rgba(255,255,255,.62) 49%,transparent 64%)}
+    .btn-outline{background-image:linear-gradient(110deg,transparent 34%,rgba(255,255,255,.30) 49%,transparent 64%)}
+    .btn:hover,.nav-cta:hover,.btn:focus-visible,.nav-cta:focus-visible{
+      background-position:-135% 0,0 0;
+      transform:translateY(-3px);
+      filter:brightness(1.08) saturate(1.08);
+      box-shadow:0 0 0 1px rgba(255,255,255,.62),
+                 0 0 12px rgba(8,127,229,.34),
+                 0 0 28px rgba(35,122,87,.32),
+                 0 12px 28px rgba(20,45,78,.22);
+      outline:none;
+    }
+    .btn-outline:hover,.btn-outline:focus-visible{background-color:#142d4e;color:#fff}
+    .btn-primary:hover,.btn-primary:focus-visible{background-image:linear-gradient(110deg,transparent 34%,rgba(255,255,255,.68) 49%,transparent 64%),linear-gradient(120deg,#185d40,#087f60)}
+    .nav-cta:hover,.nav-cta:focus-visible{filter:brightness(1.15)}
+    .btn:active,.nav-cta:active{transform:translateY(0) scale(.985);filter:brightness(1.02)}
+    @media(prefers-reduced-motion:reduce){
+      .btn,.nav-cta{background-position:0 0!important}
+      .btn:hover,.nav-cta:hover,.btn:focus-visible,.nav-cta:focus-visible{transform:none;filter:none}
+    }
+
+
   </style>
   <script type="application/ld+json">
   {
