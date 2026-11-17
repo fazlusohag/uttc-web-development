@@ -191,7 +191,7 @@
     .branch-card a{color:var(--green);font-weight:700}
 
     /* UTTC website-grounded AI chat interface */
-    .uttc-ai-launch{position:fixed;right:22px;bottom:91px;z-index:1000;width:56px;height:56px;border:0;border-radius:50%;background:linear-gradient(145deg,#142d4e,#237a57);color:#fff;display:flex;align-items:center;justify-content:center;gap:2px;flex-direction:column;cursor:pointer;box-shadow:0 6px 22px #142d4e35;transition:transform .25s,box-shadow .25s}
+    .uttc-ai-launch{position:fixed;right:22px;bottom:116px;z-index:1000;width:56px;height:56px;border:0;border-radius:50%;background:linear-gradient(145deg,#142d4e,#237a57);color:#fff;display:flex;align-items:center;justify-content:center;gap:2px;flex-direction:column;cursor:pointer;box-shadow:0 6px 22px #142d4e35;transition:transform .25s,box-shadow .25s;animation:uttcAiPulse 2.6s infinite}
     .uttc-ai-launch:hover{transform:translateY(-4px);box-shadow:0 12px 28px #142d4e45}
     .uttc-ai-launch span{font-size:19px;line-height:1}.uttc-ai-launch b{font:700 10px Inter,sans-serif;letter-spacing:.08em}
     .uttc-ai-panel{position:fixed;right:22px;bottom:160px;z-index:1002;width:min(370px,calc(100vw - 28px));height:min(510px,calc(100dvh - 190px));background:#fff;border:1px solid #e6e9ed;border-radius:20px;box-shadow:0 22px 65px #142d4e30;display:none;flex-direction:column;overflow:hidden}
@@ -211,8 +211,8 @@
     .uttc-ai-form input:focus{border-color:#237a57;box-shadow:0 0 0 3px #237a5718}
     .uttc-ai-form button{width:42px;height:42px;flex:0 0 42px;border:0;border-radius:50%;background:#237a57;color:#fff;font-size:20px;cursor:pointer}
     .uttc-ai-foot{text-align:center;padding:0 8px 9px;color:#8a95a3;font-size:10px;background:#fff}
-    @media(max-width:480px){.uttc-ai-launch{right:16px;bottom:84px}.uttc-ai-panel{right:12px;bottom:148px;width:calc(100vw - 24px);height:min(500px,calc(100dvh - 170px))}.whatsapp{right:16px;bottom:16px}}
-    @media(prefers-reduced-motion:reduce){.uttc-ai-launch{transition:none}}
+    @media(max-width:480px){.uttc-ai-launch{right:16px;bottom:109px}.uttc-ai-panel{right:12px;bottom:148px;width:calc(100vw - 24px);height:min(500px,calc(100dvh - 170px))}.whatsapp{right:16px;bottom:16px}}
+    @keyframes uttcAiPulse{0%,100%{box-shadow:0 6px 22px #142d4e35,0 0 0 0 #237a5744}50%{box-shadow:0 6px 22px #142d4e35,0 0 0 12px #237a5700}}\n    @media(prefers-reduced-motion:reduce){.uttc-ai-launch{transition:none;animation:none}}
 
     .whatsapp{animation:whatsappPulse 2.6s infinite}
     @keyframes whatsappPulse{0%,100%{box-shadow:0 5px 20px #0003,0 0 0 0 #20b96b44}50%{box-shadow:0 5px 20px #0003,0 0 0 12px #20b96b00}}
