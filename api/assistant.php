@@ -87,6 +87,16 @@ $knowledge = is_file($knowledgeFile) ? json_decode((string)file_get_contents($kn
 $pages = is_array($knowledge) ? ($knowledge['pages'] ?? []) : [];
 if (!$pages) respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC তথ্যভান্ডার এখনো প্রস্তুত নয়।']);
 rate_limit();
+$smallTalk = [
+    '/^(hi|hello|hey|good morning|good afternoon|good evening|good night)[!. ]*$/iu',
+    '/^(আসসালামু আলাইকুম|সালাম|হ্যালো|হাই|শুভ সকাল|শুভ দুপুর|শুভ সন্ধ্যা|ধন্যবাদ|অনেক ধন্যবাদ)[!. ।]*$/u',
+    '/(আপনি কেমন আছেন|তোমার নাম কী|আপনার নাম কী|who are you|what is your name|how are you)/iu'
+];
+foreach ($smallTalk as $pattern) {
+    if (preg_match($pattern, $question)) {
+        respond(200, ['ok'=>true,'answer'=>'ওয়ালাইকুম আসসালাম! আমি UTTC AI Assistant। উপজেলা কারিগরি প্রশিক্ষণ কেন্দ্র, মৌলভীবাজারের কোর্স, ভর্তি ও প্রশিক্ষণসংক্রান্ত তথ্য জানাতে সাহায্য করতে পারি। আপনি কী জানতে চান?','sources'=>[]]);
+    }
+}
 $matches = retrieve($question, $pages);
 if (!$matches || (int)$matches[0]['score'] < 2) {
     respond(200, ['ok'=>true,'answer'=>'দুঃখিত, এই বিষয়ে UTTC-এর প্রকাশিত ওয়েবসাইটে নির্ভরযোগ্য তথ্য খুঁজে পাইনি। সঠিক তথ্যের জন্য UTTC অফিসে 01727-007417 নম্বরে যোগাযোগ করুন।','sources'=>[['title'=>'UTTC Contact','url'=>'https://uttc.online/contact-uttc-moulvibazar.html']]]);
