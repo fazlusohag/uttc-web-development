@@ -9,6 +9,8 @@ Branch: `release/uttc-complete-platform-2026`
 - Added `api/cms.php` for listing, Draft creation/update, Publish and delete actions, plus non-secret AI operations status.
 - CMS writes use file locking, atomic file replacement and bounded text validation with an mbstring fallback.
 - CMS audit events are appended only after the corresponding content write succeeds; the authenticated lifecycle test checks Create and Publish audit entries.
+- Knowledge-base source uploads are deleted only after the knowledge-base record deletion is saved successfully; stored filenames are reduced to basenames before filesystem deletion.
+- CLI knowledge sync accepts only same-host HTTPS sitemap URLs, parses XML with network access disabled, and uses a lock plus unique temporary file for atomic index replacement.
 - Added CMS record types: Course, Notice, Gallery, Page, Contact and Navigation Menu.
 - Added SEO title, meta description and canonical HTTPS URL fields for Page records.
 - Added `api/cms-public.php`, a read-only endpoint that returns Published records only.
@@ -37,6 +39,7 @@ Branch: `release/uttc-complete-platform-2026`
 - AI Operations does not provide usage analytics, request logs, cost reporting, alerts or live health checks.
 - The CMS and AI Knowledge Base have not been exercised in an authenticated browser against a live PHP server.
 - Hostinger storage access rules, HTTPS cookies, PHP extensions, file permissions, environment-variable support, upload parser dependencies and actual OpenAI API calls remain unverified.
+- GitHub status and workflow-run lookups returned no check records for the latest release commit; therefore the newest changes have not been independently confirmed by CI yet.
 - Visual browser QA, mobile QA, accessibility review, SEO crawl, live links and institutional content verification remain release gates.
 
 ## Security observations and deployment checks
