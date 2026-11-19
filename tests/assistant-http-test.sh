@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Public assistant knowledge and curated private records must fail closed on unsafe paths/data.
+grep -q 'uttc_private_storage_directory_is_safe(\$privateDir)' api/assistant.php
+grep -q 'is_link(\$curatedFile)' api/assistant.php
+grep -q 'private Knowledge Base JSON is invalid' api/assistant.php
+grep -q 'website knowledge contains an invalid page record' api/assistant.php
+
+
 port="$(php -r '$s=stream_socket_server("tcp://127.0.0.1:0", $e, $m); if (!$s) exit(1); echo substr(strrchr(stream_socket_get_name($s, false), ":"), 1); fclose($s);')"
 log_file="$(mktemp)"
 php -S "127.0.0.1:${port}" -t . >"$log_file" 2>&1 &
