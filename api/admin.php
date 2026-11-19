@@ -10,6 +10,8 @@ session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>$secure,'httponly
 ini_set('session.use_strict_mode','1');
 session_start();
 
+require_once __DIR__ . '/storage.php';
+
 function out(int $status, array $data): never {
     http_response_code($status);
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -68,38 +70,45 @@ function save_entries(array $entries): void {
     $file = $dir . '/knowledge-base.json';
     // Preserve the previous published/draft state before each successful change.
     if (is_file($file)) {
-        $old = json_decode((string)file_get_contents($file), true);
-        if (is_array($old) && is_array($old['entries'] ?? null)) {
-            $historyFile = $dir . '/knowledge-history.json';
-            $historyData = null;
-            if (is_file($historyFile)) {
-                $historyRaw = @file_get_contents($historyFile);
-                $historyData = $historyRaw === false ? null : json_decode($historyRaw, true);
-                if ($historyRaw === false || json_last_error() !== JSON_ERROR_NONE || !is_array($historyData) || !isset($historyData['versions']) || !is_array($historyData['versions'])) {
-                    flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
-                    out(500,['ok'=>false,'message'=>'Knowledge Base History নষ্ট বা পড়া যাচ্ছে না; নিরাপত্তার জন্য পরিবর্তন বন্ধ রাখা হয়েছে।']);
-                }
-            }
-            $versions = is_array($historyData) ? $historyData['versions'] : [];
-            $versions[] = ['saved_at'=>gmdate('c'),'entry_count'=>count($old['entries']),'entries'=>$old['entries']];
-            $versions = array_slice($versions, -30);
-            $historyTmp = $historyFile . '.' . bin2hex(random_bytes(6)) . '.tmp';
-            $historyJson = json_encode(['versions'=>$versions], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-            if ($historyJson === false || file_put_contents($historyTmp, $historyJson, LOCK_EX) === false || !rename($historyTmp, $historyFile)) {
-                @unlink($historyTmp);
+        $oldRaw = @file_get_contents($file);
+        $old = $oldRaw === false ? null : json_decode($oldRaw, true);
+        if ($oldRaw === false || json_last_error() !== JSON_ERROR_NONE || !is_array($old)
+            || !isset($old['entries']) || !is_array($old['entries'])) {
+            flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
+            out(500,['ok'=>false,'message'=>'Knowledge Base ডেটা পড়া যাচ্ছে না বা JSON অবৈধ; পরিবর্তন বন্ধ রাখা হয়েছে।']);
+        }
+        $historyFile = $dir . '/knowledge-history.json';
+        $historyData = null;
+        if (is_link($historyFile)) {
+            flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
+            out(500,['ok'=>false,'message'=>'Knowledge Base History-এর storage path নিরাপদ নয়; পরিবর্তন বন্ধ রাখা হয়েছে।']);
+        }
+        if (is_file($historyFile)) {
+            $historyRaw = @file_get_contents($historyFile);
+            $historyData = $historyRaw === false ? null : json_decode($historyRaw, true);
+            if ($historyRaw === false || json_last_error() !== JSON_ERROR_NONE || !is_array($historyData)
+                || !isset($historyData['versions']) || !is_array($historyData['versions'])) {
                 flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
-                out(500,['ok'=>false,'message'=>'তথ্য পরিবর্তনের ইতিহাস সংরক্ষণ করা যায়নি; পরিবর্তনটি করা হয়নি।']);
+                out(500,['ok'=>false,'message'=>'Knowledge Base History নষ্ট বা পড়া যাচ্ছে না; নিরাপত্তার জন্য পরিবর্তন বন্ধ রাখা হয়েছে।']);
             }
+        } elseif (file_exists($historyFile)) {
+            flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
+            out(500,['ok'=>false,'message'=>'Knowledge Base History-এর storage path নিরাপদ নয়; পরিবর্তন বন্ধ রাখা হয়েছে।']);
+        }
+        $versions = is_array($historyData) ? $historyData['versions'] : [];
+        $versions[] = ['saved_at'=>gmdate('c'),'entry_count'=>count($old['entries']),'entries'=>$old['entries']];
+        $versions = array_slice($versions, -30);
+        $historyJson = json_encode(['versions'=>$versions], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        if ($historyJson === false || !uttc_atomic_write_file($historyFile, $historyJson)) {
+            flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
+            out(500,['ok'=>false,'message'=>'তথ্য পরিবর্তনের ইতিহাস সম্পূর্ণভাবে সংরক্ষণ করা যায়নি; পরিবর্তনটি করা হয়নি।']);
         }
     }
     $payload = ['updated_at'=>gmdate('c'),'entries'=>array_values($entries)];
-    $tmp = $file . '.' . bin2hex(random_bytes(6)) . '.tmp';
     $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-    $ok = $encoded !== false ? file_put_contents($tmp, $encoded, LOCK_EX) : false;
-    if ($ok === false || !rename($tmp, $file)) {
-        @unlink($tmp);
+    if ($encoded === false || !uttc_atomic_write_file($file, $encoded)) {
         flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
-        out(500,['ok'=>false,'message'=>'তথ্য ফাইলে সংরক্ষণ ব্যর্থ হয়েছে।']);
+        out(500,['ok'=>false,'message'=>'তথ্য সম্পূর্ণভাবে সংরক্ষণ ব্যর্থ হয়েছে; আগের ফাইল অক্ষত রাখা হয়েছে।']);
     }
     flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
 }
@@ -192,8 +201,19 @@ require_admin();
 if ($action === 'history') {
     $dir = storage_dir();
     $historyFile = $dir . '/knowledge-history.json';
-    $historyData = is_file($historyFile) ? json_decode((string)file_get_contents($historyFile), true) : null;
-    $versions = is_array($historyData) && is_array($historyData['versions'] ?? null) ? $historyData['versions'] : [];
+    $versions = [];
+    if (is_link($historyFile) || (file_exists($historyFile) && !is_file($historyFile))) {
+        out(500,['ok'=>false,'message'=>'Knowledge Base History-এর storage path নিরাপদ নয়।']);
+    }
+    if (is_file($historyFile)) {
+        $historyRaw = @file_get_contents($historyFile);
+        $historyData = $historyRaw === false ? null : json_decode($historyRaw, true);
+        if ($historyRaw === false || json_last_error() !== JSON_ERROR_NONE || !is_array($historyData)
+            || !isset($historyData['versions']) || !is_array($historyData['versions'])) {
+            out(500,['ok'=>false,'message'=>'Knowledge Base History নষ্ট বা পড়া যাচ্ছে না; কোনো তথ্য গোপন করে খালি তালিকা দেখানো হয়নি।']);
+        }
+        $versions = $historyData['versions'];
+    }
     $summary = [];
     foreach (array_reverse($versions) as $version) {
         $titles = [];
