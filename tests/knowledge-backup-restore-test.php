@@ -60,6 +60,7 @@ try {
     $must($status === 0, 'pre-restore safety snapshot should verify');
 
     /* Snapshot without history restores KB and removes stale live history. */
+    @unlink($temp . '/api/data/knowledge-history.json');
     [$status,$out,$err] = $run('backup-knowledge-base.php');
     $must($status === 0 && preg_match('/Backup created: ([0-9]{8}-[0-9]{6}-[a-f0-9]{8})/', $out, $noHistory) === 1, 'snapshot without history should be created');
     $noHistoryId = $noHistory[1];
