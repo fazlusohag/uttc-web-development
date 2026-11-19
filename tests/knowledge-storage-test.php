@@ -31,6 +31,9 @@ try {
     $assert(str_contains($api, "require_once __DIR__ . '/storage.php';"), 'admin API loads atomic storage helper');
     $assert(substr_count($api, 'uttc_atomic_write_file(') >= 2, 'both history and Knowledge Base writes use atomic helper');
     $assert(str_contains($api, 'Knowledge Base History নষ্ট বা পড়া যাচ্ছে না'), 'history endpoint fails closed on invalid history');
+    $assert(str_contains($api, 'Knowledge Base-এ অবৈধ রেকর্ড পাওয়া গেছে'), 'malformed individual entries fail closed');
+    $assert(str_contains($api, 'foreach ($data[\'entries\'] as $entry)'), 'every stored entry is validated before any save can discard it');
+    $assert(!str_contains($api, "array_filter($data['entries'], 'is_array')"), 'malformed entries are never silently discarded');
     echo "Knowledge Base atomic storage tests passed.\n";
 } finally {
     foreach (glob($root . '/*') ?: [] as $path) {
