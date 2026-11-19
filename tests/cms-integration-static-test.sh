@@ -37,4 +37,11 @@ grep -q "og:title" assets/js/cms-public.js
 grep -q "og:description" assets/js/cms-public.js
 grep -q "setMeta('meta\[name=" assets/js/cms-public.js
 
+cms_page="$(cat admin/cms.php)"
+grep -q '<dialog id="previewDialog"' <<<"$cms_page"
+grep -q 'data-preview=' <<<"$cms_page"
+grep -q "\$('previewBody').textContent=item.body" <<<"$cms_page"
+grep -q "\$('previewDialog').showModal()" <<<"$cms_page"
+grep -q "u.protocol==='https:'&&!u.username&&!u.password" <<<"$cms_page"
+
 echo "CMS static integration checks passed."
