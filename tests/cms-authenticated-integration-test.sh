@@ -51,7 +51,51 @@ cms_csrf="$(php -r '$d=json_decode(stream_get_contents(STDIN),true); echo $d["cs
 [ -n "$cms_csrf" ]
 
 unauth_with_token="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$(php -r 'echo json_encode(["action"=>"list","csrf"=>$argv[1]]);' "$cms_csrf")" --write-out '\n%{http_code}' "http://127.0.0.1:${port}/api/cms.php")"
-[ "${unauth_with_token##*$'\n'}" = "401" ]
+[ "${unauth_with_token##*"$(curl --silent --show-error --cookie-jar "$cookie_jar" --cookie "$cookie_jar" \
+  --header 'Content-Type: application/json' --data "$(php -r 'echo json_encode(["action"=>"login","csrf"=>$argv[1],"password"=>$argv[2]]);' "$csrf" "$password")" \
+  "http://127.0.0.1:${port}/api/admin.php")"
+grep -q '"ok":true' <<<"$login"
+
+
+
+list_payload="$(php -r 'echo json_encode(["action"=>"list","csrf"=>$argv[1]]);' "$cms_csrf")"
+list_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$list_payload" "http://127.0.0.1:${port}/api/cms.php")"
+grep -q '"ok":true' <<<"$list_result"
+
+save_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"course","title"=>"CI CMS Contract Record","body"=>"Temporary integration test record"]);' "$cms_csrf")"
+save_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$save_payload" "http://127.0.0.1:${port}/api/cms.php")"
+grep -q '"ok":true' <<<"$save_result"
+
+public_before="$(curl --silent --show-error "http://127.0.0.1:${port}/api/cms-public.php?type=course")"
+! grep -q 'CI CMS Contract Record' <<<"$public_before"
+
+id="$(php -r '$d=json_decode(stream_get_contents(STDIN),true); foreach(($d["items"]??[]) as $i) if(($i["title"]??"")==="CI CMS Contract Record") echo $i["id"];' <<<"$(cat "$fixture")")"
+[ -n "$id" ]
+publish_payload="$(php -r 'echo json_encode(["action"=>"publish","csrf"=>$argv[1],"id"=>$argv[2]]);' "$cms_csrf" "$id")"
+publish_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$publish_payload" "http://127.0.0.1:${port}/api/cms.php")"
+grep -q '"ok":true' <<<"$publish_result"
+public_after="$(curl --silent --show-error "http://127.0.0.1:${port}/api/cms-public.php?type=course")"
+grep -q 'CI CMS Contract Record' <<<"$public_after"
+grep -q '"action":"create"' "$audit"
+grep -q '"action":"publish"' "$audit"
+
+delete_payload="$(php -r 'echo json_encode(["action"=>"delete","csrf"=>$argv[1],"id"=>$argv[2]]);' "$cms_csrf" "$id")"
+delete_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$delete_payload" "http://127.0.0.1:${port}/api/cms.php")"
+grep -q '"ok":true' <<<"$delete_result"
+public_after_delete="$(curl --silent --show-error "http://127.0.0.1:${port}/api/cms-public.php?type=course")"
+! grep -q 'CI CMS Contract Record' <<<"$public_after_delete"
+grep -q '"action":"delete"' "$audit"
+
+echo "OK: CMS session, CSRF, oversized-body rejection, Draft isolation, Publish, public-feed removal and audit lifecycle passed."
+\n'}" = "401" ]
+
+oversized_body_file="$(mktemp)"
+head -c 65537 /dev/zero | tr '\0' 'x' >"$oversized_body_file"
+oversized_cms_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+  --header 'Content-Type: application/json' --data-binary "@${oversized_body_file}" \
+  "http://127.0.0.1:${port}/api/cms.php")"
+rm -f "$oversized_body_file"
+[ "$oversized_cms_status" = "413" ]
 
 login="$(curl --silent --show-error --cookie-jar "$cookie_jar" --cookie "$cookie_jar" \
   --header 'Content-Type: application/json' --data "$(php -r 'echo json_encode(["action"=>"login","csrf"=>$argv[1],"password"=>$argv[2]]);' "$csrf" "$password")" \
