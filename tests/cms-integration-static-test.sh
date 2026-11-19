@@ -93,3 +93,10 @@ grep -q "aria-label.*মূল মেনু" <<<"$index_page"
 grep -q "addEventListener('error'.*img.remove()" assets/js/cms-public.js
 
 echo "CMS static integration checks passed."
+
+grep -q 'id="search"' admin/cms.php
+grep -q 'id="statusFilter"' admin/cms.php
+grep -q 'id="resultCount"' admin/cms.php
+grep -q "toLocaleLowerCase().includes(query)" admin/cms.php
+grep -q "statusFilter==='published'" admin/cms.php
+grep -q "addEventListener('input',render)" admin/cms.php
