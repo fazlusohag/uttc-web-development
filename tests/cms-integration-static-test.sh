@@ -20,6 +20,9 @@ for page in "${pages[@]}"; do
   test -f "$page" || { echo "Missing public page: $page"; exit 1; }
   grep -q 'data-page-key=' "$page" || { echo "Missing CMS page key: $page"; exit 1; }
   grep -q 'assets/js/cms-public.js' "$page" || { echo "Missing CMS public integration: $page"; exit 1; }
+  grep -q 'class="skip-link" href="#main-content"' "$page" || { echo "Missing keyboard skip link: $page"; exit 1; }
+  grep -q 'id="main-content"' "$page" || { echo "Missing main landmark target: $page"; exit 1; }
+  grep -q '.skip-link:focus' "$page" || { echo "Missing visible skip-link focus style: $page"; exit 1; }
 done
 grep -q 'data-cms-feed="notice"' notices-uttc-moulvibazar.html
 grep -q 'data-cms-feed="gallery"' gallery-uttc-moulvibazar.html
