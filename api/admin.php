@@ -151,25 +151,8 @@ function extract_document(string $path, string $ext): string {
     out(422,['ok'=>false,'message'=>'এই ফাইল ফরম্যাট সমর্থিত নয়।']);
 }
 
-function retrieval_preview(string $question, array $pages, int $limit = 5): array {
-    $q = mb_strtolower($question, 'UTF-8');
-    preg_match_all('/[\\p{L}\\p{N}]{2,}/u', $q, $m);
-    $terms = array_values(array_unique($m[0] ?? []));
-    $ranked = [];
-    foreach ($pages as $page) {
-        $title = (string)($page['title'] ?? '');
-        $text = (string)($page['text'] ?? '');
-        $hay = mb_strtolower($title . ' ' . $text, 'UTF-8');
-        $score = 0;
-        foreach ($terms as $term) {
-            if (mb_strpos(mb_strtolower($title, 'UTF-8'), $term) !== false) $score += 5;
-            $score += min(substr_count($hay, $term), 8);
-        }
-        if ($score > 0) $ranked[] = ['score'=>$score,'title'=>$title,'url'=>(string)($page['url'] ?? ''),'source_type'=>(string)($page['_source_type'] ?? 'website'),'excerpt'=>mb_substr($text,0,700,'UTF-8')];
-    }
-    usort($ranked, fn($a,$b) => $b['score'] <=> $a['score']);
-    return array_slice($ranked, 0, $limit);
-}
+require_once __DIR__ . '/retrieval.php';
+
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && ($_GET['action'] ?? '') === 'token') {
     if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
     out(200,['ok'=>true,'csrf'=>$_SESSION['csrf']]);
@@ -222,7 +205,7 @@ if ($action === 'test_retrieval') {
         $q = trim((string)($entry['question'] ?? ''));
         $pages[] = ['title'=>'[অনুমোদিত UTTC তথ্য] '.$title,'url'=>'','text'=>($q !== '' ? 'প্রশ্ন: '.$q.' ' : '').'উত্তর: '.$answer,'_source_type'=>'admin'];
     }
-    $matches = retrieval_preview($question, $pages);
+    $matches = array_map(static fn($item) => ['score'=>$item['score'],'title'=>$item['title'],'url'=>$item['url'],'source_type'=>$item['source_type'],'excerpt'=>mb_substr($item['text'],0,700,'UTF-8')], uttc_retrieve($question, $pages));
     out(200,['ok'=>true,'matches'=>$matches,'match_count'=>count($matches),'website_indexed'=>count($websiteData['pages'] ?? []),'published_admin_entries'=>count(array_filter(load_entries(),fn($e)=>($e['status'] ?? '')==='published'))]);
 }
 if ($action === 'list') {
