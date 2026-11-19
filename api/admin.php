@@ -116,53 +116,18 @@ function clean_text(string $s, int $max): string {
     return $s;
 }
 function clear_login_attempts(): void {
+    require_once __DIR__ . '/login-throttle.php';
     $path = storage_dir() . '/login-attempts.json';
     $ip = hash('sha256', (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-    $fp = @fopen($path, 'c+');
-    if (!$fp || !flock($fp, LOCK_EX)) { if (is_resource($fp)) fclose($fp); return; }
-    rewind($fp);
-    $all = json_decode(stream_get_contents($fp) ?: '{}', true);
-    if (!is_array($all)) $all = [];
-    unset($all[$ip]);
-    rewind($fp);
-    ftruncate($fp, 0);
-    fwrite($fp, json_encode($all));
-    fflush($fp);
-    flock($fp, LOCK_UN);
-    fclose($fp);
+    if (!uttc_clear_login_attempts($path, $ip)) {
+        error_log('UTTC admin login throttle: could not clear the successful IP bucket; preserving stored data.');
+    }
 }
 function login_throttled(): bool {
-    $dir = storage_dir();
-    $path = $dir . '/login-attempts.json';
+    require_once __DIR__ . '/login-throttle.php';
+    $path = storage_dir() . '/login-attempts.json';
     $ip = hash('sha256', (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-    $fp = @fopen($path, 'c+');
-    if (!$fp) return true;
-    if (!flock($fp, LOCK_EX)) { fclose($fp); return true; }
-    rewind($fp);
-    $raw = stream_get_contents($fp);
-    $all = json_decode($raw ?: '{}', true);
-    if (!is_array($all)) $all = [];
-    $now = time();
-    // Expire stale IP buckets and cap the file so distributed probing cannot grow it indefinitely.
-    foreach ($all as $key => $bucket) {
-        if (!is_array($bucket) || $now - (int)($bucket['start'] ?? 0) >= 900) unset($all[$key]);
-    }
-    if (!isset($all[$ip]) && count($all) >= 1000) {
-        uasort($all, static fn($a, $b) => (int)($a['start'] ?? 0) <=> (int)($b['start'] ?? 0));
-        $all = array_slice($all, -999, null, true);
-    }
-    $row = $all[$ip] ?? ['start'=>$now,'hits'=>0];
-    if ($now - (int)($row['start'] ?? 0) >= 900) $row = ['start'=>$now,'hits'=>0];
-    if ((int)($row['hits'] ?? 0) >= 5) {
-        flock($fp, LOCK_UN); fclose($fp);
-        return true;
-    }
-    $row['hits'] = (int)($row['hits'] ?? 0) + 1;
-    $all[$ip] = $row;
-    rewind($fp);
-    $written = ftruncate($fp, 0) && fwrite($fp, json_encode($all)) !== false && fflush($fp);
-    flock($fp, LOCK_UN); fclose($fp);
-    return !$written;
+    return uttc_login_attempt_throttled($path, $ip, time(), 900, 5, 1000);
 }
 require_once __DIR__ . '/document-extract.php';
 require_once __DIR__ . '/retrieval.php';
