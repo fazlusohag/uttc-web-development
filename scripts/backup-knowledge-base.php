@@ -19,6 +19,10 @@ if (!is_dir($dataDir) || is_link($dataDir)) {
     exit(1);
 }
 $realData = realpath($dataDir);
+if (is_link($realData . '/.htaccess')) {
+    fwrite(STDERR, "Private storage access-control file is a symbolic link.\\n");
+    exit(1);
+}
 if ($realData === false || !uttc_private_storage_directory_is_safe($realData)) {
     fwrite(STDERR, "Private storage protection could not be verified; a valid access-denial rule and safe upload path are required.\\n");
     exit(1);
