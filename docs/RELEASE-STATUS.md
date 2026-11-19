@@ -8,6 +8,7 @@ Branch: `release/uttc-complete-platform-2026`
 - Added the authenticated Website CMS at `admin/cms.php`, reusing the existing admin session and CSRF protection.
 - Added `api/cms.php` for listing, Draft creation/update, Publish and delete actions, plus non-secret AI operations status.
 - CMS writes use file locking, atomic file replacement and bounded text validation with an mbstring fallback.
+- CMS audit events are appended only after the corresponding content write succeeds; the authenticated lifecycle test checks Create and Publish audit entries.
 - Added CMS record types: Course, Notice, Gallery, Page, Contact and Navigation Menu.
 - Added SEO title, meta description and canonical HTTPS URL fields for Page records.
 - Added `api/cms-public.php`, a read-only endpoint that returns Published records only.
@@ -16,7 +17,7 @@ Branch: `release/uttc-complete-platform-2026`
 - Connected Published Course feeds to Driving, Women's Driving, Computer Office Application, Freelancing and Graphic Design pages.
 - Added `data-page-key` and the shared CMS integration script to all 14 public HTML pages so Published Page metadata and Navigation Menu records can be applied where compatible markup exists.
 - Prevented duplicate CMS navigation links when the same URL or label already exists in the page navigation.
-- Added CI checks for JavaScript syntax, static CMS page wiring, public CMS API behavior (Published-only visibility, public-type allowlisting, type filtering and invalid-type rejection), and authenticated CMS lifecycle (shared admin session, CSRF, Draft isolation and explicit Publish).
+- Added CI checks for JavaScript syntax, static CMS page wiring, public CMS API behavior (Published-only visibility, public-type allowlisting, type filtering and invalid-type rejection), and authenticated CMS lifecycle (shared admin session, CSRF, Draft isolation, explicit Publish and audit events).
 - Added `docs/EXTENDING-UTTC-PLATFORM.md` to define module boundaries, extension rules, API compatibility, storage/security rules and the definition of done for future features.
 - Updated the project README to describe the current implementation and its limitations.
 
@@ -49,7 +50,7 @@ Branch: `release/uttc-complete-platform-2026`
 
 ## CI
 
-The GitHub Actions workflow runs PHP 8.3 syntax checks, retrieval regression tests, assistant HTTP/CORS tests, document extraction smoke tests, Node syntax validation for the CMS JavaScript and static checks that all public pages load the CMS integration. CI does not prove live PHP session correctness, Hostinger security configuration, real OpenAI API access or browser rendering.
+The GitHub Actions workflow runs PHP 8.3 syntax checks, retrieval regression tests, assistant HTTP/CORS tests, document extraction smoke tests, Node syntax validation for the CMS JavaScript and static checks that all public pages load the CMS integration. The latest branch commit's Actions result has not yet been confirmed through the available GitHub status interface. CI does not prove live Hostinger security configuration, real OpenAI API access or browser rendering.
 
 ## Release decision
 
