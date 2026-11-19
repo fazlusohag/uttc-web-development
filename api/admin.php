@@ -121,38 +121,7 @@ function login_throttled(): bool {
     flock($fp, LOCK_UN); fclose($fp);
     return !$written;
 }
-function extract_document(string $path, string $ext): string {
-    if ($ext === 'txt' || $ext === 'md') {
-        $text = file_get_contents($path);
-        if ($text === false) return '';
-        if (!mb_check_encoding($text,'UTF-8')) $text = mb_convert_encoding($text,'UTF-8','auto');
-        return trim($text);
-    }
-    if ($ext === 'docx') {
-        if (!class_exists('ZipArchive')) out(422,['ok'=>false,'message'=>'এই সার্ভারে DOCX পড়ার জন্য PHP ZipArchive extension চালু নেই।']);
-        $zip = new ZipArchive();
-        if ($zip->open($path) !== true) out(422,['ok'=>false,'message'=>'DOCX ফাইলটি পড়া যাচ্ছে না।']);
-        $documentStat = $zip->statName('word/document.xml');
-        if (!is_array($documentStat) || (int)($documentStat['size'] ?? 0) > 10 * 1024 * 1024) { $zip->close(); out(422,['ok'=>false,'message'=>'DOCX-এর মূল লেখার আকার ১০ MB-এর বেশি বা ফাইলটি অসম্পূর্ণ।']); }
-        $xml = $zip->getFromName('word/document.xml'); $zip->close();
-        if ($xml === false) out(422,['ok'=>false,'message'=>'DOCX ফাইলে মূল লেখা পাওয়া যায়নি।']);
-        $dom = new DOMDocument(); if (!@$dom->loadXML($xml,LIBXML_NONET)) out(422,['ok'=>false,'message'=>'DOCX-এর লেখা পার্স করা যায়নি।']);
-        $xp = new DOMXPath($dom); $xp->registerNamespace('w','http://schemas.openxmlformats.org/wordprocessingml/2006/main');
-        $parts=[]; foreach ($xp->query('//w:p') as $p) { $line=''; foreach ($xp->query('.//w:t',$p) as $t) $line .= $t->textContent; if ($line!=='') $parts[]=$line; }
-        return trim(implode("\n",$parts));
-    }
-    if ($ext === 'pdf') {
-        $bin = null; foreach (['/usr/bin/pdftotext','/usr/local/bin/pdftotext'] as $candidate) if (is_executable($candidate)) {$bin=$candidate;break;}
-        if (!$bin) out(422,['ok'=>false,'message'=>'এই সার্ভারে PDF থেকে লেখা পড়ার pdftotext সুবিধা পাওয়া যায়নি। TXT বা DOCX ফাইল দিন, অথবা সার্ভারে PDF parser সেটআপ করতে হবে।']);
-        $pipes=[]; $proc=proc_open([$bin,'-layout',$path,'-'],[1=>['pipe','w'],2=>['pipe','w']],$pipes);
-        if (!is_resource($proc)) out(422,['ok'=>false,'message'=>'PDF parser চালু করা যায়নি।']);
-        $text=stream_get_contents($pipes[1]); fclose($pipes[1]); stream_get_contents($pipes[2]); fclose($pipes[2]); $code=proc_close($proc);
-        if ($code!==0 || $text===false) out(422,['ok'=>false,'message'=>'PDF থেকে লেখা বের করা যায়নি।']);
-        return trim($text);
-    }
-    out(422,['ok'=>false,'message'=>'এই ফাইল ফরম্যাট সমর্থিত নয়।']);
-}
-
+require_once __DIR__ . '/document-extract.php';
 require_once __DIR__ . '/retrieval.php';
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && ($_GET['action'] ?? '') === 'token') {
@@ -252,7 +221,8 @@ if ($action === 'upload') {
     $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmp) ?: 'application/octet-stream';
     $allowedMimes = ['pdf'=>['application/pdf'],'docx'=>['application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/zip'],'txt'=>['text/plain'],'md'=>['text/plain','text/markdown']];
     if (!in_array($mime, $allowedMimes[$ext] ?? [], true)) out(422,['ok'=>false,'message'=>'ফাইলের প্রকৃত ধরন ও extension মিলছে না।']);
-    $text=extract_document($tmp,$ext);if(trim($text)==='') out(422,['ok'=>false,'message'=>'ফাইল থেকে কোনো পাঠযোগ্য লেখা পাওয়া যায়নি।']);
+    try { $text=uttc_extract_document($tmp,$ext); } catch (Throwable $e) { out(422,['ok'=>false,'message'=>$e->getMessage()]); }
+    if(trim($text)==='') out(422,['ok'=>false,'message'=>'ফাইল থেকে কোনো পাঠযোগ্য লেখা পাওয়া যায়নি।']);
     $text=mb_substr($text,0,100000,'UTF-8');
     $dir=storage_dir();$stored=bin2hex(random_bytes(16)).'.'.$ext;$target=$dir.'/uploads/'.$stored;
     if(!move_uploaded_file($tmp,$target)) out(500,['ok'=>false,'message'=>'ফাইল নিরাপদে সংরক্ষণ করা যায়নি।']);
