@@ -548,11 +548,17 @@
     }
     aiLaunch.addEventListener('click',()=>setAiOpen(!aiPanel.classList.contains('open')));
     aiClose.addEventListener('click',()=>setAiOpen(false));
+    const aiHistoryKey='uttc-ai-history-v1';
+    let aiHistory=[];
+    try{const saved=JSON.parse(sessionStorage.getItem(aiHistoryKey)||'[]');if(Array.isArray(saved))aiHistory=saved.filter(x=>x&&['user','assistant'].includes(x.role)&&typeof x.content==='string').slice(-10);}catch(_){aiHistory=[];}
+    function saveAiHistory(){try{sessionStorage.setItem(aiHistoryKey,JSON.stringify(aiHistory.slice(-10)));}catch(_){}}
     aiForm.addEventListener('submit',async event=>{
       event.preventDefault();
       const question=aiInput.value.trim();
       if(!question) return;
       addAiMessage(question,'user');
+      const priorHistory=aiHistory.slice(-10);
+      aiHistory.push({role:'user',content:question});
       aiInput.value='';
       const pending=addAiMessage('আপনার প্রশ্নের উত্তর খুঁজছি…','bot');
       const sendButton=aiForm.querySelector('button[type="submit"]');
@@ -561,11 +567,13 @@
         const response=await fetch('/api/assistant.php',{
           method:'POST',
           headers:{'Content-Type':'application/json','Accept':'application/json'},
-          body:JSON.stringify({message:question})
+          body:JSON.stringify({message:question,history:priorHistory})
         });
         const data=await response.json();
         if(!response.ok || !data.ok) throw new Error(data.message||'এই মুহূর্তে উত্তর পাওয়া যাচ্ছে না।');
         pending.textContent=data.answer||'দুঃখিত, উত্তর তৈরি করা যায়নি।';
+        aiHistory.push({role:'assistant',content:pending.textContent});
+        aiHistory=aiHistory.slice(-10);saveAiHistory();
         if(Array.isArray(data.sources)&&data.sources.length){
           const sourceBox=document.createElement('div');
           sourceBox.className='uttc-ai-sources';
