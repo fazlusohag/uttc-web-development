@@ -54,6 +54,8 @@ try {
     $api = (string)file_get_contents(dirname(__DIR__) . '/api/admin.php');
     $assert(str_contains($api, "require_once __DIR__ . '/storage.php';"), 'admin API loads storage helper');
     $assert(str_contains($api, 'uttc_private_storage_directory_is_safe($dir)'), 'admin API verifies private storage before use');
+    $assert(substr_count($api, 'is_link($file)') >= 2, 'Knowledge Base file symlinks are rejected before read and save');
+    $assert(substr_count($api, 'file_exists($file) && !is_file($file)') >= 2, 'non-regular Knowledge Base storage paths are rejected');
     $assert(substr_count($api, 'uttc_atomic_write_file(') >= 2, 'both history and Knowledge Base writes use atomic helper');
     $assert(str_contains($api, 'Knowledge Base History নষ্ট বা পড়া যাচ্ছে না'), 'history endpoint fails closed on invalid history');
     $assert(str_contains($api, 'Knowledge Base-এ অবৈধ রেকর্ড পাওয়া গেছে'), 'malformed individual entries fail closed');
