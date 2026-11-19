@@ -77,3 +77,7 @@ GitHub Actions workflow `.github/workflows/php-lint.yml` runs PHP 8.3 syntax che
 ## Release status
 
 Current status is **integration candidate, not production-final**. Review [docs/RELEASE-STATUS.md](docs/RELEASE-STATUS.md) for completed work, limitations and release gates. Do not deploy to Hostinger until the production checks are completed and deployment is separately approved.
+
+## Private Knowledge Base backup
+
+A CLI-only backup utility is provided at `scripts/backup-knowledge-base.php`. From the project root, run `php scripts/backup-knowledge-base.php`. It snapshots validated Knowledge Base data, revision history and uploaded source files under the access-denied `api/data/backups/` directory, with a SHA-256 manifest and restrictive permissions. Retention defaults to 30 snapshots; `UTTC_BACKUP_RETENTION` accepts 1–365. The script does not restore data or change live records. Configure cron only after verifying the PHP CLI path and storage permissions on the actual host, and maintain an independent off-server backup.
