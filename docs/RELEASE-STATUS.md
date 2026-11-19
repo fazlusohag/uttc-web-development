@@ -77,3 +77,5 @@ Complete authenticated browser tests, Hostinger-specific security checks, visual
 - Public CMS image cards now remove an image element if the remote image fails to load, avoiding a broken-image placeholder. Added a static regression check for the fallback handler.
 
 - Added a Bengali keyboard-accessible “মূল কনটেন্টে যান” skip link to all 14 public pages, with a visible focus state and a stable `main-content` target. Extended the static integration test to require the link, target and focus styling on every page. This improves keyboard navigation; it does not replace a full screen-reader and browser accessibility audit.
+
+- All public pages now respect the operating-system `prefers-reduced-motion` setting by disabling smooth scrolling and minimizing CSS animation/transition duration for visitors who request reduced motion. The CMS static integration test now checks this support on every listed public page.
