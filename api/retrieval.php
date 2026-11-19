@@ -54,6 +54,10 @@ function uttc_retrieve(string $question, array $pages, int $limit = 5): array {
             ];
         }
     }
-    usort($ranked, static function($a,$b) {\n        $byScore = $b['score'] <=> $a['score'];\n        if ($byScore !== 0) return $byScore;\n        return (($b['source_type'] === 'admin') <=> ($a['source_type'] === 'admin'));\n    });
+    usort($ranked, static function($a,$b) {
+        $byScore = $b['score'] <=> $a['score'];
+        if ($byScore !== 0) return $byScore;
+        return (($b['source_type'] === 'admin') <=> ($a['source_type'] === 'admin'));
+    });
     return array_slice($ranked,0,max(1,min(10,$limit)));
 }
