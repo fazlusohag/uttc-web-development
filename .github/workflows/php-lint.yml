@@ -35,3 +35,5 @@ jobs:
             echo "Checking $file"
             php -l "$file"
           done
+      - name: Run retrieval regression tests
+        run: php tests/retrieval-test.php
