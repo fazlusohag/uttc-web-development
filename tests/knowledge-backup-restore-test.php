@@ -44,6 +44,16 @@ try {
     $snapshotDir = $temp . '/api/data/backups/' . $snapshot;
     $must(is_file($snapshotDir . '/.htaccess'), 'completed snapshot must include access denial');
     $must(is_file($snapshotDir . '/index.html') && filesize($snapshotDir . '/index.html') === 0, 'empty index guard file must be published successfully');
+    $guardBackup = $snapshotDir . '/.htaccess.saved';
+    $must(rename($snapshotDir . '/.htaccess', $guardBackup), 'test can temporarily remove snapshot access guard');
+    [$status] = $run('verify-knowledge-base-backup.php', [$snapshot]);
+    $must($status !== 0, 'verifier must reject a snapshot with a missing access guard');
+    $must(rename($guardBackup, $snapshotDir . '/.htaccess'), 'test restores snapshot access guard');
+    $indexBackup = $snapshotDir . '/index.html.saved';
+    $must(rename($snapshotDir . '/index.html', $indexBackup), 'test can temporarily remove snapshot index guard');
+    [$status] = $run('verify-knowledge-base-backup.php', [$snapshot]);
+    $must($status !== 0, 'verifier must reject a snapshot with a missing index guard');
+    $must(rename($indexBackup, $snapshotDir . '/index.html'), 'test restores snapshot index guard');
     [$status] = $run('verify-knowledge-base-backup.php', [$snapshot]);
     $must($status === 0, 'initial snapshot should verify');
 
