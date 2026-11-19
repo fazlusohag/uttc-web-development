@@ -23,8 +23,18 @@ function client_ip(): string {
 }
 function rate_limit(): void {
     $dir = __DIR__ . '/runtime';
+    if (is_link($dir) || (file_exists($dir) && !is_dir($dir))) {
+        error_log('UTTC rate limiter unavailable: runtime path is unsafe.');
+        respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
+    }
     if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) {
         error_log('UTTC rate limiter unavailable: runtime directory cannot be created.');
+        respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
+    }
+    $guard = $dir . '/.htaccess';
+    $rules = (is_link($guard) || !is_file($guard) || !is_readable($guard)) ? false : @file_get_contents($guard);
+    if ($rules === false || !preg_match('/^\\s*Require\\s+all\\s+denied\\s*$/mi', $rules)) {
+        error_log('UTTC rate limiter unavailable: runtime access-denial guard is missing or invalid.');
         respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
     }
     require_once __DIR__ . '/rate-limit.php';
