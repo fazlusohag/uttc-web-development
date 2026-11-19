@@ -57,6 +57,27 @@ $totalBytes = 0;
 $maxBytes = 100 * 1024 * 1024;
 $failed = false;
 
+$writeCompleteFile = static function (string $path, string $contents): bool {
+    $handle = @fopen($path, 'xb');
+    if (!$handle) return false;
+    $length = strlen($contents);
+    $written = 0;
+    $ok = true;
+    while ($written < $length) {
+        $count = @fwrite($handle, substr($contents, $written));
+        if ($count === false || $count === 0) { $ok = false; break; }
+        $written += $count;
+    }
+    if ($ok) $ok = @fflush($handle);
+    if (function_exists('fsync') && $ok) $ok = @fsync($handle);
+    if (!@fclose($handle)) $ok = false;
+    if (!$ok || $written !== $length || !@chmod($path, 0600)) {
+        @unlink($path);
+        return false;
+    }
+    return true;
+};
+
 $copyFile = static function (string $source, string $relative) use ($staging, &$files, &$totalBytes, $maxBytes): bool {
     if (is_link($source) || !is_file($source) || !is_readable($source)) return false;
     $size = filesize($source);
@@ -141,8 +162,10 @@ if (!$failed) {
         'files'=>$files
     ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
     $manifestPath = $staging . '/manifest.json';
-    $written = $manifest === false ? false : @file_put_contents($manifestPath, $manifest, LOCK_EX);
-    if ($written === false || !@chmod($manifestPath, 0600) || (@file_put_contents($staging . '/.htaccess', "Require all denied\n", LOCK_EX) === false) || (@file_put_contents($staging . '/index.html', '', LOCK_EX) === false) || !@rename($staging, $final)) {
+    if ($manifest === false || !$writeCompleteFile($manifestPath, $manifest)
+        || !$writeCompleteFile($staging . '/.htaccess', "Require all denied\n")
+        || !$writeCompleteFile($staging . '/index.html', '')
+        || !@rename($staging, $final)) {
         $failed = true;
     }
 }
