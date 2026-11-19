@@ -59,3 +59,5 @@ jobs:
         run: bash tests/cms-authenticated-integration-test.sh
       - name: Test Knowledge Base backup and restore in an isolated fixture
         run: php tests/knowledge-backup-restore-test.php
+      - name: Test Knowledge Base atomic storage writes
+        run: php tests/knowledge-storage-test.php
