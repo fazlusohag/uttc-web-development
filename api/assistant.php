@@ -23,33 +23,30 @@ function client_ip(): string {
 }
 function rate_limit(): void {
     $dir = __DIR__ . '/runtime';
+    if (is_link($dir) || (file_exists($dir) && !is_dir($dir))) {
+        error_log('UTTC rate limiter unavailable: runtime path is unsafe.');
+        respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
+    }
     if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) {
         error_log('UTTC rate limiter unavailable: runtime directory cannot be created.');
         respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
     }
+    $guard = $dir . '/.htaccess';
+    $rules = (is_link($guard) || !is_file($guard) || !is_readable($guard)) ? false : @file_get_contents($guard);
+    if ($rules === false || !preg_match('/^\\s*Require\\s+all\\s+denied\\s*$/mi', $rules)) {
+        error_log('UTTC rate limiter unavailable: runtime access-denial guard is missing or invalid.');
+        respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
+    }
+    require_once __DIR__ . '/rate-limit.php';
     $file = $dir . '/rate-' . hash('sha256', client_ip()) . '.json';
-    $now = time(); $window = 600; $limit = 18;
-    $fp = @fopen($file, 'c+');
-    if (!$fp) {
-        error_log('UTTC rate limiter unavailable: counter file cannot be opened.');
+    $result = uttc_rate_limit_attempt($file, time(), 600, 18);
+    if ($result === null) {
+        error_log('UTTC rate limiter unavailable: counter storage is invalid or could not be updated.');
         respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
     }
-    if (!flock($fp, LOCK_EX)) {
-        fclose($fp);
-        error_log('UTTC rate limiter unavailable: counter lock failed.');
-        respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
-    }
-    $raw = stream_get_contents($fp);
-    $data = json_decode($raw ?: '{}', true);
-    $hits = is_array($data) && ($now - (int)($data['start'] ?? 0) < $window) ? (int)($data['hits'] ?? 0) : 0;
-    $start = $hits ? (int)$data['start'] : $now;
-    if ($hits >= $limit) {
-        flock($fp, LOCK_UN); fclose($fp);
+    if ($result === false) {
         respond(429, ['ok'=>false,'error'=>'rate_limited','message'=>'অনেকগুলো প্রশ্ন করা হয়েছে। ১০ মিনিট পর আবার চেষ্টা করুন।']);
     }
-    ftruncate($fp, 0); rewind($fp);
-    fwrite($fp, json_encode(['start'=>$start,'hits'=>$hits+1])); fflush($fp);
-    flock($fp, LOCK_UN); fclose($fp);
 }
 function plain_text(string $s): string {
     $s = html_entity_decode(strip_tags($s), ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -87,30 +84,61 @@ if ($body === false || strlen($body) > $maxRequestBytes) respond(413, ['ok'=>fal
 $input = json_decode($body, true);
 if (!is_array($input)) respond(400, ['ok'=>false,'error'=>'invalid_json']);
 $question = trim((string)($input['message'] ?? ''));
-$history = [];
-$rawHistory = $input['history'] ?? [];
-if (is_array($rawHistory)) {
-    foreach (array_slice($rawHistory, -10) as $turn) {
-        if (!is_array($turn)) continue;
-        $role = (string)($turn['role'] ?? '');
-        $content = trim((string)($turn['content'] ?? ''));
-        if (!in_array($role, ['user','assistant'], true) || $content === '' || mb_strlen($content, 'UTF-8') > 1200) continue;
-        $history[] = ['role'=>$role, 'content'=>$content];
-    }
-}
+require_once __DIR__ . '/assistant-history.php';
+$history = uttc_normalize_assistant_history($input['history'] ?? []);
 if ($question === '' || mb_strlen($question,'UTF-8') > 1200) respond(422, ['ok'=>false,'error'=>'invalid_message','message'=>'প্রশ্নটি ১২০০ অক্ষরের মধ্যে লিখুন।']);
 if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $question)) respond(422, ['ok'=>false,'error'=>'invalid_message']);
 $apiKey = envv('OPENAI_API_KEY');
 $model = envv('OPENAI_MODEL');
 if ($apiKey === '' || $model === '') respond(503, ['ok'=>false,'error'=>'not_configured','message'=>'AI সেবা এখনো সার্ভারে কনফিগার করা হয়নি।']);
 $knowledgeFile = __DIR__ . '/knowledge.json';
-$knowledge = is_file($knowledgeFile) ? json_decode((string)file_get_contents($knowledgeFile), true) : null;
-$pages = is_array($knowledge) && is_array($knowledge['pages'] ?? null) ? $knowledge['pages'] : [];
+if (is_link($knowledgeFile) || (file_exists($knowledgeFile) && !is_file($knowledgeFile))) {
+    error_log('UTTC assistant knowledge source path is unsafe.');
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC তথ্যভান্ডার সাময়িকভাবে যাচাই করা যাচ্ছে না।']);
+}
+$knowledgeRaw = is_file($knowledgeFile) ? @file_get_contents($knowledgeFile) : false;
+$knowledge = $knowledgeRaw === false ? null : json_decode($knowledgeRaw, true);
+if ($knowledgeRaw === false || json_last_error() !== JSON_ERROR_NONE || !is_array($knowledge)
+    || !isset($knowledge['pages']) || !is_array($knowledge['pages'])) {
+    error_log('UTTC assistant website knowledge is missing, unreadable, or invalid.');
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC তথ্যভান্ডার সাময়িকভাবে যাচাই করা যাচ্ছে না।']);
+}
+$pages = $knowledge['pages'];
+foreach ($pages as $page) {
+    if (!is_array($page)) {
+        error_log('UTTC assistant website knowledge contains an invalid page record.');
+        respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC তথ্যভান্ডারের একটি রেকর্ড যাচাই করা যাচ্ছে না।']);
+    }
+}
 
-// Only administrator-approved entries are added to the public assistant context.
-$curatedFile = __DIR__ . '/data/knowledge-base.json';
-$curatedData = is_file($curatedFile) ? json_decode((string)file_get_contents($curatedFile), true) : null;
-$curatedEntries = is_array($curatedData) && is_array($curatedData['entries'] ?? null) ? $curatedData['entries'] : [];
+// Only administrator-approved entries are added from protected private storage.
+require_once __DIR__ . '/storage.php';
+$privateDir = __DIR__ . '/data';
+if (!uttc_private_storage_directory_is_safe($privateDir)) {
+    error_log('UTTC assistant private Knowledge Base directory or access guard is unsafe.');
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC অনুমোদিত তথ্যভান্ডার সাময়িকভাবে যাচাই করা যাচ্ছে না।']);
+}
+$curatedFile = $privateDir . '/knowledge-base.json';
+if (is_link($curatedFile) || (file_exists($curatedFile) && !is_file($curatedFile))) {
+    error_log('UTTC assistant private Knowledge Base file path is unsafe.');
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC অনুমোদিত তথ্যভান্ডার সাময়িকভাবে যাচাই করা যাচ্ছে না।']);
+}
+$curatedRaw = is_file($curatedFile) ? @file_get_contents($curatedFile) : false;
+if ($curatedRaw === false && is_file($curatedFile)) {
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC অনুমোদিত তথ্যভান্ডার পড়া যাচ্ছে না।']);
+}
+$curatedData = $curatedRaw === false ? ['entries'=>[]] : json_decode($curatedRaw, true);
+if (!is_array($curatedData) || !isset($curatedData['entries']) || !is_array($curatedData['entries'])) {
+    error_log('UTTC assistant private Knowledge Base JSON is invalid.');
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC অনুমোদিত তথ্যভান্ডারের JSON যাচাই করা যাচ্ছে না।']);
+}
+$curatedEntries = $curatedData['entries'];
+foreach ($curatedEntries as $entry) {
+    if (!is_array($entry)) {
+        error_log('UTTC assistant private Knowledge Base contains an invalid record.');
+        respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC অনুমোদিত তথ্যভান্ডারের একটি রেকর্ড যাচাই করা যাচ্ছে না।']);
+    }
+}
 foreach ($curatedEntries as $entry) {
     if (($entry['status'] ?? '') !== 'published') continue;
     $title = trim((string)($entry['title'] ?? ''));

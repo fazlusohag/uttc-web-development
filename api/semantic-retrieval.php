@@ -52,8 +52,21 @@ function uttc_semantic_retrieve(string $question, array $pages, string $apiKey, 
     $question = trim($question);
     if ($question === '' || !$pages) return [];
     $runtime = __DIR__ . '/runtime';
+    if (is_link($runtime) || (file_exists($runtime) && !is_dir($runtime))) {
+        throw new RuntimeException('Semantic Search cache ফোল্ডারের পথ নিরাপদ নয়।');
+    }
     if (!is_dir($runtime) && !@mkdir($runtime, 0750, true) && !is_dir($runtime)) {
         throw new RuntimeException('Semantic Search cache ফোল্ডার তৈরি করা যায়নি।');
+    }
+    // The embedding cache contains private operational data. Require a real
+    // directory and its own access-denial file; do not rely only on rewrite rules.
+    $runtimeGuard = $runtime . '/.htaccess';
+    if (is_link($runtimeGuard) || !is_file($runtimeGuard) || !is_readable($runtimeGuard)) {
+        throw new RuntimeException('Semantic Search cache-এর ব্যক্তিগত access protection পাওয়া যায়নি।');
+    }
+    $runtimeRules = @file_get_contents($runtimeGuard);
+    if ($runtimeRules === false || !preg_match('/^\\s*Require\\s+all\\s+denied\\s*$/mi', $runtimeRules)) {
+        throw new RuntimeException('Semantic Search cache-এর access-denial rule যাচাই করা যায়নি।');
     }
 
     $adminDocuments = [];
@@ -100,7 +113,23 @@ function uttc_semantic_retrieve(string $question, array $pages, string $apiKey, 
             $cachePayload = ['model'=>$model, 'fingerprint'=>$fingerprint, 'vectors'=>$vectors, 'updated_at'=>gmdate('c')];
             $encoded = json_encode($cachePayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $tmp = $cacheFile . '.' . bin2hex(random_bytes(6)) . '.tmp';
-            if ($encoded === false || file_put_contents($tmp, $encoded, LOCK_EX) === false || !rename($tmp, $cacheFile)) {
+            $handle = $encoded === false ? false : @fopen($tmp, 'xb');
+            $writeOk = is_resource($handle);
+            if ($writeOk) {
+                $length = strlen($encoded);
+                $written = 0;
+                while ($written < $length) {
+                    $count = @fwrite($handle, substr($encoded, $written));
+                    if ($count === false || $count === 0) { $writeOk = false; break; }
+                    $written += $count;
+                }
+                if ($writeOk) $writeOk = @fflush($handle);
+                if (function_exists('fsync') && $writeOk) $writeOk = @fsync($handle);
+                if (!@fclose($handle)) $writeOk = false;
+                @chmod($tmp, 0600);
+                $writeOk = $writeOk && $written === $length;
+            }
+            if (!$writeOk || !@rename($tmp, $cacheFile)) {
                 @unlink($tmp);
                 throw new RuntimeException('Semantic Search index সংরক্ষণ করা যায়নি।');
             }

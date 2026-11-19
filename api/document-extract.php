@@ -3,6 +3,12 @@ declare(strict_types=1);
 
 /** Extract text from administrator-uploaded, untrusted documents. */
 function uttc_extract_document(string $path, string $ext): string {
+    // Enforce the upload boundary again at the parser layer. This protects
+    // future callers that may invoke extraction without the Admin upload API.
+    $inputBytes = @filesize($path);
+    if ($inputBytes === false || $inputBytes > 8 * 1024 * 1024) {
+        throw new RuntimeException('ফাইলের আকার ৮ MB-এর বেশি বা ফাইলটি পড়া যাচ্ছে না।');
+    }
     if ($ext === 'txt' || $ext === 'md') {
         $text = file_get_contents($path);
         if ($text === false) throw new RuntimeException('ফাইলটি পড়া যাচ্ছে না।');

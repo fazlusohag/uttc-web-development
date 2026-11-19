@@ -43,6 +43,10 @@ jobs:
           done
       - name: Run retrieval regression tests
         run: php tests/retrieval-test.php
+      - name: Run assistant rate-limit storage tests
+        run: php tests/rate-limit-test.php
+      - name: Test AI assistant client history trust boundary
+        run: php tests/assistant-history-test.php
       - name: Run assistant HTTP and CORS tests
         run: bash tests/assistant-http-test.sh
       - name: Install PDF text extractor
@@ -59,3 +63,7 @@ jobs:
         run: bash tests/cms-authenticated-integration-test.sh
       - name: Test Knowledge Base backup and restore in an isolated fixture
         run: php tests/knowledge-backup-restore-test.php
+      - name: Test Knowledge Base atomic storage writes
+        run: php tests/knowledge-storage-test.php
+      - name: Test admin login throttle storage
+        run: php tests/login-throttle-test.php

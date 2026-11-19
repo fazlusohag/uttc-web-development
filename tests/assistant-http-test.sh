@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Public assistant knowledge and curated private records must fail closed on unsafe paths/data.
+grep -q 'uttc_private_storage_directory_is_safe(\$privateDir)' api/assistant.php
+grep -q 'is_link(\$curatedFile)' api/assistant.php
+grep -q 'private Knowledge Base JSON is invalid' api/assistant.php
+grep -q 'website knowledge contains an invalid page record' api/assistant.php
+
+
 port="$(php -r '$s=stream_socket_server("tcp://127.0.0.1:0", $e, $m); if (!$s) exit(1); echo substr(strrchr(stream_socket_get_name($s, false), ":"), 1); fclose($s);')"
 log_file="$(mktemp)"
 php -S "127.0.0.1:${port}" -t . >"$log_file" 2>&1 &
@@ -68,4 +75,8 @@ for admin_page in "admin/index.php" "admin/cms.php"; do
   grep -qi 'Referrer-Policy: strict-origin-when-cross-origin' <<<"$headers"
 done
 
-echo "OK: CORS, origin rejection, HTTP method, request-size, and admin security-header checks passed."
+grep -Fq 'is_link($dir)' api/assistant.php
+grep -Fq 'runtime access-denial guard is missing or invalid' api/assistant.php
+grep -Fq 'is_link($file)' api/rate-limit.php
+
+echo "OK: CORS, origin rejection, HTTP method, request-size, runtime storage guard, and admin security-header checks passed."

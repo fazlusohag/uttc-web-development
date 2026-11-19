@@ -31,6 +31,8 @@ for page in driving-training-moulvibazar.html women-driving-training-moulvibazar
   grep -q 'data-cms-feed="course"' "$page" || { echo "Missing course feed: $page"; exit 1; }
 done
 grep -q 'Require all denied' api/data/.htaccess
+grep -Fq "is_link(\$lockPath)" api/admin.php
+grep -Fq 'CMS lock file-এর পথ নিরাপদ নয়' api/cms.php
 grep -q 'status.*published' api/cms-public.php
 grep -q "item.page_key===pageKey" assets/js/cms-public.js
 grep -q "const feedCache=new Map()" assets/js/cms-public.js
@@ -169,3 +171,29 @@ grep -q "is_link(\$realData . '/.htaccess')" scripts/backup-knowledge-base.php
 grep -q "is_link(dirname(\$backupRoot) . '/.htaccess')" scripts/verify-knowledge-base-backup.php
 grep -Fq "preg_match('~(?:^|/)\\\\.(?:/|$)~', \$relative)" scripts/verify-knowledge-base-backup.php
 grep -q "is_link(\$data . '/.htaccess')" scripts/restore-knowledge-base-backup.php
+
+# Semantic embedding vectors are private cache data and must have their own guard.
+grep -q 'api/runtime/.htaccess' <(git ls-files api/runtime/.htaccess)
+grep -q 'Require all denied' api/runtime/.htaccess
+grep -q "is_link(\$runtime)" api/semantic-retrieval.php
+grep -q "is_link(\$runtimeGuard)" api/semantic-retrieval.php
+grep -q "Semantic Search cache-এর access-denial rule যাচাই করা যায়নি" api/semantic-retrieval.php
+grep -q 'fflush(\$handle)' api/semantic-retrieval.php
+grep -q 'fsync(\$handle)' api/semantic-retrieval.php
+
+# CMS status counters must validate knowledge sources before reading or counting them.
+grep -q 'function cms_read_status_json' api/cms.php
+grep -q 'is_link(\$path)' api/cms.php
+grep -q 'json_last_error()!==JSON_ERROR_NONE' api/cms.php
+grep -q 'ডেটা নষ্ট বা অবৈধ JSON; আগের তথ্য অক্ষত রাখা হয়েছে' api/cms.php
+grep -q 'ফাইলের storage path নিরাপদ নয়' api/cms.php
+grep -Fq "cms_read_status_json(__DIR__.'/data/knowledge-base.json','entries'" api/cms.php
+grep -Fq "cms_read_status_json(__DIR__.'/knowledge.json','pages'" api/cms.php
+
+# CMS API must fail closed if its private data directory or files are symlinked
+# or if the web-server access-denial guard is absent or invalid.
+grep -q "is_link(\$p)" api/cms.php
+grep -q "is_link(\$guard)" api/cms.php
+grep -q "CMS ব্যক্তিগত ডেটার access-denial rule যাচাই করা যায়নি" api/cms.php
+grep -q "is_link(\$path)" api/cms.php
+grep -q "CMS ডেটা ফাইলের পথ নিরাপদ নয়" api/cms.php
