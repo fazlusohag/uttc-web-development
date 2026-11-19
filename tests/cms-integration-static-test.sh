@@ -178,3 +178,11 @@ grep -q "is_link(\$runtimeGuard)" api/semantic-retrieval.php
 grep -q "Semantic Search cache-এর access-denial rule যাচাই করা যায়নি" api/semantic-retrieval.php
 grep -q 'fflush(\$handle)' api/semantic-retrieval.php
 grep -q 'fsync(\$handle)' api/semantic-retrieval.php
+
+# CMS API must fail closed if its private data directory or files are symlinked
+# or if the web-server access-denial guard is absent or invalid.
+grep -q "is_link(\$p)" api/cms.php
+grep -q "is_link(\$guard)" api/cms.php
+grep -q "CMS ব্যক্তিগত ডেটার access-denial rule যাচাই করা যায়নি" api/cms.php
+grep -q "is_link(\$path)" api/cms.php
+grep -q "CMS ডেটা ফাইলের পথ নিরাপদ নয়" api/cms.php
