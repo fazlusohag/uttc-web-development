@@ -6,7 +6,14 @@ header('X-Content-Type-Options: nosniff');
 session_name('UTTC_KB_ADMIN');
 session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>(!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off'),'httponly'=>true,'samesite'=>'Strict']);
 ini_set('session.use_strict_mode','1');
+ini_set('session.use_only_cookies','1');
+ini_set('session.use_trans_sid','0');
 session_start();
+if (!empty($_SESSION['admin'])) {
+ $last=(int)($_SESSION['last_activity']??0);
+ if ($last<=0 || time()-$last>1800) { $_SESSION=[]; session_regenerate_id(true); }
+ else { $_SESSION['last_activity']=time(); }
+}
 function cms_out(int $s,array $d): never {http_response_code($s);echo json_encode($d,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);exit;}
 function cms_input(): array {
  $maxBytes=64*1024;$length=(int)($_SERVER['CONTENT_LENGTH']??0);
@@ -38,7 +45,10 @@ function cms_read(): array {
  if(!is_file($p))return [];
  $raw=@file_get_contents($p);if($raw===false)cms_out(500,['ok'=>false,'message'=>'CMS ডেটা পড়া যাচ্ছে না; নিরাপত্তার জন্য পরিবর্তন বন্ধ রাখা হয়েছে।']);
  $d=json_decode($raw,true);if(json_last_error()!==JSON_ERROR_NONE||!is_array($d)||!isset($d['items'])||!is_array($d['items']))cms_out(500,['ok'=>false,'message'=>'CMS ডেটা নষ্ট বা অবৈধ JSON; আগের ফাইল অক্ষত রেখে ব্যাকআপ/পুনরুদ্ধার প্রয়োজন।']);
- return array_values(array_filter($d['items'],'is_array'));
+ foreach($d['items'] as $item){
+  if(!is_array($item))cms_out(500,['ok'=>false,'message'=>'CMS ডেটায় অবৈধ রেকর্ড পাওয়া গেছে; কোনো রেকর্ড বাদ দিয়ে পরিবর্তন করা হবে না।']);
+ }
+ return array_values($d['items']);
 }
 function cms_assert_unique_target(array $items,string $id): void {if($id==='')cms_out(422,['ok'=>false,'message'=>'রেকর্ডের ID পাওয়া যায়নি।']);$matches=0;foreach($items as $item){if(is_array($item)&&is_string($item['id']??null)&&hash_equals($item['id'],$id))$matches++;}if($matches>1)cms_out(409,['ok'=>false,'message'=>'একই ID-র একাধিক পুরোনো রেকর্ড পাওয়া গেছে। নিরাপদ সম্পাদনার জন্য আগে ডেটা সংশোধন করুন।']);}
 function cms_write(array $items): void {
@@ -51,7 +61,18 @@ function cms_write(array $items): void {
  if($ok)$ok=fflush($h);if(function_exists('fsync')&&$ok)$ok=fsync($h);if(!fclose($h))$ok=false;
  if(!$ok||$written!==$length||!@rename($tmp,$p)){@unlink($tmp);cms_out(500,['ok'=>false,'message'=>'তথ্য সম্পূর্ণভাবে সংরক্ষণ করা যায়নি। আগের তথ্য অপরিবর্তিত রাখা হয়েছে।']);}
 }
-function cms_audit(string $action,array $item): void {$line=json_encode(['at'=>gmdate('c'),'action'=>$action,'id'=>$item['id']??null,'type'=>$item['type']??null],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);if($line!==false)file_put_contents(cms_dir().'/cms-audit.jsonl',$line."\n",FILE_APPEND|LOCK_EX);}
+function cms_audit(string $action,array $item): void {
+ $path=cms_dir().'/cms-audit.jsonl';
+ if(is_link($path)||(file_exists($path)&&!is_file($path)))cms_out(500,['ok'=>false,'message'=>'CMS audit log-এর storage path নিরাপদ নয়।']);
+ $line=json_encode(['at'=>gmdate('c'),'action'=>$action,'id'=>$item['id']??null,'type'=>$item['type']??null],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+ if($line===false)cms_out(500,['ok'=>false,'message'=>'CMS audit record তৈরি করা যায়নি।']);
+ $h=@fopen($path,'ab');
+ if(!$h||!flock($h,LOCK_EX)){if(is_resource($h))fclose($h);cms_out(500,['ok'=>false,'message'=>'CMS audit log সংরক্ষণ করা যাচ্ছে না।']);}
+ $payload=$line."\n";$length=strlen($payload);$written=0;
+ while($written<$length){$n=fwrite($h,substr($payload,$written));if($n===false||$n===0)break;$written+=$n;}
+ $ok=$written===$length&&fflush($h);flock($h,LOCK_UN);fclose($h);
+ if(!$ok)cms_out(500,['ok'=>false,'message'=>'CMS audit log সম্পূর্ণভাবে সংরক্ষণ করা যায়নি।']);
+}
 function cms_text(mixed $v,int $max): string {if(!is_string($v))return '';$v=trim(str_replace("\0",'',$v));if((function_exists('mb_strlen')?mb_strlen($v,'UTF-8'):strlen($v))>$max)cms_out(422,['ok'=>false,'message'=>'একটি ঘরে নির্ধারিত সীমার চেয়ে বেশি লেখা হয়েছে।']);return $v;}
 function cms_https(string $v,string $field): void {if($v==='')return;$parts=parse_url($v);if(!filter_var($v,FILTER_VALIDATE_URL)||!is_array($parts)||strtolower((string)($parts['scheme']??''))!=='https'||empty($parts['host'])||isset($parts['user'])||isset($parts['pass']))cms_out(422,['ok'=>false,'message'=>$field.'-এ শুধু credential-বিহীন পূর্ণ HTTPS URL গ্রহণ করা হয়।']);}
 if(($_SERVER['REQUEST_METHOD']??'GET')==='GET'&&($_GET['action']??'')==='token'){if(empty($_SESSION['csrf']))$_SESSION['csrf']=bin2hex(random_bytes(32));cms_out(200,['ok'=>true,'csrf'=>$_SESSION['csrf']]);}
