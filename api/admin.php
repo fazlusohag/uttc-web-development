@@ -247,6 +247,9 @@ if ($action === 'upload') {
     $original=(string)$f['name'];$ext=strtolower(pathinfo($original,PATHINFO_EXTENSION));
     if(!in_array($ext,['pdf','docx','txt','md'],true)) out(422,['ok'=>false,'message'=>'শুধু PDF, DOCX, TXT বা MD ফাইল আপলোড করুন।']);
     $tmp=(string)$f['tmp_name'];if(!is_uploaded_file($tmp)) out(422,['ok'=>false,'message'=>'অবৈধ আপলোড শনাক্ত হয়েছে।']);
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($tmp) ?: 'application/octet-stream';
+    $allowedMimes = ['pdf'=>['application/pdf'],'docx'=>['application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/zip'],'txt'=>['text/plain'],'md'=>['text/plain','text/markdown']];
+    if (!in_array($mime, $allowedMimes[$ext] ?? [], true)) out(422,['ok'=>false,'message'=>'ফাইলের প্রকৃত ধরন ও extension মিলছে না।']);
     $text=extract_document($tmp,$ext);if(trim($text)==='') out(422,['ok'=>false,'message'=>'ফাইল থেকে কোনো পাঠযোগ্য লেখা পাওয়া যায়নি।']);
     $text=mb_substr($text,0,100000,'UTF-8');
     $dir=storage_dir();$stored=bin2hex(random_bytes(16)).'.'.$ext;$target=$dir.'/uploads/'.$stored;
