@@ -44,4 +44,13 @@ grep -q "\$('previewBody').textContent=item.body" <<<"$cms_page"
 grep -q "\$('previewDialog').showModal()" <<<"$cms_page"
 grep -q "u.protocol==='https:'&&!u.username&&!u.password" <<<"$cms_page"
 
+index_page="$(cat index.html)"
+grep -q 'aria-controls="navLinks"' <<<"$index_page"
+grep -q "function setMenuOpen(open)" <<<"$index_page"
+grep -q "event.key==='Escape'" <<<"$index_page"
+grep -q "menuBtn.focus()" <<<"$index_page"
+grep -q "event.target.closest('a')" <<<"$index_page"
+grep -q "aria-label.*মূল মেনু" <<<"$index_page"
+grep -q "addEventListener('error'.*img.remove()" assets/js/cms-public.js
+
 echo "CMS static integration checks passed."
