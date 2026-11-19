@@ -13,6 +13,8 @@ function uttc_login_attempt_throttled(
     int $limit = 5,
     int $maxBuckets = 1000
 ): bool {
+    // Do not follow attacker-planted links in the protected storage directory.
+    if (is_link($file) || (file_exists($file) && !is_file($file))) return true;
     $fp = @fopen($file, 'c+');
     if (!$fp) return true;
     if (!flock($fp, LOCK_EX)) { fclose($fp); return true; }
@@ -72,6 +74,7 @@ function uttc_login_attempt_throttled(
 
 /** Clear a successful login's bucket; returns false on any storage failure. */
 function uttc_clear_login_attempts(string $file, string $ip): bool {
+    if (is_link($file) || (file_exists($file) && !is_file($file))) return false;
     $fp = @fopen($file, 'c+');
     if (!$fp) return false;
     if (!flock($fp, LOCK_EX)) { fclose($fp); return false; }
