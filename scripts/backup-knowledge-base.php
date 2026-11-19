@@ -142,7 +142,7 @@ if (!$failed) {
     ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
     $manifestPath = $staging . '/manifest.json';
     $written = $manifest === false ? false : @file_put_contents($manifestPath, $manifest, LOCK_EX);
-    if ($written === false || !@chmod($manifestPath, 0600) || !@file_put_contents($staging . '/.htaccess', "Require all denied\n", LOCK_EX) || !@file_put_contents($staging . '/index.html', '', LOCK_EX) || !@rename($staging, $final)) {
+    if ($written === false || !@chmod($manifestPath, 0600) || !@file_put_contents($staging . '/.htaccess', "Require all denied\n", LOCK_EX) || @file_put_contents($staging . '/index.html', '', LOCK_EX) === false || !@rename($staging, $final)) {
         $failed = true;
     }
 }
