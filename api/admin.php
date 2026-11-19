@@ -61,6 +61,9 @@ function load_entries(): array {
         }
     }
     $file = $dir . '/knowledge-base.json';
+    if (is_link($file) || (file_exists($file) && !is_file($file))) {
+        out(500, ['ok'=>false,'message'=>'Knowledge Base ফাইলের storage path নিরাপদ নয়।']);
+    }
     if (!is_file($file)) return [];
     $raw = @file_get_contents($file);
     $data = $raw === false ? null : json_decode($raw, true);
@@ -86,6 +89,10 @@ function save_entries(array $entries): void {
         }
     }
     $file = $dir . '/knowledge-base.json';
+    if (is_link($file) || (file_exists($file) && !is_file($file))) {
+        flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
+        out(500,['ok'=>false,'message'=>'Knowledge Base ফাইলের storage path নিরাপদ নয়; পরিবর্তন বন্ধ রাখা হয়েছে।']);
+    }
     // Preserve the previous published/draft state before each successful change.
     if (is_file($file)) {
         $oldRaw = @file_get_contents($file);
