@@ -46,8 +46,8 @@ cms_token_json="$(curl --silent --show-error --cookie-jar "$cookie_jar" --cookie
 cms_csrf="$(php -r '$d=json_decode(stream_get_contents(STDIN),true); echo $d["csrf"]??"";' <<<"$cms_token_json")"
 [ -n "$cms_csrf" ]
 
-unauth_with_token="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$(php -r 'echo json_encode(["action"=>"list","csrf"=>$argv[1]]);' "$cms_csrf")" --write-out '\\n%{http_code}' "http://127.0.0.1:\${port}/api/cms.php")"
-[ "\${unauth_with_token##*$'\\n'}" = "401" ]
+unauth_with_token="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$(php -r 'echo json_encode(["action"=>"list","csrf"=>$argv[1]]);' "$cms_csrf")" --write-out '\n%{http_code}' "http://127.0.0.1:${port}/api/cms.php")"
+[ "${unauth_with_token##*$'\n'}" = "401" ]
 
 login="$(curl --silent --show-error --cookie-jar "$cookie_jar" --cookie "$cookie_jar" \
   --header 'Content-Type: application/json' --data "$(php -r 'echo json_encode(["action"=>"login","csrf"=>$argv[1],"password"=>$argv[2]]);' "$csrf" "$password")" \
