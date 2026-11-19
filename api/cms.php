@@ -19,7 +19,7 @@ function cms_admin(): void {if(empty($_SESSION['admin']))cms_out(401,['ok'=>fals
 function cms_csrf(array $d): void {if(empty($_SESSION['csrf'])||!hash_equals((string)$_SESSION['csrf'],(string)($d['csrf']??'')))cms_out(419,['ok'=>false,'message'=>'নিরাপত্তা যাচাই ব্যর্থ। পেজ রিফ্রেশ করে আবার চেষ্টা করুন।']);}
 function cms_dir(): string {$p=__DIR__.'/data';if(!is_dir($p)&&!mkdir($p,0750,true)&&!is_dir($p))cms_out(500,['ok'=>false,'message'=>'ডেটা ফোল্ডার তৈরি করা যায়নি।']);return $p;}
 function cms_lock(){ $h=@fopen(cms_dir().'/cms.lock','c');if(!$h||!flock($h,LOCK_EX))cms_out(500,['ok'=>false,'message'=>'ডেটা লক করা যাচ্ছে না।']);return $h;}
-function cms_read(): array {$p=cms_dir().'/cms-content.json';if(!is_file($p))return [];$d=json_decode((string)file_get_contents($p),true);return is_array($d)&&is_array($d['items']??null)?$d['items']:[];}
+function cms_read(): array {$p=cms_dir().'/cms-content.json';if(!is_file($p))return [];$d=json_decode((string)file_get_contents($p),true);if(!is_array($d)||!is_array($d['items']??null))return [];return array_values(array_filter($d['items'],'is_array'));}
 function cms_write(array $items): void {$p=cms_dir().'/cms-content.json';$tmp=$p.'.'.bin2hex(random_bytes(6)).'.tmp';$json=json_encode(['updated_at'=>gmdate('c'),'items'=>array_values($items)],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);if($json===false||file_put_contents($tmp,$json,LOCK_EX)===false||!rename($tmp,$p)){@unlink($tmp);cms_out(500,['ok'=>false,'message'=>'তথ্য সংরক্ষণ করা যায়নি।']);}}
 function cms_audit(string $action,array $item): void {$line=json_encode(['at'=>gmdate('c'),'action'=>$action,'id'=>$item['id']??null,'type'=>$item['type']??null],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);if($line!==false)file_put_contents(cms_dir().'/cms-audit.jsonl',$line."\n",FILE_APPEND|LOCK_EX);}
 function cms_text(mixed $v,int $max): string {if(!is_string($v))return '';$v=trim(str_replace("\0",'',$v));if((function_exists('mb_strlen')?mb_strlen($v,'UTF-8'):strlen($v))>$max)cms_out(422,['ok'=>false,'message'=>'একটি ঘরে নির্ধারিত সীমার চেয়ে বেশি লেখা হয়েছে।']);return $v;}
@@ -54,6 +54,7 @@ if($action==='save'){
 if($action==='publish'||$action==='delete'){
  $id=cms_text($d['id']??'',48);$items=cms_read();$found=false;$auditItem=null;
  foreach($items as $i=>&$it){if(($it['id']??'')===$id){$found=true;$auditItem=$it;if($action==='publish'){
+  if(!in_array(($it['type']??''),['course','notice','gallery','page','contact','menu'],true)||!is_string($it['title']??null)||trim($it['title'])===''||!is_string($it['body']??null)||trim($it['body'])==='')cms_out(422,['ok'=>false,'message'=>'এই পুরোনো রেকর্ডে বৈধ ধরন, শিরোনাম ও বিবরণ নেই। সম্পাদনা করে সংশোধন করুন।']);
   $coursePageKeys=['driving-training-moulvibazar','women-driving-training-moulvibazar','computer-office-application-moulvibazar','freelancing-course-moulvibazar','graphic-design-course-moulvibazar'];
   $publicPageKeys=['index','about-uttc-moulvibazar','404','contact-uttc-moulvibazar','facilities-uttc-moulvibazar','faq-uttc-moulvibazar','privacy-policy','notices-uttc-moulvibazar','gallery-uttc-moulvibazar',...$coursePageKeys];
   if(($it['type']??'')==='course'&&!in_array(($it['page_key']??''),$coursePageKeys,true))cms_out(422,['ok'=>false,'message'=>'এই পুরোনো কোর্স রেকর্ডে বৈধ Public Page নির্ধারিত নেই। সম্পাদনা করে পেজ নির্বাচন করুন।']);
