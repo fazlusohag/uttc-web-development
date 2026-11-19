@@ -16,7 +16,7 @@ Branch: `release/uttc-complete-platform-2026`
 - Connected Published Course feeds to Driving, Women's Driving, Computer Office Application, Freelancing and Graphic Design pages.
 - Added `data-page-key` and the shared CMS integration script to all 14 public HTML pages so Published Page metadata and Navigation Menu records can be applied where compatible markup exists.
 - Prevented duplicate CMS navigation links when the same URL or label already exists in the page navigation.
-- Added CI checks for JavaScript syntax, static CMS page wiring and the public CMS API contract (Published-only visibility, public-type allowlisting, type filtering and invalid-type rejection).
+- Added CI checks for JavaScript syntax, static CMS page wiring, public CMS API behavior (Published-only visibility, public-type allowlisting, type filtering and invalid-type rejection), and authenticated CMS lifecycle (shared admin session, CSRF, Draft isolation and explicit Publish).
 - Added `docs/EXTENDING-UTTC-PLATFORM.md` to define module boundaries, extension rules, API compatibility, storage/security rules and the definition of done for future features.
 - Updated the project README to describe the current implementation and its limitations.
 
