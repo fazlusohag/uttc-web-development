@@ -52,4 +52,12 @@ wrong_method="$(curl --silent --show-error --output /dev/null --write-out '%{htt
   "http://127.0.0.1:${port}/api/assistant.php")"
 [ "$wrong_method" = "405" ]
 
-echo "OK: CORS preflight, origin rejection, and HTTP method checks passed."
+oversized_body_file="$(mktemp)"
+head -c 65537 /dev/zero | tr '\0' 'x' >"$oversized_body_file"
+oversized_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+  --header 'Content-Type: application/json' --data-binary "@${oversized_body_file}" \
+  "http://127.0.0.1:${port}/api/assistant.php")"
+rm -f "$oversized_body_file"
+[ "$oversized_status" = "413" ]
+
+echo "OK: CORS, origin rejection, HTTP method, and request-size checks passed."
