@@ -179,6 +179,15 @@ grep -q "Semantic Search cache-এর access-denial rule যাচাই কর�
 grep -q 'fflush(\$handle)' api/semantic-retrieval.php
 grep -q 'fsync(\$handle)' api/semantic-retrieval.php
 
+# CMS status counters must validate knowledge sources before reading or counting them.
+grep -q 'function cms_read_status_json' api/cms.php
+grep -q 'is_link(\$path)' api/cms.php
+grep -q 'json_last_error()!==JSON_ERROR_NONE' api/cms.php
+grep -q 'Public Knowledge Index ডেটা নষ্ট বা অবৈধ JSON' api/cms.php
+grep -q 'অনুমোদিত Knowledge Base ফাইলের storage path নিরাপদ নয়' api/cms.php
+grep -q 'cms_read_status_json(__DIR__.\x27/data/knowledge-base.json\x27,\x27entries\x27' api/cms.php
+grep -q 'cms_read_status_json(__DIR__.\x27/knowledge.json\x27,\x27pages\x27' api/cms.php
+
 # CMS API must fail closed if its private data directory or files are symlinked
 # or if the web-server access-denial guard is absent or invalid.
 grep -q "is_link(\$p)" api/cms.php
