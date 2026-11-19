@@ -20,6 +20,7 @@ Branch: `release/uttc-complete-platform-2026`
 - Added CMS record types: Course, Notice, Gallery, Page, Contact and Navigation Menu.
 - Added SEO title, meta description and canonical HTTPS URL fields for Page records. CMS URL validation now rejects embedded username/password credentials in HTTPS links, image URLs and canonical URLs, matching the public renderer’s URL policy. Only one CMS Page record can target each existing public-page slug; the API rejects duplicate targets with HTTP 409 so administrators update the existing record instead of creating ambiguous metadata/content.
 - The public CMS script memoizes in-flight and completed feed requests by content type, reducing duplicate requests when metadata and page content need the same Page feed; failed requests are evicted so a later call can retry.
+- CMS Publish now revalidates legacy records at the point of publication: allowed record type, non-empty title/body, course page assignment, Page slug, duplicate published Page target and credential-free HTTPS URLs. CMS reads also discard malformed non-array entries before admin list sorting/rendering. Authenticated integration tests include legacy records with invalid types, empty bodies, invalid page assignments/slugs and credential-bearing URLs.
 - Added `api/cms-public.php`, a read-only endpoint that returns Published records only.
 - Added `assets/js/cms-public.js`; CMS text is rendered with DOM text nodes, not raw HTML, and outbound/image URLs are restricted to HTTPS.
 - Connected Published Notice and Gallery feeds to their public pages.
