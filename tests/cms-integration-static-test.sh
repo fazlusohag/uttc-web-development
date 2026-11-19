@@ -112,3 +112,8 @@ grep -q 'cms_assert_unique_target' api/cms.php
 grep -q 'একই ID-র একাধিক পুরোনো রেকর্ড' api/cms.php
 grep -q 'legacy-duplicate-id' tests/cms-authenticated-integration-test.sh
 grep -q 'duplicate_update_status' tests/cms-authenticated-integration-test.sh
+
+grep -q 'CMS ডেটা নষ্ট বা অবৈধ JSON' api/cms.php
+grep -q 'json_last_error() !== JSON_ERROR_NONE' api/cms-public.php
+grep -q 'corrupt_save_status' tests/cms-authenticated-integration-test.sh
+grep -q 'corrupt_public_status' tests/cms-public-api-test.sh
