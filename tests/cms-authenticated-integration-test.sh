@@ -83,6 +83,10 @@ invalid_cms_page_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$
 invalid_cms_page_result="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$invalid_cms_page_payload" "http://127.0.0.1:${port}/api/cms.php")"
 [ "$invalid_cms_page_result" = "422" ]
 
+credential_url_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"page","title"=>"CI Credential URL Rejection","body"=>"Must be rejected","slug"=>"index","canonical_url"=>"https://admin:secret@example.com/"]);' "$cms_csrf")"
+credential_url_result="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$credential_url_payload" "http://127.0.0.1:${port}/api/cms.php")"
+[ "$credential_url_result" = "422" ]
+
 valid_cms_page_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"page","title"=>"CI Valid Home SEO Page","body"=>"Temporary SEO page record","slug"=>"index"]);' "$cms_csrf")"
 valid_cms_page_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$valid_cms_page_payload" "http://127.0.0.1:${port}/api/cms.php")"
 grep -q '"ok":true' <<<"$valid_cms_page_result"
@@ -125,4 +129,4 @@ throttled_login="$(curl --silent --show-error --output /dev/null --write-out '%{
   "http://127.0.0.1:${port}/api/admin.php")"
 [ "$throttled_login" = "429" ]
 
-echo "OK: CMS session, CSRF, body limit, course/page validation, duplicate page protection, Draft/Publish/Delete, audit and login throttling passed."
+echo "OK: CMS session, CSRF, body limit, course/page validation, credential URL rejection, duplicate page protection, Draft/Publish/Delete, audit and login throttling passed."
