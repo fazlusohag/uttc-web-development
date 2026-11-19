@@ -16,8 +16,9 @@ if (!preg_match('/^20[0-9]{6}-[0-9]{6}-[a-f0-9]{8}$/D', $id)) {
     exit(2);
 }
 $root = dirname(__DIR__);
+require_once $root . '/api/storage.php';
 $backupRoot = $root . '/api/data/backups';
-if (!is_dir($backupRoot) || is_link($backupRoot) || is_link(dirname($backupRoot) . '/.htaccess') || !is_file(dirname($backupRoot) . '/.htaccess')) {
+if (!is_dir($backupRoot) || is_link($backupRoot) || !uttc_private_storage_directory_is_safe(dirname($backupRoot))) {
     fwrite(STDERR, "Private backup storage could not be verified.\n");
     exit(1);
 }
