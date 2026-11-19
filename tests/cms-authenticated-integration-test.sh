@@ -72,7 +72,11 @@ list_payload="$(php -r 'echo json_encode(["action"=>"list","csrf"=>$argv[1]]);' 
 list_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$list_payload" "http://127.0.0.1:${port}/api/cms.php")"
 grep -q '"ok":true' <<<"$list_result"
 
-save_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"course","title"=>"CI CMS Contract Record","body"=>"Temporary integration test record"]);' "$cms_csrf")"
+invalid_course_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"course","title"=>"CI Missing Page Assignment","body"=>"Must be rejected"]);' "$cms_csrf")"
+invalid_course_result="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$invalid_course_payload" "http://127.0.0.1:${port}/api/cms.php")"
+[ "$invalid_course_result" = "422" ]
+
+save_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"course","title"=>"CI CMS Contract Record","body"=>"Temporary integration test record","page_key"=>"computer-office-application-moulvibazar"]);' "$cms_csrf")"
 save_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$save_payload" "http://127.0.0.1:${port}/api/cms.php")"
 grep -q '"ok":true' <<<"$save_result"
 
