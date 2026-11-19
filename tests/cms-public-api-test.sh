@@ -12,6 +12,10 @@ cat > "$fixture" <<'JSON'
 {"id":"pub-course","type":"course","title":"Published course","body":"Visible","page_key":"computer-office-application-moulvibazar","status":"published"},
 {"id":"draft-course","type":"course","title":"Draft course","body":"Hidden","status":"draft"},
 {"id":"pub-notice","type":"notice","title":"Published notice","body":"Notice body","status":"published"},
+{"id":"pub-home-page","type":"page","title":"Home SEO content","body":"Published home copy","slug":"index","meta_title":"UTTC Home SEO","meta_description":"Published home description","canonical_url":"https://uttc.example/","published_at":"2026-11-19T00:00:00Z","status":"published"},
+{"id":"draft-page","type":"page","title":"Draft SEO content","body":"Must stay hidden","slug":"about-uttc-moulvibazar","meta_title":"Draft title","status":"draft"},
+{"id":"pub-contact","type":"contact","title":"Contact desk","body":"Contact details","status":"published"},
+{"id":"pub-menu","type":"menu","title":"Admissions","body":"Menu item","url":"https://uttc.example/admission","status":"published"},
 {"id":"private-extra","type":"internal","title":"Internal record","body":"Must not be public","status":"published"}
 ]}
 JSON
@@ -32,6 +36,13 @@ grep -q '"pub-course"' <<<"$all"
 grep -q '"pub-notice"' <<<"$all"
 ! grep -q '"draft-course"' <<<"$all"
 ! grep -q '"private-extra"' <<<"$all"
+grep -q '"pub-home-page"' <<<"$all"
+grep -q '"meta_title":"UTTC Home SEO"' <<<"$all"
+grep -q '"published_at":"2026-11-19T00:00:00Z"' <<<"$all"
+! grep -q '"draft-page"' <<<"$all"
+! grep -q '"Draft SEO content"' <<<"$all"
+grep -q '"pub-contact"' <<<"$all"
+grep -q '"pub-menu"' <<<"$all"
 courses="$(curl --silent --show-error "http://127.0.0.1:${port}/api/cms-public.php?type=course")"
 grep -q '"pub-course"' <<<"$courses"
 grep -q '"page_key":"computer-office-application-moulvibazar"' <<<"$courses"
@@ -39,4 +50,9 @@ grep -q '"page_key":"computer-office-application-moulvibazar"' <<<"$courses"
 ! grep -q '"draft-course"' <<<"$courses"
 invalid="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:${port}/api/cms-public.php?type=unknown")"
 [ "$invalid" = "400" ]
-echo "OK: CMS public API exposes Published records only, filters by type, and rejects unknown types."
+pages="$(curl --silent --show-error "http://127.0.0.1:${port}/api/cms-public.php?type=page")"
+grep -q '"slug":"index"' <<<"$pages"
+grep -q '"canonical_url":"https://uttc.example/"' <<<"$pages"
+! grep -q '"draft-page"' <<<"$pages"
+! grep -q '"pub-contact"' <<<"$pages"
+echo "OK: CMS public API exposes Published records only, filters by type, preserves Page SEO fields, and rejects unknown types."
