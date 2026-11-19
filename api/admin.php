@@ -54,7 +54,12 @@ function load_entries(): array {
     if ($raw === false || json_last_error() !== JSON_ERROR_NONE || !is_array($data) || !isset($data['entries']) || !is_array($data['entries'])) {
         out(500, ['ok'=>false,'message'=>'Knowledge Base ডেটা পড়া যাচ্ছে না বা JSON অবৈধ। মূল ফাইল অক্ষত রাখা হয়েছে; যাচাইকৃত Backup থেকে Restore প্রয়োজন।']);
     }
-    return array_values(array_filter($data['entries'], 'is_array'));
+    foreach ($data['entries'] as $entry) {
+        if (!is_array($entry)) {
+            out(500, ['ok'=>false,'message'=>'Knowledge Base-এ অবৈধ রেকর্ড পাওয়া গেছে। মূল ফাইল অক্ষত রাখা হয়েছে; যাচাই ছাড়া কোনো রেকর্ড বাদ দেওয়া হবে না।']);
+        }
+    }
+    return array_values($data['entries']);
 }
 function save_entries(array $entries): void {
     global $entries_lock_handle;
