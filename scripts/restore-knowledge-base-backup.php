@@ -117,8 +117,9 @@ if (!$lock || !flock($lock, LOCK_EX)) {
 $changed = false;
 foreach ($liveNames as $name) {
     $path = $data . '/' . $name;
+    if (is_link($path)) { $changed = true; continue; }
     $now = is_file($path) ? hash_file('sha256', $path) : null;
-    if ($now !== $before[$name]) $changed = true;
+    if ($now === false || $now !== $before[$name]) $changed = true;
 }
 if ($changed) {
     flock($lock, LOCK_UN); fclose($lock);
@@ -145,7 +146,9 @@ foreach ($restoreFiles as $name => $source) {
 }
 /* Stage the absent-history case as an explicit removal marker. */
 $rollback = [];
+$replacementStarted = false;
 if ($ok) {
+    $replacementStarted = true;
     foreach ($liveNames as $name) {
         $live = $data . '/' . $name;
         if (is_file($live)) {
@@ -160,11 +163,15 @@ if ($ok) {
         if (!@rename($stage . '/' . $name, $data . '/' . $name)) { $ok = false; break; }
     }
 }
-if (!$ok) {
+if (!$ok && $replacementStarted) {
     foreach ($liveNames as $name) {
         $live = $data . '/' . $name;
-        if (is_file($live)) @unlink($live);
-        if (isset($rollback[$name]) && is_file($rollback[$name])) @rename($rollback[$name], $live);
+        if (isset($rollback[$name])) {
+            if (is_file($live) || is_link($live)) @unlink($live);
+            if (is_file($rollback[$name])) @rename($rollback[$name], $live);
+        } elseif ($before[$name] === null && (is_file($live) || is_link($live))) {
+            @unlink($live);
+        }
     }
 }
 flock($lock, LOCK_UN);
