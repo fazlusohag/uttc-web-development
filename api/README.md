@@ -2,7 +2,7 @@
 
 ## Features
 - PHP JSON endpoint using the OpenAI Responses API.
-- Local BM25-style retrieval from published pages in the UTTC sitemap and Published admin knowledge (lexical RAG; no vector embeddings yet).
+- Hybrid retrieval: cached OpenAI embedding vectors with cosine-similarity ranking when configured, plus BM25 lexical fallback over published UTTC website pages and Published admin knowledge.
 - Bangla/English answers, source links, refusal to invent missing institutional facts.
 - Server-side API key only, origin allowlist, input validation, per-IP rate limit.
 - CLI sitemap sync to refresh the local knowledge base.
@@ -14,7 +14,7 @@ PHP 8.1+, cURL, DOM, SimpleXML, mbstring, writable `api/` directory. Confirm ext
 1. Upload the `api/` folder to the same public_html directory as the website.
 2. Set environment variables in the hosting environment (never in browser JavaScript or Git):
    - `OPENAI_API_KEY`: create/manage in your OpenAI API project.
-   - `OPENAI_MODEL`: a model available to that API project.
+   - `OPENAI_MODEL`: a model available to that API project.\n   - `OPENAI_EMBEDDING_MODEL`: an embedding model available to that API project (for example, `text-embedding-3-small`). Set this only after confirming API project access and budget; without it the assistant uses BM25 fallback.
    - `UTTC_SITE_URL=https://uttc.edu.bd`
    - `UTTC_ALLOWED_ORIGINS=https://uttc.edu.bd,https://www.uttc.edu.bd`
 3. Run once by SSH/cron: `php /home/ACCOUNT/public_html/api/sync-knowledge.php`
@@ -59,10 +59,10 @@ The feature branch also contains a private admin interface at `/admin/` and its 
 - Editing an entry returns it to Draft, requiring a fresh review and Publish.
 - Supported uploads: PDF (requires an executable `pdftotext`), DOCX (requires PHP `ZipArchive`), TXT, and Markdown. Maximum upload size is 8 MB; extracted text is capped at 100,000 characters.
 - If the server lacks the PDF/DOCX extraction dependency, the upload is rejected with a clear message; it is not silently indexed as empty text.
-- Assistant and admin preview share a BM25-style lexical retriever with term-frequency, inverse-document-frequency and title weighting. This is stronger than raw keyword counts but is not vector/embedding semantic search. Relevance and conflicting facts should be checked using the built-in AI test process before public launch.
+- Assistant and admin preview use the same retrieval choice: when `OPENAI_EMBEDDING_MODEL` and `OPENAI_API_KEY` are configured, the backend builds/caches embeddings for up to 500 approved corpus documents (each text is capped at 6,000 characters), then ranks questions with cosine similarity. The cache is fingerprinted to the corpus and embedding model and stored under `api/runtime/`, which the included Apache rewrite rule blocks from direct HTTP access. A corpus or model change rebuilds the index; the first request after a change can take longer and incur embedding API usage.\n- If semantic indexing fails or its best cosine score is below 0.30, the assistant falls back to the shared BM25 retriever. BM25 uses term-frequency, inverse-document-frequency and title weighting. The 0.30 semantic threshold is an initial conservative setting and must be tuned against real UTTC questions before public launch. The Admin Retrieval Test displays whether it used Semantic Search, BM25 Fallback, or BM25 Keyword Search.\n- This is retrieval-augmented generation (RAG): retrieved official excerpts are supplied to the Responses API. It is not model fine-tuning. The model must still be evaluated for grounded answers and refusal behavior before public launch.
 - The browser retains up to 10 recent user/assistant messages in `sessionStorage` for the current tab session and sends them as dialogue context. The API validates and caps the history; only the latest prior user question is added to the retrieval query. Conversation history is never added to the approved institutional knowledge corpus and must not be treated as a source of institutional facts.
 - Each successful Knowledge Base change preserves the previous version in `api/data/knowledge-history.json` (up to 30 versions). The admin dashboard can display timestamps, entry counts and titles. This history is private under `api/data/.htaccess`; it is not a full audit log of who made each change.
-- CI runs `tests/retrieval-test.php` and `tests/document-extract-test.php` after PHP syntax checks. CI installs `mbstring`, `dom`, `zip`, `fileinfo` and `poppler-utils`, then exercises TXT, DOCX and PDF extraction fixtures. These are regression/smoke tests, not end-to-end tests of the OpenAI API, authenticated browser uploads, or Hostinger deployment.
+- CI runs `tests/retrieval-test.php` (including cosine-similarity math checks) and `tests/document-extract-test.php` after PHP syntax checks. CI installs `mbstring`, `dom`, `zip`, `fileinfo` and `poppler-utils`, then exercises TXT, DOCX and PDF extraction fixtures. These are regression/smoke tests, not end-to-end tests of the OpenAI API, authenticated browser uploads, or Hostinger deployment.
 
 ### Important deployment checks
 - This repository change is only a code change. It does not configure Hostinger, create the admin password, upload files, or activate the dashboard.
