@@ -60,4 +60,12 @@ oversized_status="$(curl --silent --show-error --output /dev/null --write-out '%
 rm -f "$oversized_body_file"
 [ "$oversized_status" = "413" ]
 
-echo "OK: CORS, origin rejection, HTTP method, and request-size checks passed."
+for admin_page in "admin/index.php" "admin/cms.php"; do
+  headers="$(curl --silent --show-error --head "http://127.0.0.1:${port}/${admin_page}")"
+  grep -qi 'Cache-Control: no-store' <<<"$headers"
+  grep -qi 'X-Content-Type-Options: nosniff' <<<"$headers"
+  grep -qi 'X-Frame-Options: DENY' <<<"$headers"
+  grep -qi 'Referrer-Policy: strict-origin-when-cross-origin' <<<"$headers"
+done
+
+echo "OK: CORS, origin rejection, HTTP method, request-size, and admin security-header checks passed."
