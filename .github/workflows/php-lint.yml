@@ -22,6 +22,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
+          extensions: mbstring, dom, zip, fileinfo
       - name: Lint all PHP files
         shell: bash
         run: |
@@ -37,3 +38,7 @@ jobs:
           done
       - name: Run retrieval regression tests
         run: php tests/retrieval-test.php
+      - name: Install PDF text extractor
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Run document extraction smoke tests
+        run: php tests/document-extract-test.php
