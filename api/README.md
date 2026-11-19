@@ -34,3 +34,31 @@ The homepage calls `/api/assistant.php` with POST JSON. The API returns `{ok, an
 - Keep PHP error display off in production; review server logs for diagnostics.
 - Verify PHP extensions, writable permissions and environment-variable support with the actual Hostinger plan.
 - The sync script only indexes URLs listed in the same-domain sitemap. Add new public pages to sitemap.xml before syncing.
+
+## Private AI Knowledge Base admin
+
+The feature branch also contains a private admin interface at `/admin/` and its JSON API at `/api/admin.php`.
+
+### Admin configuration (required before use)
+1. Keep the admin interface behind HTTPS. The admin login is not usable until the server environment variable `UTTC_ADMIN_PASSWORD_HASH` is configured.
+2. Generate a password hash on the server (do not use or commit a plain-text password):
+   `php -r 'echo password_hash("REPLACE_WITH_A_LONG_UNIQUE_PASSWORD", PASSWORD_DEFAULT), PHP_EOL;'`
+3. Add the resulting hash as the Hostinger environment variable `UTTC_ADMIN_PASSWORD_HASH`. Never put the plain password or hash in GitHub, browser JavaScript, or chat.
+4. Ensure PHP session support and the `mbstring` extension are enabled. The PHP process must be able to create/write `api/data/`.
+5. The included `api/data/.htaccess` denies direct HTTP access to the JSON knowledge store and uploaded documents on Apache. Confirm this protection is active on the actual hosting configuration before uploading any real institutional documents.
+6. Visit `/admin/`, sign in, add a question/answer or upload a supported document, review it, and only then press Publish.
+
+### Knowledge publishing and supported files
+- New manual entries and extracted document contents are saved as Draft.
+- Only entries with status `published` are appended to the assistant's retrieval corpus. Draft entries are excluded.
+- Editing an entry returns it to Draft, requiring a fresh review and Publish.
+- Supported uploads: PDF (requires an executable `pdftotext`), DOCX (requires PHP `ZipArchive`), TXT, and Markdown. Maximum upload size is 8 MB; extracted text is capped at 100,000 characters.
+- If the server lacks the PDF/DOCX extraction dependency, the upload is rejected with a clear message; it is not silently indexed as empty text.
+- The dashboard currently uses the existing lightweight keyword retrieval, not vector/semantic search. Relevance and conflicting facts should be checked using the built-in AI test process before public launch.
+
+### Important deployment checks
+- This repository change is only a code change. It does not configure Hostinger, create the admin password, upload files, or activate the dashboard.
+- Before deployment, confirm the canonical UTTC domain and update `UTTC_SITE_URL`, `UTTC_ALLOWED_ORIGINS`, the front-end source-link allowlist, and any old hard-coded contact/source URLs consistently.
+- Verify that `api/data/` is not web-accessible, the admin password hash is set, and HTTPS/session cookies work.
+- Do not upload real student personal data, identity documents, passwords, payment details, or sensitive records into this knowledge base. Store only approved general institutional information.
+- Back up the knowledge JSON and uploaded files securely. Restrict server file permissions and review admin access periodically.
