@@ -12,14 +12,15 @@ if (PHP_SAPI !== 'cli') {
 }
 
 $root = dirname(__DIR__);
+require_once $root . '/api/storage.php';
 $dataDir = $root . '/api/data';
 if (!is_dir($dataDir) || is_link($dataDir)) {
-    fwrite(STDERR, "Knowledge Base data directory is missing or unsafe.\n");
+    fwrite(STDERR, "Knowledge Base data directory is missing or unsafe.\\n");
     exit(1);
 }
 $realData = realpath($dataDir);
-if ($realData === false || is_link($realData . '/.htaccess') || !is_file($realData . '/.htaccess')) {
-    fwrite(STDERR, "Private storage protection could not be verified (.htaccess missing).\n");
+if ($realData === false || !uttc_private_storage_directory_is_safe($realData)) {
+    fwrite(STDERR, "Private storage protection could not be verified; a valid access-denial rule and safe upload path are required.\\n");
     exit(1);
 }
 
