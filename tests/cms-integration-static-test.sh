@@ -125,3 +125,11 @@ grep -q 'নিরাপত্তার জন্য সম্পাদনা' a
 grep -q 'Knowledge Base ডেটা পড়া যাচ্ছে না বা JSON অবৈধ' api/admin.php
 grep -q 'Knowledge Base History নষ্ট বা পড়া যাচ্ছে না' api/admin.php
 grep -q 'json_last_error() !== JSON_ERROR_NONE' api/admin.php
+
+# Knowledge Base backup must be CLI-only, private, lock-consistent and integrity-verifiable.
+grep -q "PHP_SAPI !== 'cli'" scripts/backup-knowledge-base.php
+grep -q "flock(\$lock, LOCK_SH)" scripts/backup-knowledge-base.php
+grep -q "hash_file('sha256'" scripts/backup-knowledge-base.php
+grep -q "knowledge-history.json" scripts/backup-knowledge-base.php
+grep -q "UTTC_BACKUP_RETENTION" scripts/backup-knowledge-base.php
+grep -q "Refusing to back up invalid" scripts/backup-knowledge-base.php
