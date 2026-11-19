@@ -75,4 +75,8 @@ for admin_page in "admin/index.php" "admin/cms.php"; do
   grep -qi 'Referrer-Policy: strict-origin-when-cross-origin' <<<"$headers"
 done
 
-echo "OK: CORS, origin rejection, HTTP method, request-size, and admin security-header checks passed."
+grep -Fq "is_link(\$dir)" "${repo_root}/api/assistant.php"
+grep -Fq "runtime access-denial guard is missing or invalid" "${repo_root}/api/assistant.php"
+grep -Fq "is_link(\$file)" "${repo_root}/api/rate-limit.php"
+
+echo "OK: CORS, origin rejection, HTTP method, request-size, runtime storage guard, and admin security-header checks passed."
