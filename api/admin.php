@@ -17,7 +17,13 @@ function out(int $status, array $data): never {
 }
 function input_data(): array {
     if (isset($_POST['action'])) return $_POST;
-    $v = json_decode(file_get_contents('php://input') ?: '', true);
+    $maxBytes = 64 * 1024;
+    if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > $maxBytes) out(413, ['ok'=>false,'message'=>'অনুরোধটি খুব বড়।']);
+    $stream = fopen('php://input', 'rb');
+    $raw = $stream ? stream_get_contents($stream, $maxBytes + 1) : false;
+    if (is_resource($stream)) fclose($stream);
+    if ($raw === false || strlen($raw) > $maxBytes) out(413, ['ok'=>false,'message'=>'অনুরোধটি খুব বড়।']);
+    $v = json_decode($raw, true);
     return is_array($v) ? $v : [];
 }
 function storage_dir(): string {
