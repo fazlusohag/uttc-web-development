@@ -41,11 +41,14 @@ function uttc_extract_document(string $path, string $ext): string {
         $pipes = [];
         $proc = proc_open([$bin, '-layout', $path, '-'], [1=>['pipe','w'], 2=>['pipe','w']], $pipes);
         if (!is_resource($proc)) throw new RuntimeException('PDF parser চালু করা যায়নি।');
-        $text = stream_get_contents($pipes[1]);
+        $maxExtractedBytes = 2 * 1024 * 1024;
+        $text = stream_get_contents($pipes[1], $maxExtractedBytes + 1);
         fclose($pipes[1]);
-        stream_get_contents($pipes[2]);
+        // Keep parser diagnostics bounded; never return raw stderr to the browser.
+        stream_get_contents($pipes[2], 16 * 1024);
         fclose($pipes[2]);
         $code = proc_close($proc);
+        if ($text !== false && strlen($text) > $maxExtractedBytes) throw new RuntimeException('PDF থেকে পাওয়া লেখা ২ MB-এর বেশি। ছোট PDF বা TXT/DOCX ফাইল ব্যবহার করুন।');
         if ($code !== 0 || $text === false) throw new RuntimeException('PDF থেকে লেখা বের করা যায়নি।');
         return trim($text);
     }
