@@ -1,47 +1,57 @@
 # UTTC Release Branch — Review Status
 
 Date: 2026-11-19
-Branch: release/uttc-complete-platform-2026
+Branch: `release/uttc-complete-platform-2026`
 
-## Work completed in this iteration
+## Work completed
 
-- Added an authenticated Website CMS at admin/cms.php using the existing admin session and CSRF token.
-- Added api/cms.php for Draft, Publish, edit, delete, listing and non-secret AI operations status; record writes use file locking and atomic replacement, and text length validation has an mbstring fallback.
-- Extended Website CMS controls for Navigation Menu records and SEO title, description and canonical HTTPS URL fields.
-- Added api/cms-public.php as a read-only endpoint that returns Published records only.
-- Added assets/js/cms-public.js. It renders text using DOM text nodes, not raw HTML, and accepts only HTTPS outbound/image URLs.
-- Connected the Notices and Gallery pages to published CMS records.
-- Added published CMS course records to the Driving, Women's Driving, Computer, Freelancing and Graphic Design pages.
-- Added a link from the AI Knowledge Base dashboard to the Website CMS.
-- Updated README and API setup documentation.
+- Added the authenticated Website CMS at `admin/cms.php`, reusing the existing admin session and CSRF protection.
+- Added `api/cms.php` for listing, Draft creation/update, Publish and delete actions, plus non-secret AI operations status.
+- CMS writes use file locking, atomic file replacement and bounded text validation with an mbstring fallback.
+- Added CMS record types: Course, Notice, Gallery, Page, Contact and Navigation Menu.
+- Added SEO title, meta description and canonical HTTPS URL fields for Page records.
+- Added `api/cms-public.php`, a read-only endpoint that returns Published records only.
+- Added `assets/js/cms-public.js`; CMS text is rendered with DOM text nodes, not raw HTML, and outbound/image URLs are restricted to HTTPS.
+- Connected Published Notice and Gallery feeds to their public pages.
+- Connected Published Course feeds to Driving, Women's Driving, Computer Office Application, Freelancing and Graphic Design pages.
+- Added `data-page-key` and the shared CMS integration script to all 14 public HTML pages so Published Page metadata and Navigation Menu records can be applied where compatible markup exists.
+- Prevented duplicate CMS navigation links when the same URL or label already exists in the page navigation.
+- Added CI checks for JavaScript syntax and static CMS page wiring.
+- Updated the project README to describe the current implementation and its limitations.
 
 ## Current admin modules
 
-1. AI Knowledge Base: existing knowledge-entry Draft/Publish, document extraction, history summary and retrieval preview at admin/index.php.
-2. Website CMS: Course, Notice, Gallery, Page and Contact records at admin/cms.php.
-3. AI Operations status: non-secret configured/not-configured flags, indexed-page count, published knowledge count, PHP version and CMS update time shown in the CMS dashboard.
+1. **AI Knowledge Base:** existing knowledge-entry Draft/Publish, document extraction, update-history summaries and retrieval preview at `admin/index.php`.
+2. **Website CMS:** structured content and SEO/navigation fields at `admin/cms.php`.
+3. **AI Operations status:** non-secret configuration flags, indexed-page count, published knowledge count, PHP version and CMS update time. This is a basic status panel, not full analytics or alerting.
 
-## Remaining scope / limitations
+## Known limitations
 
-- The CMS manages structured records and now includes fields for page SEO metadata and Navigation Menu records. Public metadata/menu rendering is implemented in the shared feed script, but page-by-page activation and end-to-end verification remain required. Image file upload is not implemented; use HTTPS image URLs only.
-- CMS image content must use an HTTPS image URL. Direct media upload is not implemented.
-- AI Operations is a basic status panel, not full analytics, alerting, cost reporting or request-log exploration.
-- The CMS public feed is connected to notices, gallery and the five course pages. Other page/contact fields are stored but do not automatically replace all hard-coded public content.
-- No live browser session has been exercised against an actual PHP server; CI syntax and regression tests cannot establish end-to-end login/session correctness.
-- Hostinger storage access rules, HTTPS cookies, PHP extensions, file permissions, upload parser dependencies and real OpenAI requests remain unverified.
-- Visual browser QA, mobile QA, accessibility review, SEO crawl, live links and institutional content verification remain required.
+- CMS records are additive. They do not edit or replace all hard-coded content in the existing static HTML pages.
+- Page SEO metadata is applied client-side after the shared script loads. It is not server-rendered metadata and should not be considered a complete SEO implementation for crawlers that do not execute JavaScript. Existing static title/description/canonical tags remain the fallback.
+- Navigation Menu records are appended only where a compatible `header nav` element exists. Pages without that structure will not show CMS menu items.
+- Image file upload is not implemented; CMS images must be provided as HTTPS URLs.
+- Contact records are stored but do not automatically replace the hard-coded contact details throughout the website.
+- AI Operations does not provide usage analytics, request logs, cost reporting, alerts or live health checks.
+- The CMS and AI Knowledge Base have not been exercised in an authenticated browser against a live PHP server.
+- Hostinger storage access rules, HTTPS cookies, PHP extensions, file permissions, environment-variable support, upload parser dependencies and actual OpenAI API calls remain unverified.
+- Visual browser QA, mobile QA, accessibility review, SEO crawl, live links and institutional content verification remain release gates.
 
-## Security observations
+## Security observations and deployment checks
 
-- CMS endpoints reuse the existing UTTC_KB_ADMIN session and require the session admin flag and CSRF token for writes.
-- The public endpoint returns Published entries only.
-- Public rendering uses textContent/createTextNode and restricts links/images to HTTPS.
-- Private JSON data relies on api/data/.htaccess on compatible Apache configurations. On Hostinger, verify denial directly or move data outside the document root.
-- Never commit API keys or password hashes. Keep them in server environment variables.
-- Confirm the admin password hash, HTTPS and cookie Secure behavior on the actual server before production.
+- CMS write actions require the existing session admin flag and CSRF token.
+- Public CMS API filters to Published records only.
+- Public rendering avoids HTML injection and restricts external content URLs to HTTPS.
+- Private CMS JSON data relies on `api/data/.htaccess`. Verify direct access denial on the actual Hostinger server; if the host does not enforce it, move private data outside the document root.
+- Never commit API keys, password hashes, private knowledge files, session data, logs or uploaded source documents.
+- Confirm the admin password hash is configured, HTTPS is active, and Secure/HttpOnly/SameSite cookie behavior works on the actual server.
 
-## CI and release decision
+## CI
 
-GitHub Actions is configured to lint all PHP files and run retrieval, assistant HTTP/CORS and document extraction tests. The latest workflow runs triggered by this series of commits must be checked for completion before release.
+The GitHub Actions workflow runs PHP 8.3 syntax checks, retrieval regression tests, assistant HTTP/CORS tests, document extraction smoke tests, Node syntax validation for the CMS JavaScript and static checks that all public pages load the CMS integration. CI does not prove live PHP session correctness, Hostinger security configuration, real OpenAI API access or browser rendering.
 
-**Release status: integration candidate, not production-final.** Complete remaining CMS scope, run authenticated browser tests and security/accessibility/SEO QA, then open a reviewed PR for the agreed target branch. Do not upload to Hostinger until separately approved.
+## Release decision
+
+**Status: integration candidate, not production-final.**
+
+Complete authenticated browser tests, Hostinger-specific security checks, visual/accessibility/SEO QA and final content verification. Review and merge through a reviewed pull request only after those gates pass. Do not upload to Hostinger until separately approved.
