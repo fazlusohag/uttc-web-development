@@ -46,6 +46,7 @@ function plain_text(string $s): string {
     return trim(preg_replace('/\s+/u', ' ', $s) ?? $s);
 }
 require_once __DIR__ . '/retrieval.php';
+require_once __DIR__ . '/semantic-retrieval.php';
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') respond(405, ['ok'=>false,'error'=>'method_not_allowed']);
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -113,8 +114,21 @@ $retrievalQuestion = $question;
 for ($i = count($history) - 1; $i >= 0; $i--) {
     if ($history[$i]['role'] === 'user') { $retrievalQuestion = $history[$i]['content'] . ' ' . $question; break; }
 }
-$matches = uttc_retrieve($retrievalQuestion, $pages);
-if (!$matches || (int)$matches[0]['score'] < 2) {
+$semanticEnabled = envv('OPENAI_EMBEDDING_MODEL') !== '';
+$retrievalMode = 'bm25';
+$matches = [];
+if ($semanticEnabled) {
+    try {
+        $matches = uttc_semantic_retrieve($retrievalQuestion, $pages, $apiKey, envv('OPENAI_EMBEDDING_MODEL'));
+        $retrievalMode = 'semantic';
+    } catch (Throwable $e) {
+        error_log('UTTC semantic retrieval fallback: '.$e->getMessage());
+    }
+}
+if (!$matches) $matches = uttc_retrieve($retrievalQuestion, $pages);
+$topScore = (float)($matches[0]['score'] ?? 0);
+$noReliableMatch = !$matches || ($retrievalMode === 'semantic' ? $topScore < 0.30 : $topScore < 2);
+if ($noReliableMatch) {
     respond(200, ['ok'=>true,'answer'=>'দুঃখিত, এই তথ্যটি বর্তমানে আমাদের ওয়েবসাইটে প্রকাশিত নেই। সঠিক তথ্যের জন্য অনুগ্রহ করে আমাদের অফিসিয়াল মোবাইল নম্বরে যোগাযোগ করুন: 01727-007417।','sources'=>[]]);
 }
 $context = '';
@@ -154,4 +168,4 @@ foreach ($matches as $item) {
         $sources[] = ['title'=>$item['title'],'url'=>$item['url']];
     }
 }
-respond(200, ['ok'=>true,'answer'=>$answer,'sources'=>$sources]);
+respond(200, ['ok'=>true,'answer'=>$answer,'sources'=>$sources,'retrieval_mode'=>$retrievalMode]);
