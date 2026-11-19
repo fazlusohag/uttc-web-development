@@ -114,8 +114,17 @@ function login_throttled(): bool {
     $raw = stream_get_contents($fp);
     $all = json_decode($raw ?: '{}', true);
     if (!is_array($all)) $all = [];
-    $row = $all[$ip] ?? ['start'=>time(),'hits'=>0];
-    if (time() - (int)($row['start'] ?? 0) >= 900) $row = ['start'=>time(),'hits'=>0];
+    $now = time();
+    // Expire stale IP buckets and cap the file so distributed probing cannot grow it indefinitely.
+    foreach ($all as $key => $bucket) {
+        if (!is_array($bucket) || $now - (int)($bucket['start'] ?? 0) >= 900) unset($all[$key]);
+    }
+    if (!isset($all[$ip]) && count($all) >= 1000) {
+        uasort($all, static fn($a, $b) => (int)($a['start'] ?? 0) <=> (int)($b['start'] ?? 0));
+        $all = array_slice($all, -999, null, true);
+    }
+    $row = $all[$ip] ?? ['start'=>$now,'hits'=>0];
+    if ($now - (int)($row['start'] ?? 0) >= 900) $row = ['start'=>$now,'hits'=>0];
     if ((int)($row['hits'] ?? 0) >= 5) {
         flock($fp, LOCK_UN); fclose($fp);
         return true;
