@@ -117,3 +117,7 @@ grep -q 'CMS ডেটা নষ্ট বা অবৈধ JSON' api/cms.php
 grep -q 'json_last_error() !== JSON_ERROR_NONE' api/cms-public.php
 grep -q 'corrupt_save_status' tests/cms-authenticated-integration-test.sh
 grep -q 'corrupt_public_status' tests/cms-public-api-test.sh
+
+grep -q 'session_write_close();\$action' api/cms.php
+grep -q 'submit.disabled=true' admin/cms.php
+grep -q 'নিরাপত্তার জন্য সম্পাদনা' admin/cms.php
