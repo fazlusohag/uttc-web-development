@@ -1,5 +1,10 @@
 <?php
 declare(strict_types=1);
+header('Cache-Control: no-store, max-age=0');
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 ?><!doctype html>
 <html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>UTTC Website CMS & AI Operations</title>
 <style>
