@@ -64,7 +64,11 @@ function load_entries(): array {
     global $entries_lock_handle;
     $dir = storage_dir();
     if (!is_resource($entries_lock_handle)) {
-        $entries_lock_handle = @fopen($dir . '/write.lock', 'c');
+        $lockPath = $dir . '/write.lock';
+        if (is_link($lockPath) || (file_exists($lockPath) && !is_file($lockPath))) {
+            out(500, ['ok'=>false,'message'=>'তথ্যভান্ডারের Lock ফাইলের storage path নিরাপদ নয়।']);
+        }
+        $entries_lock_handle = @fopen($lockPath, 'c');
         if (!$entries_lock_handle || !flock($entries_lock_handle, LOCK_EX)) {
             if (is_resource($entries_lock_handle)) fclose($entries_lock_handle);
             $entries_lock_handle = null;
@@ -92,7 +96,11 @@ function save_entries(array $entries): void {
     global $entries_lock_handle;
     $dir = storage_dir();
     if (!is_resource($entries_lock_handle)) {
-        $entries_lock_handle = @fopen($dir . '/write.lock', 'c');
+        $lockPath = $dir . '/write.lock';
+        if (is_link($lockPath) || (file_exists($lockPath) && !is_file($lockPath))) {
+            out(500, ['ok'=>false,'message'=>'তথ্যভান্ডারের Lock ফাইলের storage path নিরাপদ নয়।']);
+        }
+        $entries_lock_handle = @fopen($lockPath, 'c');
         if (!$entries_lock_handle || !flock($entries_lock_handle, LOCK_EX)) {
             if (is_resource($entries_lock_handle)) fclose($entries_lock_handle);
             $entries_lock_handle = null;
