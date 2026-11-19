@@ -41,6 +41,9 @@ try {
     [$status,$out,$err] = $run('backup-knowledge-base.php');
     $must($status === 0 && preg_match('/Backup created: ([0-9]{8}-[0-9]{6}-[a-f0-9]{8})/', $out, $m) === 1, 'initial backup should complete: ' . $err);
     $snapshot = $m[1];
+    $snapshotDir = $temp . '/api/data/backups/' . $snapshot;
+    $must(is_file($snapshotDir . '/.htaccess'), 'completed snapshot must include access denial');
+    $must(is_file($snapshotDir . '/index.html') && filesize($snapshotDir . '/index.html') === 0, 'empty index guard file must be published successfully');
     [$status] = $run('verify-knowledge-base-backup.php', [$snapshot]);
     $must($status === 0, 'initial snapshot should verify');
 
