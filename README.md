@@ -47,7 +47,7 @@ The shared `assets/js/cms-public.js` integration is loaded by the public HTML pa
 - Adds Published Navigation Menu records to the page navigation where a header navigation element exists
 - Uses DOM text nodes rather than injecting CMS text as HTML, and only accepts HTTPS image/link URLs
 
-CMS records are additive: they do not rewrite or remove the existing hard-coded page content. Menu records may appear only on pages with a compatible `header nav` element. SEO metadata is applied client-side after page load; it is not a server-rendered SEO solution and should not be treated as a substitute for static HTML metadata.
+CMS records are additive: they do not rewrite or remove the existing hard-coded page content. Navigation Menu records are appended to the site's supported navigation list (`header .nav-links`, with compatible `header nav ul`/`header nav` fallbacks); duplicate links are skipped. SEO metadata is applied client-side after page load; it is not a server-rendered SEO solution and should not be treated as a substitute for static HTML metadata.
 
 ## AI assistant backend
 
