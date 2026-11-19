@@ -47,8 +47,12 @@ function load_entries(): array {
     }
     $file = $dir . '/knowledge-base.json';
     if (!is_file($file)) return [];
-    $data = json_decode((string)file_get_contents($file), true);
-    return is_array($data) && isset($data['entries']) && is_array($data['entries']) ? $data['entries'] : [];
+    $raw = @file_get_contents($file);
+    $data = $raw === false ? null : json_decode($raw, true);
+    if ($raw === false || json_last_error() !== JSON_ERROR_NONE || !is_array($data) || !isset($data['entries']) || !is_array($data['entries'])) {
+        out(500, ['ok'=>false,'message'=>'Knowledge Base ডেটা পড়া যাচ্ছে না বা JSON অবৈধ। মূল ফাইল অক্ষত রাখা হয়েছে; যাচাইকৃত Backup থেকে Restore প্রয়োজন।']);
+    }
+    return array_values(array_filter($data['entries'], 'is_array'));
 }
 function save_entries(array $entries): void {
     global $entries_lock_handle;
@@ -67,8 +71,16 @@ function save_entries(array $entries): void {
         $old = json_decode((string)file_get_contents($file), true);
         if (is_array($old) && is_array($old['entries'] ?? null)) {
             $historyFile = $dir . '/knowledge-history.json';
-            $historyData = is_file($historyFile) ? json_decode((string)file_get_contents($historyFile), true) : null;
-            $versions = is_array($historyData) && is_array($historyData['versions'] ?? null) ? $historyData['versions'] : [];
+            $historyData = null;
+            if (is_file($historyFile)) {
+                $historyRaw = @file_get_contents($historyFile);
+                $historyData = $historyRaw === false ? null : json_decode($historyRaw, true);
+                if ($historyRaw === false || json_last_error() !== JSON_ERROR_NONE || !is_array($historyData) || !isset($historyData['versions']) || !is_array($historyData['versions'])) {
+                    flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
+                    out(500,['ok'=>false,'message'=>'Knowledge Base History নষ্ট বা পড়া যাচ্ছে না; নিরাপত্তার জন্য পরিবর্তন বন্ধ রাখা হয়েছে।']);
+                }
+            }
+            $versions = is_array($historyData) ? $historyData['versions'] : [];
             $versions[] = ['saved_at'=>gmdate('c'),'entry_count'=>count($old['entries']),'entries'=>$old['entries']];
             $versions = array_slice($versions, -30);
             $historyTmp = $historyFile . '.' . bin2hex(random_bytes(6)) . '.tmp';
