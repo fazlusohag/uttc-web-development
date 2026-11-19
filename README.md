@@ -38,10 +38,12 @@ The current /admin/ implementation is an **AI Knowledge Base Dashboard**, not ye
 
 ## Not yet implemented / not yet verified
 
-- A separate, full **Website Admin CMS** for editing all public pages, course information, notices, gallery items, menus and contact details is not present yet. The Knowledge Base Dashboard does not provide those CMS functions.
-- The AI Knowledge Base Dashboard is the current admin interface; a separate AI operations/analytics dashboard is not yet implemented.
+- A first **Website CMS** is now available at `admin/cms.php` for Course, Notice, Gallery, Page and Contact records, with Draft/Publish and a read-only public API. Published notices/gallery and course additions are rendered on the matching public pages.
+- The CMS is not yet a complete source-page editor: it does not edit every existing HTML page, SEO metadata, navigation menus or upload image files. Those remain release enhancements.
+- The AI Operations status panel is integrated into the CMS dashboard and shows non-secret configuration booleans and counts. It is not yet a full analytics/alerting dashboard.
 - No live Hostinger deployment or server-side configuration has been performed by this repository workflow.
 - Real OpenAI API calls, production upload behavior, Hostinger filesystem protections, HTTPS/session behavior, visual browser QA, accessibility, SEO crawl and live domain behavior have not been verified here.
+- The CMS uses HTTPS image URLs; direct image upload, full static-page editing, SEO-field editing, navigation editing and a full audit log are not implemented yet.
 - CI does not test a live OpenAI account, Hostinger configuration, actual browser admin workflows or end-to-end production security.
 
 ## Important files
