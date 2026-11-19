@@ -66,3 +66,5 @@ The GitHub Actions workflow runs PHP 8.3 syntax checks, retrieval regression tes
 **Status: integration candidate, not production-final.**
 
 Complete authenticated browser tests, Hostinger-specific security checks, visual/accessibility/SEO QA and final content verification. Review and merge through a reviewed pull request only after those gates pass. Do not upload to Hostinger until separately approved.
+
+- Fixed CMS navigation injection to target the site's actual `.nav-links` list and append valid `<li><a>` items; added static regression checks for the selector, list structure, and text-only rendering. Previously the integration looked only for `header nav`, which does not exist in the main page markup, so published CMS menu items were silently omitted.
