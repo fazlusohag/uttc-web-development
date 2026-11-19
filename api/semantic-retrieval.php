@@ -56,18 +56,23 @@ function uttc_semantic_retrieve(string $question, array $pages, string $apiKey, 
         throw new RuntimeException('Semantic Search cache ফোল্ডার তৈরি করা যায়নি।');
     }
 
-    $documents = [];
-    foreach (array_slice($pages, 0, 500) as $page) {
+    $adminDocuments = [];
+    $websiteDocuments = [];
+    foreach ($pages as $page) {
         $title = trim((string)($page['title'] ?? ''));
         $text = trim((string)($page['text'] ?? ''));
         if ($title === '' || $text === '') continue;
-        $documents[] = [
+        $document = [
             'title'=>$title,
             'url'=>(string)($page['url'] ?? ''),
             'text'=>mb_substr($text, 0, 6000, 'UTF-8'),
             'source_type'=>(string)($page['_source_type'] ?? 'website')
         ];
+        if ($document['source_type'] === 'admin') $adminDocuments[] = $document;
+        else $websiteDocuments[] = $document;
     }
+    // Keep approved admin knowledge inside the bounded index before website pages.
+    $documents = array_slice(array_merge($adminDocuments, $websiteDocuments), 0, 500);
     if (!$documents) return [];
     $fingerprint = hash('sha256', json_encode($documents, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '');
     $cacheFile = $runtime . '/semantic-index.json';
