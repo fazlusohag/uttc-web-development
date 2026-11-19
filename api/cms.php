@@ -34,7 +34,7 @@ function cms_text(mixed $v,int $max): string {if(!is_string($v))return '';$v=tri
 function cms_https(string $v,string $field): void {if($v==='')return;$parts=parse_url($v);if(!filter_var($v,FILTER_VALIDATE_URL)||!is_array($parts)||strtolower((string)($parts['scheme']??''))!=='https'||empty($parts['host'])||isset($parts['user'])||isset($parts['pass']))cms_out(422,['ok'=>false,'message'=>$field.'-এ শুধু credential-বিহীন পূর্ণ HTTPS URL গ্রহণ করা হয়।']);}
 if(($_SERVER['REQUEST_METHOD']??'GET')==='GET'&&($_GET['action']??'')==='token'){if(empty($_SESSION['csrf']))$_SESSION['csrf']=bin2hex(random_bytes(32));cms_out(200,['ok'=>true,'csrf'=>$_SESSION['csrf']]);}
 if(($_SERVER['REQUEST_METHOD']??'')!=='POST')cms_out(405,['ok'=>false,'message'=>'অনুমোদিত অনুরোধ নয়।']);
-$d=cms_input();cms_csrf($d);cms_admin();$action=(string)($d['action']??'');$lock=cms_lock();
+$d=cms_input();cms_csrf($d);cms_admin();session_write_close();$action=(string)($d['action']??'');$lock=cms_lock();
 if($action==='list'){
  $items=cms_read();usort($items,fn($a,$b)=>strcmp((string)($b['updated_at']??''),(string)($a['updated_at']??'')));
  $kd=is_file(__DIR__.'/data/knowledge-base.json')?json_decode((string)file_get_contents(__DIR__.'/data/knowledge-base.json'),true):[];
