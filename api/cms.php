@@ -8,7 +8,13 @@ session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>(!empty($_SERVER[
 ini_set('session.use_strict_mode','1');
 session_start();
 function cms_out(int $s,array $d): never {http_response_code($s);echo json_encode($d,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);exit;}
-function cms_input(): array {$v=json_decode(file_get_contents('php://input')?:'',true);return is_array($v)?$v:[];}
+function cms_input(): array {
+ $maxBytes=64*1024;$length=(int)($_SERVER['CONTENT_LENGTH']??0);
+ if($length>$maxBytes)cms_out(413,['ok'=>false,'message'=>'অনুরোধটি খুব বড়।']);
+ $stream=fopen('php://input','rb');$raw=$stream?stream_get_contents($stream,$maxBytes+1):false;if(is_resource($stream))fclose($stream);
+ if($raw===false||strlen($raw)>$maxBytes)cms_out(413,['ok'=>false,'message'=>'অনুরোধটি খুব বড়।']);
+ $v=json_decode($raw,true);return is_array($v)?$v:[];
+}
 function cms_admin(): void {if(empty($_SESSION['admin']))cms_out(401,['ok'=>false,'message'=>'প্রথমে Admin Dashboard-এ লগইন করুন।']);}
 function cms_csrf(array $d): void {if(empty($_SESSION['csrf'])||!hash_equals((string)$_SESSION['csrf'],(string)($d['csrf']??'')))cms_out(419,['ok'=>false,'message'=>'নিরাপত্তা যাচাই ব্যর্থ। পেজ রিফ্রেশ করে আবার চেষ্টা করুন।']);}
 function cms_dir(): string {$p=__DIR__.'/data';if(!is_dir($p)&&!mkdir($p,0750,true)&&!is_dir($p))cms_out(500,['ok'=>false,'message'=>'ডেটা ফোল্ডার তৈরি করা যায়নি।']);return $p;}
