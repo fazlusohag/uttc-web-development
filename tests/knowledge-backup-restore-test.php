@@ -57,6 +57,21 @@ try {
     [$status] = $run('verify-knowledge-base-backup.php', [$snapshot]);
     $must($status === 0, 'initial snapshot should verify');
 
+    /* Every CLI operation must reject a data directory whose access guard is missing or ineffective. */
+    $guardPath = $temp . '/api/data/.htaccess';
+    $validGuard = file_get_contents($guardPath);
+    $must(is_string($validGuard), 'fixture access guard should be readable');
+    file_put_contents($guardPath, "Options -Indexes\\n");
+    [$status] = $run('backup-knowledge-base.php');
+    $must($status !== 0, 'backup must reject a data directory without Require all denied');
+    [$status] = $run('verify-knowledge-base-backup.php', [$snapshot]);
+    $must($status !== 0, 'verifier must reject unsafe root storage protection');
+    $liveGuardProbe = hash_file('sha256', $temp . '/api/data/knowledge-base.json');
+    [$status] = $run('restore-knowledge-base-backup.php', [$snapshot]);
+    $must($status !== 0, 'restore must reject unsafe root storage protection');
+    $must(hash_file('sha256', $temp . '/api/data/knowledge-base.json') === $liveGuardProbe, 'unsafe root guard must not permit restore to alter live data');
+    file_put_contents($guardPath, $validGuard);
+
     file_put_contents($temp . '/api/data/knowledge-base.json', json_encode(['entries'=>[['id'=>'new','answer'=>'live changed']]]));
     file_put_contents($temp . '/api/data/knowledge-history.json', json_encode(['versions'=>[['id'=>'v2']]]));
     file_put_contents($temp . '/api/data/uploads/current.txt', 'upload created after snapshot');
