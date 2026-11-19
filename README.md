@@ -41,7 +41,7 @@ The Website CMS is available at `admin/cms.php` and reuses the existing admin se
 - A read-only public endpoint at `api/cms-public.php` that returns Published records only
 
 The shared `assets/js/cms-public.js` integration is loaded by the public HTML pages. It:
-- Renders published course feeds on Driving, Women's Driving, Computer, Freelancing and Graphic Design pages
+- Renders Published course records only on the explicitly assigned course page (Driving, Women's Driving, Computer, Freelancing or Graphic Design); each course record must have a matching Page assignment
 - Renders published Notice and Gallery feeds on their respective pages
 - Applies Page SEO metadata when a Published Page record's slug matches the page's `data-page-key`
 - Adds Published Navigation Menu records to the page navigation where a header navigation element exists
