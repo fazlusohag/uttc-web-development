@@ -103,3 +103,5 @@ Complete authenticated browser tests, Hostinger-specific security checks, visual
 - Extended the isolated restore integration fixture to cover snapshots created when revision history is absent: a stale live history file must be removed when restoring such a snapshot. The fixture also checks that uploads remain unchanged and that a tampered snapshot is rejected without modifying the live Knowledge Base JSON.
 
 - Additional recovery safeguard: if automatic rollback itself cannot restore one or more original JSON files, the restore utility now preserves its private staging directory instead of deleting the remaining original copies. The error output reports the recovery directory and pre-restore snapshot ID for manual recovery. Static regression assertions cover this fail-safe behavior.
+
+- Backup path hardening: backup, verification, and restore now reject a symlinked storage `.htaccess` protection file. The verifier also rejects dot path segments in manifest paths, in addition to traversal, duplicate separators, and symlinks. Static regression assertions cover these checks.
