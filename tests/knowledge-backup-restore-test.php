@@ -5,7 +5,7 @@ declare(strict_types=1);
 $sourceRoot = dirname(__DIR__);
 $temp = sys_get_temp_dir() . '/uttc-kb-restore-' . bin2hex(random_bytes(6));
 $must = static function (bool $condition, string $message): void {
-    if (!$condition) { fwrite(STDERR, "FAIL: {$message}\n"); exit(1); }
+    if (!$condition) { throw new RuntimeException("FAIL: {$message}"); }
 };
 $removeTree = static function (string $path) use (&$removeTree): void {
     if (!file_exists($path) && !is_link($path)) return;
