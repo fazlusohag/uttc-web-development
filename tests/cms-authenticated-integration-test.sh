@@ -125,4 +125,4 @@ throttled_login="$(curl --silent --show-error --output /dev/null --write-out '%{
   "http://127.0.0.1:${port}/api/admin.php")"
 [ "$throttled_login" = "429" ]
 
-echo "OK: CMS session, CSRF, body limit, Draft/Publish/Delete, audit and login throttling passed."
+echo "OK: CMS session, CSRF, body limit, course/page validation, duplicate page protection, Draft/Publish/Delete, audit and login throttling passed."
