@@ -16,7 +16,7 @@ Branch: `release/uttc-complete-platform-2026`
 - Connected Published Course feeds to Driving, Women's Driving, Computer Office Application, Freelancing and Graphic Design pages.
 - Added `data-page-key` and the shared CMS integration script to all 14 public HTML pages so Published Page metadata and Navigation Menu records can be applied where compatible markup exists.
 - Prevented duplicate CMS navigation links when the same URL or label already exists in the page navigation.
-- Added CI checks for JavaScript syntax, static CMS page wiring and the public CMS API contract (Published-only visibility, type filtering and invalid-type rejection).
+- Added CI checks for JavaScript syntax, static CMS page wiring and the public CMS API contract (Published-only visibility, public-type allowlisting, type filtering and invalid-type rejection).
 - Added `docs/EXTENDING-UTTC-PLATFORM.md` to define module boundaries, extension rules, API compatibility, storage/security rules and the definition of done for future features.
 - Updated the project README to describe the current implementation and its limitations.
 
@@ -41,7 +41,7 @@ Branch: `release/uttc-complete-platform-2026`
 ## Security observations and deployment checks
 
 - CMS write actions require the existing session admin flag and CSRF token.
-- Public CMS API filters to Published records only.
+- Public CMS API filters to Published records and an explicit allowlist of public record types; internal/unknown record types are never exposed.
 - Public rendering avoids HTML injection and restricts external content URLs to HTTPS.
 - Private CMS JSON data relies on `api/data/.htaccess`. Verify direct access denial on the actual Hostinger server; if the host does not enforce it, move private data outside the document root.
 - Never commit API keys, password hashes, private knowledge files, session data, logs or uploaded source documents.
