@@ -74,17 +74,8 @@ if ($body === false || strlen($body) > $maxRequestBytes) respond(413, ['ok'=>fal
 $input = json_decode($body, true);
 if (!is_array($input)) respond(400, ['ok'=>false,'error'=>'invalid_json']);
 $question = trim((string)($input['message'] ?? ''));
-$history = [];
-$rawHistory = $input['history'] ?? [];
-if (is_array($rawHistory)) {
-    foreach (array_slice($rawHistory, -10) as $turn) {
-        if (!is_array($turn)) continue;
-        $role = (string)($turn['role'] ?? '');
-        $content = trim((string)($turn['content'] ?? ''));
-        if (!in_array($role, ['user','assistant'], true) || $content === '' || mb_strlen($content, 'UTF-8') > 1200) continue;
-        $history[] = ['role'=>$role, 'content'=>$content];
-    }
-}
+require_once __DIR__ . '/assistant-history.php';
+$history = uttc_normalize_assistant_history($input['history'] ?? []);
 if ($question === '' || mb_strlen($question,'UTF-8') > 1200) respond(422, ['ok'=>false,'error'=>'invalid_message','message'=>'প্রশ্নটি ১২০০ অক্ষরের মধ্যে লিখুন।']);
 if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $question)) respond(422, ['ok'=>false,'error'=>'invalid_message']);
 $apiKey = envv('OPENAI_API_KEY');
