@@ -63,8 +63,16 @@ foreach ($manifest['files'] as $entry) {
     }
     $seen[$relative] = true;
     $path = $dir . '/' . $relative;
+    $cursor = $dir;
+    foreach (explode('/', $relative) as $segment) {
+        $cursor .= '/' . $segment;
+        if (is_link($cursor)) {
+            fwrite(STDERR, "A listed backup path contains a symbolic link: {$relative}\\n");
+            exit(1);
+        }
+    }
     $real = realpath($path);
-    if ($real === false || !str_starts_with($real, $dir . '/') || is_link($path) || !is_file($path) || !is_readable($path)) {
+    if ($real === false || !str_starts_with($real, $dir . '/') || !is_file($path) || !is_readable($path)) {
         fwrite(STDERR, "A listed backup file is missing or unsafe: {$relative}\n");
         exit(1);
     }
@@ -85,6 +93,10 @@ foreach ($manifest['files'] as $entry) {
     }
     $total += $size;
     $verified++;
+}
+if (!isset($seen['knowledge-base.json'])) {
+    fwrite(STDERR, "Snapshot does not contain the required Knowledge Base file.\\n");
+    exit(1);
 }
 if ($total !== $manifest['total_bytes']) {
     fwrite(STDERR, "Manifest total byte count does not match verified files.\n");
