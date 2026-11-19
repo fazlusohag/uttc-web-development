@@ -12,7 +12,7 @@ if [ -f "$login_attempts" ]; then attempt_backup="$(mktemp)"; cp "$login_attempt
 cleanup_files() {
   if [ -n "$backup" ]; then cp "$backup" "$fixture"; rm -f "$backup"; else rm -f "$fixture"; fi
   if [ -n "$attempt_backup" ]; then cp "$attempt_backup" "$login_attempts"; rm -f "$attempt_backup"; else rm -f "$login_attempts"; fi
-  rm -f "$data_dir/cms.lock" "$data_dir/cms-audit.jsonl"
+  rm -f "$data_dir/cms.lock"
 }
 trap cleanup_files EXIT
 
