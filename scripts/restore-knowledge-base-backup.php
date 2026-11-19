@@ -19,7 +19,7 @@ if (!preg_match('/^20[0-9]{6}-[0-9]{6}-[a-f0-9]{8}$/D', $id)) {
 $root = dirname(__DIR__);
 $data = $root . '/api/data';
 $backupRoot = $data . '/backups';
-if (!is_dir($data) || is_link($data) || !is_file($data . '/.htaccess')
+if (!is_dir($data) || is_link($data) || is_link($data . '/.htaccess') || !is_file($data . '/.htaccess')
     || !is_dir($backupRoot) || is_link($backupRoot)) {
     fwrite(STDERR, "Private Knowledge Base storage could not be verified.\n");
     exit(1);
