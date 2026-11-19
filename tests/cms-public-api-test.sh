@@ -15,7 +15,7 @@ cat > "$fixture" <<'JSON'
 {"id":"private-extra","type":"internal","title":"Internal record","body":"Must not be public","status":"published"}
 ]}
 JSON
-port="$(php -r '$s=stream_socket_server("tcp://127.0.0.1:0", $e, $m); if (!$s) exit(1); echo substr(strrchr(stream_socket_name($s), ":"), 1); fclose($s);')"
+port="$(php -r '$s=stream_socket_server("tcp://127.0.0.1:0", $e, $m); if (!$s) exit(1); echo substr(strrchr(stream_socket_get_name($s, false), ":"), 1); fclose($s);')"
 log_file="$(mktemp)"
 php -S "127.0.0.1:${port}" -t . >"$log_file" 2>&1 &
 server_pid=$!
