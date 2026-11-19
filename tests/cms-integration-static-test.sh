@@ -152,3 +152,6 @@ grep -q "Live data changed while preparing safety backup" scripts/restore-knowle
 grep -q "rollback was attempted" scripts/restore-knowledge-base-backup.php
 grep -q "Uploaded source documents were not changed" scripts/restore-knowledge-base-backup.php
 grep -q "knowledge-base.json" scripts/restore-knowledge-base-backup.php
+grep -q "\$replacementStarted = false" scripts/restore-knowledge-base-backup.php
+grep -q "if (!\$ok && \$replacementStarted)" scripts/restore-knowledge-base-backup.php
+grep -q "if (isset(\$rollback\[\$name\]))" scripts/restore-knowledge-base-backup.php
