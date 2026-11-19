@@ -133,3 +133,12 @@ grep -q "hash_file('sha256'" scripts/backup-knowledge-base.php
 grep -q "knowledge-history.json" scripts/backup-knowledge-base.php
 grep -q "UTTC_BACKUP_RETENTION" scripts/backup-knowledge-base.php
 grep -q "Refusing to back up invalid" scripts/backup-knowledge-base.php
+
+# Read-only backup verification validates snapshot manifests, file hashes and JSON structure.
+grep -q "PHP_SAPI !== 'cli'" scripts/verify-knowledge-base-backup.php
+grep -q "hash_equals(\$entry\['sha256'\], \$hash)" scripts/verify-knowledge-base-backup.php
+grep -q "Snapshot manifest is invalid" scripts/verify-knowledge-base-backup.php
+grep -q "No live data was changed" scripts/verify-knowledge-base-backup.php
+grep -q "Snapshot does not contain the required Knowledge Base file" scripts/verify-knowledge-base-backup.php
+grep -q "A listed backup path contains a symbolic link" scripts/verify-knowledge-base-backup.php
+grep -q "Knowledge Base source file is missing or unsafe" scripts/backup-knowledge-base.php
