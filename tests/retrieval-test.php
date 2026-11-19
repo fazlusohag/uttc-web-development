@@ -32,4 +32,6 @@ check($matches[0]['score'] > $matches[1]['score'], 'BM25 scores should order rel
 check(uttc_retrieve('welding certification', $pages) === [], 'unmatched question should return no results');
 $limited = uttc_retrieve('driving', $pages, 1);
 check(count($limited) === 1, 'result limit should be respected');
-echo "OK: 5 retrieval assertions passed.\n";
+$bangla = uttc_retrieve('ড্রাইভিং প্রশিক্ষণ', [['title'=>'ড্রাইভিং প্রশিক্ষণ','url'=>'','text'=>'মৌলভীবাজারে গাড়ি চালনা শেখানো হয়']]);
+check(count($bangla) === 1, 'Unicode Bangla terms should be tokenized and retrieved');
+echo "OK: 6 retrieval assertions passed.\n";
