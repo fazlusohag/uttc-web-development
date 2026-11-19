@@ -33,6 +33,8 @@ done
 grep -q 'Require all denied' api/data/.htaccess
 grep -q 'status.*published' api/cms-public.php
 grep -q "item.page_key===pageKey" assets/js/cms-public.js
+grep -q "const feedCache=new Map()" assets/js/cms-public.js
+grep -q "feedCache.delete(type)" assets/js/cms-public.js
 grep -q "function publishedDate(value)" assets/js/cms-public.js
 grep -q "cms-published-date" assets/js/cms-public.js
 grep -q "new Intl.DateTimeFormat" assets/js/cms-public.js
@@ -48,6 +50,8 @@ grep -q "page_key" api/cms-public.php
 grep -q 'কোর্সের জন্য আবশ্যক' admin/cms.php
 grep -q "coursePageKeys" api/cms.php
 grep -q "publicPageKeys" api/cms.php
+grep -q "type===\x27page\x27){foreach(cms_read()" api/cms.php
+grep -q "cms_out(409" api/cms.php
 grep -q "type==='page'" api/cms.php
 grep -q 'id="previewMeta"' admin/cms.php
 grep -q "previewMeta').textContent=meta.join" admin/cms.php
