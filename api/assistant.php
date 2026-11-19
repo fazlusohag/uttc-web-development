@@ -76,7 +76,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
     exit;
 }
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') respond(405, ['ok'=>false,'error'=>'method_not_allowed']);
-$input = json_decode(file_get_contents('php://input') ?: '', true);
+ // Bound request bodies before JSON decoding to avoid oversized history/payload memory use.
+$maxRequestBytes = 64 * 1024;
+$contentLength = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+if ($contentLength > $maxRequestBytes) respond(413, ['ok'=>false,'error'=>'request_too_large','message'=>'অনুরোধটি খুব বড়। সংক্ষিপ্ত প্রশ্ন পাঠান।']);
+$bodyStream = fopen('php://input', 'rb');
+$body = $bodyStream ? stream_get_contents($bodyStream, $maxRequestBytes + 1) : false;
+if (is_resource($bodyStream)) fclose($bodyStream);
+if ($body === false || strlen($body) > $maxRequestBytes) respond(413, ['ok'=>false,'error'=>'request_too_large','message'=>'অনুরোধটি খুব বড়। সংক্ষিপ্ত প্রশ্ন পাঠান।']);
+$input = json_decode($body, true);
 if (!is_array($input)) respond(400, ['ok'=>false,'error'=>'invalid_json']);
 $question = trim((string)($input['message'] ?? ''));
 $history = [];
