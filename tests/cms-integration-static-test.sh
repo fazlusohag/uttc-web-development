@@ -169,3 +169,12 @@ grep -q "is_link(\$realData . '/.htaccess')" scripts/backup-knowledge-base.php
 grep -q "is_link(dirname(\$backupRoot) . '/.htaccess')" scripts/verify-knowledge-base-backup.php
 grep -Fq "preg_match('~(?:^|/)\\\\.(?:/|$)~', \$relative)" scripts/verify-knowledge-base-backup.php
 grep -q "is_link(\$data . '/.htaccess')" scripts/restore-knowledge-base-backup.php
+
+# Semantic embedding vectors are private cache data and must have their own guard.
+grep -q 'api/runtime/.htaccess' <(git ls-files api/runtime/.htaccess)
+grep -q 'Require all denied' api/runtime/.htaccess
+grep -q "is_link(\$runtime)" api/semantic-retrieval.php
+grep -q "is_link(\$runtimeGuard)" api/semantic-retrieval.php
+grep -q "Semantic Search cache-এর access-denial rule যাচাই করা যায়নি" api/semantic-retrieval.php
+grep -q 'fflush(\$handle)' api/semantic-retrieval.php
+grep -q 'fsync(\$handle)' api/semantic-retrieval.php
