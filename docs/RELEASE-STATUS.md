@@ -10,6 +10,9 @@ Branch: `release/uttc-complete-platform-2026`
 - CMS writes use file locking, atomic file replacement and bounded text validation with an mbstring fallback.
 - CMS audit events are appended only after the corresponding content write succeeds; the authenticated lifecycle test checks Create and Publish audit entries.
 - Knowledge-base source uploads are deleted only after the knowledge-base record deletion is saved successfully; stored filenames are reduced to basenames before filesystem deletion.
+- AI Assistant rejects request bodies larger than 64 KB before JSON decoding; the HTTP regression script checks the 413 response.
+- PDF text extraction caps parser output at 2 MB and limits captured parser diagnostics.
+- Failed knowledge-base upload saves remove the moved upload through a shutdown cleanup guard, avoiding orphaned private documents.
 - CLI knowledge sync accepts only same-host HTTPS sitemap URLs, parses XML with network access disabled, and uses a lock plus unique temporary file for atomic index replacement. Sitemap and page downloads are capped at 2 MB each, and a single run indexes at most 300 unique pages.
 - Added CMS record types: Course, Notice, Gallery, Page, Contact and Navigation Menu.
 - Added SEO title, meta description and canonical HTTPS URL fields for Page records.
@@ -53,7 +56,7 @@ Branch: `release/uttc-complete-platform-2026`
 
 ## CI
 
-The GitHub Actions workflow runs PHP 8.3 syntax checks, retrieval regression tests, assistant HTTP/CORS tests, document extraction smoke tests, Node syntax validation for the CMS JavaScript and static checks that all public pages load the CMS integration. The latest branch commit's Actions result has not yet been confirmed through the available GitHub status interface. CI does not prove live Hostinger security configuration, real OpenAI API access or browser rendering.
+The GitHub Actions workflow runs PHP 8.3 syntax checks, retrieval regression tests, assistant HTTP/CORS/request-size tests, document extraction smoke tests, Node syntax validation for the CMS JavaScript and static checks that all public pages load the CMS integration. The latest branch commit's Actions result has not yet been confirmed through the available GitHub status interface. CI does not prove live Hostinger security configuration, real OpenAI API access or browser rendering.
 
 ## Release decision
 
