@@ -59,6 +59,16 @@ try {
     [$status] = $run('verify-knowledge-base-backup.php', [$pre[1]]);
     $must($status === 0, 'pre-restore safety snapshot should verify');
 
+    /* Snapshot without history restores KB and removes stale live history. */
+    [$status,$out,$err] = $run('backup-knowledge-base.php');
+    $must($status === 0 && preg_match('/Backup created: ([0-9]{8}-[0-9]{6}-[a-f0-9]{8})/', $out, $noHistory) === 1, 'snapshot without history should be created');
+    $noHistoryId = $noHistory[1];
+    $historyPath = $temp . '/api/data/backups/' . $noHistoryId . '/knowledge-history.json';
+    $must(!is_file($historyPath), 'fixture snapshot should omit absent history');
+    file_put_contents($temp . '/api/data/knowledge-history.json', json_encode(['versions'=>[['id'=>'stale']]]));
+    [$status,$out,$err] = $run('restore-knowledge-base-backup.php', [$noHistoryId]);
+    $must($status === 0 && !is_file($temp . '/api/data/knowledge-history.json'], 'restore must remove stale history absent from snapshot: ' . $err . $out);
+
     /* A tampered selected snapshot must be rejected before any live data changes. */
     [$status,$out,$err] = $run('backup-knowledge-base.php');
     $must($status === 0 && preg_match('/Backup created: ([0-9]{8}-[0-9]{6}-[a-f0-9]{8})/', $out, $bad) === 1, 'second backup should complete');
