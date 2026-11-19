@@ -73,3 +73,21 @@ The feature branch also contains a private admin interface at `/admin/` and its 
 - Verify that `api/data/` is not web-accessible, the admin password hash is set, and HTTPS/session cookies work.
 - Do not upload real student personal data, identity documents, passwords, payment details, or sensitive records into this knowledge base. Store only approved general institutional information.
 - Back up the knowledge JSON and uploaded files securely. Restrict server file permissions and review admin access periodically.
+
+## Website CMS and AI Operations dashboard
+
+A separate authenticated Website CMS is available at `/admin/cms.php`. It shares the existing admin session and CSRF token with the Knowledge Base dashboard; sign in at `/admin/` first.
+
+- Manage Course, Notice, Gallery, Page and Contact records.
+- New and edited records are saved as Draft; an administrator must explicitly Publish.
+- `api/cms-public.php` exposes only Published records. It returns plain text fields and optional HTTPS URLs; public rendering uses DOM text nodes rather than interpreting record content as HTML.
+- The public Notices and Gallery pages consume their matching published feeds. Course pages show published course records in an additional section.
+- The AI Operations panel shows only boolean configuration status and non-secret operational counts. It never returns the API key or password hash.
+- CMS records are stored in `api/data/cms-content.json`, protected by the existing `api/data/.htaccess` on compatible Apache servers.
+
+### CMS limitations and release checks
+
+- The CMS stores content records and publishes them through a read-only JSON API. It does not yet edit the source HTML, page SEO metadata, navigation menus, or upload image files. Use HTTPS image URLs only.
+- Test that `/api/data/cms-content.json` is denied by the actual hosting server. Prefer storage outside the public document root where possible.
+- Verify that `/admin/cms.php` redirects unauthenticated users to the login page and that CSRF, publish, edit, delete and public-feed behavior work on the deployed PHP version.
+- Confirm that public pages show the new records correctly at desktop and mobile widths before launch.
