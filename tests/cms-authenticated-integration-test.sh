@@ -79,6 +79,10 @@ invalid_page_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv
 invalid_page_result="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$invalid_page_payload" "http://127.0.0.1:${port}/api/cms.php")"
 [ "$invalid_page_result" = "422" ]
 
+invalid_cms_page_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"page","title"=>"CI Invalid Page Slug","body"=>"Must be rejected","slug"=>"not-a-real-public-page"]);' "$cms_csrf")"
+invalid_cms_page_result="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$invalid_cms_page_payload" "http://127.0.0.1:${port}/api/cms.php")"
+[ "$invalid_cms_page_result" = "422" ]
+
 save_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"course","title"=>"CI CMS Contract Record","body"=>"Temporary integration test record","page_key"=>"computer-office-application-moulvibazar"]);' "$cms_csrf")"
 save_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$save_payload" "http://127.0.0.1:${port}/api/cms.php")"
 grep -q '"ok":true' <<<"$save_result"
