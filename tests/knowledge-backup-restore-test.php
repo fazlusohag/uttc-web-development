@@ -29,6 +29,9 @@ try {
             throw new RuntimeException('Could not create fixture directory');
         }
     }
+    if (!copy($sourceRoot . '/api/storage.php', $temp . '/api/storage.php')) {
+        throw new RuntimeException('Could not copy shared private-storage guard');
+    }
     foreach (['backup-knowledge-base.php','verify-knowledge-base-backup.php','restore-knowledge-base-backup.php'] as $file) {
         if (!copy($sourceRoot . '/scripts/' . $file, $temp . '/scripts/' . $file)) {
             throw new RuntimeException('Could not copy ' . $file);
@@ -41,8 +44,36 @@ try {
     [$status,$out,$err] = $run('backup-knowledge-base.php');
     $must($status === 0 && preg_match('/Backup created: ([0-9]{8}-[0-9]{6}-[a-f0-9]{8})/', $out, $m) === 1, 'initial backup should complete: ' . $err);
     $snapshot = $m[1];
+    $snapshotDir = $temp . '/api/data/backups/' . $snapshot;
+    $must(is_file($snapshotDir . '/.htaccess'), 'completed snapshot must include access denial');
+    $must(is_file($snapshotDir . '/index.html') && filesize($snapshotDir . '/index.html') === 0, 'empty index guard file must be published successfully');
+    $guardBackup = $snapshotDir . '/.htaccess.saved';
+    $must(rename($snapshotDir . '/.htaccess', $guardBackup), 'test can temporarily remove snapshot access guard');
+    [$status] = $run('verify-knowledge-base-backup.php', [$snapshot]);
+    $must($status !== 0, 'verifier must reject a snapshot with a missing access guard');
+    $must(rename($guardBackup, $snapshotDir . '/.htaccess'), 'test restores snapshot access guard');
+    $indexBackup = $snapshotDir . '/index.html.saved';
+    $must(rename($snapshotDir . '/index.html', $indexBackup), 'test can temporarily remove snapshot index guard');
+    [$status] = $run('verify-knowledge-base-backup.php', [$snapshot]);
+    $must($status !== 0, 'verifier must reject a snapshot with a missing index guard');
+    $must(rename($indexBackup, $snapshotDir . '/index.html'), 'test restores snapshot index guard');
     [$status] = $run('verify-knowledge-base-backup.php', [$snapshot]);
     $must($status === 0, 'initial snapshot should verify');
+
+    /* Every CLI operation must reject a data directory whose access guard is missing or ineffective. */
+    $guardPath = $temp . '/api/data/.htaccess';
+    $validGuard = file_get_contents($guardPath);
+    $must(is_string($validGuard), 'fixture access guard should be readable');
+    file_put_contents($guardPath, "Options -Indexes\\n");
+    [$status] = $run('backup-knowledge-base.php');
+    $must($status !== 0, 'backup must reject a data directory without Require all denied');
+    [$status] = $run('verify-knowledge-base-backup.php', [$snapshot]);
+    $must($status !== 0, 'verifier must reject unsafe root storage protection');
+    $liveGuardProbe = hash_file('sha256', $temp . '/api/data/knowledge-base.json');
+    [$status] = $run('restore-knowledge-base-backup.php', [$snapshot]);
+    $must($status !== 0, 'restore must reject unsafe root storage protection');
+    $must(hash_file('sha256', $temp . '/api/data/knowledge-base.json') === $liveGuardProbe, 'unsafe root guard must not permit restore to alter live data');
+    file_put_contents($guardPath, $validGuard);
 
     file_put_contents($temp . '/api/data/knowledge-base.json', json_encode(['entries'=>[['id'=>'new','answer'=>'live changed']]]));
     file_put_contents($temp . '/api/data/knowledge-history.json', json_encode(['versions'=>[['id'=>'v2']]]));
