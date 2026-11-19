@@ -18,7 +18,7 @@ if (!is_dir($dataDir) || is_link($dataDir)) {
     exit(1);
 }
 $realData = realpath($dataDir);
-if ($realData === false || !is_file($realData . '/.htaccess')) {
+if ($realData === false || is_link($realData . '/.htaccess') || !is_file($realData . '/.htaccess')) {
     fwrite(STDERR, "Private storage protection could not be verified (.htaccess missing).\n");
     exit(1);
 }
