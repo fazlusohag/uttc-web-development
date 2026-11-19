@@ -94,8 +94,8 @@ for credential_field in url image_url; do
 done
 
 # Simulate legacy Draft records that bypassed current save-time validation.
-php -r '$p=$argv[1];$d=json_decode(file_get_contents($p),true)?:[];$d["items"][]=["id"=>"legacy-invalid-course","type"=>"course","title"=>"Legacy invalid course","body"=>"Must not publish","page_key"=>"invalid-page","status"=>"draft"];$d["items"][]=["id"=>"legacy-invalid-page","type"=>"page","title"=>"Legacy invalid page","body"=>"Must not publish","slug"=>"unknown-page","status"=>"draft"];$d["items"][]=["id"=>"legacy-credential-url","type"=>"notice","title"=>"Legacy credential URL","body"=>"Must not publish","url"=>"https://user:pass@example.com/","status"=>"draft"];file_put_contents($p,json_encode($d,JSON_UNESCAPED_SLASHES));' "$fixture"
-for legacy_id in legacy-invalid-course legacy-invalid-page legacy-credential-url; do
+php -r '$p=$argv[1];$d=json_decode(file_get_contents($p),true)?:[];$d["items"][]=["id"=>"legacy-invalid-course","type"=>"course","title"=>"Legacy invalid course","body"=>"Must not publish","page_key"=>"invalid-page","status"=>"draft"];$d["items"][]=["id"=>"legacy-invalid-page","type"=>"page","title"=>"Legacy invalid page","body"=>"Must not publish","slug"=>"unknown-page","status"=>"draft"];$d["items"][]=["id"=>"legacy-credential-url","type"=>"notice","title"=>"Legacy credential URL","body"=>"Must not publish","url"=>"https://user:pass@example.com/","status"=>"draft"];$d["items"][]=["id"=>"legacy-unknown-type","type"=>"private","title"=>"Legacy unknown type","body"=>"Must not publish","status"=>"draft"];$d["items"][]=["id"=>"legacy-empty-body","type"=>"notice","title"=>"Legacy empty body","body"=>"   ","status"=>"draft"];file_put_contents($p,json_encode($d,JSON_UNESCAPED_SLASHES));' "$fixture"
+for legacy_id in legacy-invalid-course legacy-invalid-page legacy-credential-url legacy-unknown-type legacy-empty-body; do
   legacy_publish="$(php -r 'echo json_encode(["action"=>"publish","csrf"=>$argv[1],"id"=>$argv[2]]);' "$cms_csrf" "$legacy_id")"
   legacy_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$legacy_publish" "http://127.0.0.1:${port}/api/cms.php")"
   [ "$legacy_status" = "422" ]
@@ -143,4 +143,4 @@ throttled_login="$(curl --silent --show-error --output /dev/null --write-out '%{
   "http://127.0.0.1:${port}/api/admin.php")"
 [ "$throttled_login" = "429" ]
 
-echo "OK: CMS session, CSRF, body limit, course/page validation, legacy publish revalidation, credential URL rejection, duplicate page protection, Draft/Publish/Delete, audit and login throttling passed."
+echo "OK: CMS session, CSRF, body limit, course/page validation, legacy publish revalidation, required-field checks, credential URL rejection, duplicate page protection, Draft/Publish/Delete, audit and login throttling passed."
