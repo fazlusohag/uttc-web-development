@@ -48,6 +48,11 @@ The feature branch also contains a private admin interface at `/admin/` and its 
 5. The included `api/data/.htaccess` denies direct HTTP access to the JSON knowledge store and uploaded documents on Apache. Confirm this protection is active on the actual hosting configuration before uploading any real institutional documents.
 6. Visit `/admin/`, sign in, add a question/answer or upload a supported document, review it, and only then press Publish.
 
+### Admin retrieval preview
+- The dashboard includes a private `AI Knowledge Retrieval Test` panel. It runs the same keyword-based ranking over the locally synced website index and Published admin entries.
+- The preview returns matching source titles, source type, score and a short excerpt. It does not call the OpenAI API and does not validate the final generated answer.
+- Draft entries are excluded. A zero-match result should be treated as an unanswered question and referred to the official contact number rather than guessed.
+
 ### Knowledge publishing and supported files
 - New manual entries and extracted document contents are saved as Draft.
 - Only entries with status `published` are appended to the assistant's retrieval corpus. Draft entries are excluded.
