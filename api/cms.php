@@ -43,6 +43,7 @@ if($action==='save'){
  if($type==='course'&&!in_array($pageKey,$coursePageKeys,true))cms_out(422,['ok'=>false,'message'=>'কোর্সের জন্য নির্দিষ্ট Public Page নির্বাচন করুন।']);
  $publicPageKeys=['index','about-uttc-moulvibazar','404','contact-uttc-moulvibazar','facilities-uttc-moulvibazar','faq-uttc-moulvibazar','privacy-policy','notices-uttc-moulvibazar','gallery-uttc-moulvibazar',...$coursePageKeys];
  if($type==='page'&&($slug===''||!in_array($slug,$publicPageKeys,true)))cms_out(422,['ok'=>false,'message'=>'Page কনটেন্টের জন্য বিদ্যমান Public Page-এর সঠিক slug নির্বাচন বা লিখুন।']);
+ if($type==='page'){foreach(cms_read() as $existing){if(($existing['type']??'')==='page'&&($existing['slug']??'')===$slug&&($existing['id']??'')!==$id)cms_out(409,['ok'=>false,'message'=>'এই পেজের জন্য ইতিমধ্যে একটি CMS Page record রয়েছে। সেটি সম্পাদনা করুন।']);}}
  if($type!=='course')$pageKey='';
  $items=cms_read();$now=gmdate('c');$found=false;$auditAction='create';$auditItem=null;
  foreach($items as &$it){if($id!==''&&($it['id']??'')===$id){$it=array_merge($it,['type'=>$type,'title'=>$title,'body'=>$body,'url'=>$url,'image_url'=>$image,'slug'=>$slug,'page_key'=>$pageKey,'meta_title'=>$mt,'meta_description'=>$md,'canonical_url'=>$canonical,'status'=>'draft','updated_at'=>$now,'published_at'=>null]);$found=true;$auditAction='update';$auditItem=$it;break;}}unset($it);
