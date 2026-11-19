@@ -7,11 +7,15 @@ fixture="$data_dir/cms-content.json"
 login_attempts="$data_dir/login-attempts.json"
 backup=""
 attempt_backup=""
+audit="$data_dir/cms-audit.jsonl"
+audit_backup=""
 if [ -f "$fixture" ]; then backup="$(mktemp)"; cp "$fixture" "$backup"; fi
 if [ -f "$login_attempts" ]; then attempt_backup="$(mktemp)"; cp "$login_attempts" "$attempt_backup"; fi
+if [ -f "$audit" ]; then audit_backup="$(mktemp)"; cp "$audit" "$audit_backup"; fi
 cleanup_files() {
   if [ -n "$backup" ]; then cp "$backup" "$fixture"; rm -f "$backup"; else rm -f "$fixture"; fi
   if [ -n "$attempt_backup" ]; then cp "$attempt_backup" "$login_attempts"; rm -f "$attempt_backup"; else rm -f "$login_attempts"; fi
+  if [ -n "$audit_backup" ]; then cp "$audit_backup" "$audit"; rm -f "$audit_backup"; else rm -f "$audit"; fi
   rm -f "$data_dir/cms.lock"
 }
 trap cleanup_files EXIT
