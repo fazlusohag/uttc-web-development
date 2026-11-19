@@ -142,3 +142,13 @@ grep -q "No live data was changed" scripts/verify-knowledge-base-backup.php
 grep -q "Snapshot does not contain the required Knowledge Base file" scripts/verify-knowledge-base-backup.php
 grep -q "A listed backup path contains a symbolic link" scripts/verify-knowledge-base-backup.php
 grep -q "Knowledge Base source file is missing or unsafe" scripts/backup-knowledge-base.php
+
+# Restore is an explicit CLI operation with pre-restore backup, verification, locking and rollback.
+grep -q "PHP_SAPI !== 'cli'" scripts/restore-knowledge-base-backup.php
+grep -q "verify-knowledge-base-backup.php" scripts/restore-knowledge-base-backup.php
+grep -q "backup-knowledge-base.php" scripts/restore-knowledge-base-backup.php
+grep -q "flock(\$lock, LOCK_EX)" scripts/restore-knowledge-base-backup.php
+grep -q "Live data changed while preparing safety backup" scripts/restore-knowledge-base-backup.php
+grep -q "rollback was attempted" scripts/restore-knowledge-base-backup.php
+grep -q "Uploaded source documents were not changed" scripts/restore-knowledge-base-backup.php
+grep -q "knowledge-base.json" scripts/restore-knowledge-base-backup.php
