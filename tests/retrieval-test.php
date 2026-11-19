@@ -30,5 +30,6 @@ check(count($matches) === 2, 'retrieval should return only documents with query 
 check($matches[0]['title'] === 'Driving License Training', 'title matches should rank first');
 check($matches[0]['score'] > $matches[1]['score'], 'BM25 scores should order relevant matches');
 check(uttc_retrieve('welding certification', $pages) === [], 'unmatched question should return no results');
-check(uttc_retrieve('driving', $pages, 1)[0]['title'] === 'Driving License Training', 'result limit should be respected');
+$limited = uttc_retrieve('driving', $pages, 1);
+check(count($limited) === 1, 'result limit should be respected');
 echo "OK: 5 retrieval assertions passed.\n";
