@@ -33,6 +33,11 @@ done
 grep -q 'Require all denied' api/data/.htaccess
 grep -q 'status.*published' api/cms-public.php
 grep -q "item.page_key===pageKey" assets/js/cms-public.js
+grep -q "function publishedDate(value)" assets/js/cms-public.js
+grep -q "cms-published-date" assets/js/cms-public.js
+grep -q "new Intl.DateTimeFormat" assets/js/cms-public.js
+grep -q "cms-gallery-card" assets/js/cms-public.js
+grep -q "renderCard(item,type)" assets/js/cms-public.js
 grep -q "page_key" api/cms-public.php
 grep -q 'কোর্সের জন্য আবশ্যক' admin/cms.php
 grep -q "coursePageKeys" api/cms.php
