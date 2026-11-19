@@ -30,6 +30,18 @@ try {
     $txt = $dir.'/sample.txt'; file_put_contents($txt,"UTTC plain text extraction smoke test");
     assert_same('UTTC plain text extraction smoke test',uttc_extract_document($txt,'txt'),'TXT extraction');
 
+    $oversized = $dir.'/oversized.txt';
+    $handle = fopen($oversized, 'wb');
+    if (!$handle) throw new RuntimeException('Could not create oversized fixture');
+    ftruncate($handle, 8 * 1024 * 1024 + 1);
+    fclose($handle);
+    try {
+        uttc_extract_document($oversized, 'txt');
+        throw new RuntimeException('Oversized input was not rejected by the parser');
+    } catch (RuntimeException $e) {
+        if (!str_contains($e->getMessage(), '৮ MB')) throw $e;
+    }
+
     if (class_exists('ZipArchive') && class_exists('DOMDocument')) {
         $docx = $dir.'/sample.docx'; $zip = new ZipArchive();
         if ($zip->open($docx,ZipArchive::CREATE)!==true) throw new RuntimeException('Could not create DOCX fixture');
