@@ -155,3 +155,6 @@ grep -q "knowledge-base.json" scripts/restore-knowledge-base-backup.php
 grep -q "\$replacementStarted = false" scripts/restore-knowledge-base-backup.php
 grep -q "if (!\$ok && \$replacementStarted)" scripts/restore-knowledge-base-backup.php
 grep -q "if (isset(\$rollback\[\$name\]))" scripts/restore-knowledge-base-backup.php
+grep -q "\$installed = \[\]" scripts/restore-knowledge-base-backup.php
+grep -q "\$installed\[\$name\] = true" scripts/restore-knowledge-base-backup.php
+grep -q "isset(\$installed\[\$name\])" scripts/restore-knowledge-base-backup.php
