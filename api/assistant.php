@@ -60,7 +60,7 @@ require_once __DIR__ . '/semantic-retrieval.php';
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowed = array_filter(array_map('trim', explode(',', envv('UTTC_ALLOWED_ORIGINS','https://uttc.edu.bd,https://www.uttc.edu.bd'))));
-$isLocalOrigin = $origin !== '' && preg_match('#^https?://(localhost|127\\.0\\.1)(:\\d+)?$#', $origin);
+$isLocalOrigin = $origin !== '' && preg_match('#^https?://(localhost|127\\.0\\.0\\.1)(:\\d+)?$#', $origin);
 if ($origin !== '' && !in_array($origin, $allowed, true) && !$isLocalOrigin) {
     respond(403, ['ok'=>false,'error'=>'origin_not_allowed']);
 }
