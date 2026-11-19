@@ -132,6 +132,8 @@ function extract_document(string $path, string $ext): string {
         if (!class_exists('ZipArchive')) out(422,['ok'=>false,'message'=>'এই সার্ভারে DOCX পড়ার জন্য PHP ZipArchive extension চালু নেই।']);
         $zip = new ZipArchive();
         if ($zip->open($path) !== true) out(422,['ok'=>false,'message'=>'DOCX ফাইলটি পড়া যাচ্ছে না।']);
+        $documentStat = $zip->statName('word/document.xml');
+        if (!is_array($documentStat) || (int)($documentStat['size'] ?? 0) > 10 * 1024 * 1024) { $zip->close(); out(422,['ok'=>false,'message'=>'DOCX-এর মূল লেখার আকার ১০ MB-এর বেশি বা ফাইলটি অসম্পূর্ণ।']); }
         $xml = $zip->getFromName('word/document.xml'); $zip->close();
         if ($xml === false) out(422,['ok'=>false,'message'=>'DOCX ফাইলে মূল লেখা পাওয়া যায়নি।']);
         $dom = new DOMDocument(); if (!@$dom->loadXML($xml,LIBXML_NONET)) out(422,['ok'=>false,'message'=>'DOCX-এর লেখা পার্স করা যায়নি।']);
