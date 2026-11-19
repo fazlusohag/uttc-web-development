@@ -20,6 +20,7 @@ function cms_csrf(array $d): void {if(empty($_SESSION['csrf'])||!hash_equals((st
 function cms_dir(): string {$p=__DIR__.'/data';if(!is_dir($p)&&!mkdir($p,0750,true)&&!is_dir($p))cms_out(500,['ok'=>false,'message'=>'ডেটা ফোল্ডার তৈরি করা যায়নি।']);return $p;}
 function cms_lock(){ $h=@fopen(cms_dir().'/cms.lock','c');if(!$h||!flock($h,LOCK_EX))cms_out(500,['ok'=>false,'message'=>'ডেটা লক করা যাচ্ছে না।']);return $h;}
 function cms_read(): array {$p=cms_dir().'/cms-content.json';if(!is_file($p))return [];$d=json_decode((string)file_get_contents($p),true);if(!is_array($d)||!is_array($d['items']??null))return [];return array_values(array_filter($d['items'],'is_array'));}
+function cms_assert_unique_target(array $items,string $id): void {if($id==='')cms_out(422,['ok'=>false,'message'=>'রেকর্ডের ID পাওয়া যায়নি।']);$matches=0;foreach($items as $item){if(is_array($item)&&is_string($item['id']??null)&&hash_equals($item['id'],$id))$matches++;}if($matches>1)cms_out(409,['ok'=>false,'message'=>'একই ID-র একাধিক পুরোনো রেকর্ড পাওয়া গেছে। নিরাপদ সম্পাদনার জন্য আগে ডেটা সংশোধন করুন।']);}
 function cms_write(array $items): void {
  $p=cms_dir().'/cms-content.json';$tmp=$p.'.'.bin2hex(random_bytes(8)).'.tmp';$json=json_encode(['updated_at'=>gmdate('c'),'items'=>array_values($items)],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
  if($json===false)cms_out(500,['ok'=>false,'message'=>'তথ্য প্রস্তুত করা যায়নি।']);
@@ -52,14 +53,14 @@ if($action==='save'){
  if($type==='page'&&($slug===''||!in_array($slug,$publicPageKeys,true)))cms_out(422,['ok'=>false,'message'=>'Page কনটেন্টের জন্য বিদ্যমান Public Page-এর সঠিক slug নির্বাচন বা লিখুন।']);
  if($type==='page'){foreach(cms_read() as $existing){if(($existing['type']??'')==='page'&&($existing['slug']??'')===$slug&&($existing['id']??'')!==$id)cms_out(409,['ok'=>false,'message'=>'এই পেজের জন্য ইতিমধ্যে একটি CMS Page record রয়েছে। সেটি সম্পাদনা করুন।']);}}
  if($type!=='course')$pageKey='';
- $items=cms_read();$now=gmdate('c');$found=false;$auditAction='create';$auditItem=null;
+ $items=cms_read();if($id!=='')cms_assert_unique_target($items,$id);$now=gmdate('c');$found=false;$auditAction='create';$auditItem=null;
  foreach($items as &$it){if($id!==''&&($it['id']??'')===$id){$it=array_merge($it,['type'=>$type,'title'=>$title,'body'=>$body,'url'=>$url,'image_url'=>$image,'slug'=>$slug,'page_key'=>$pageKey,'meta_title'=>$mt,'meta_description'=>$md,'canonical_url'=>$canonical,'status'=>'draft','updated_at'=>$now,'published_at'=>null]);$found=true;$auditAction='update';$auditItem=$it;break;}}unset($it);
  if($id!==''&&!$found)cms_out(404,['ok'=>false,'message'=>'সম্পাদনার রেকর্ড পাওয়া যায়নি।']);
  if(!$found){$it=['id'=>bin2hex(random_bytes(12)),'type'=>$type,'title'=>$title,'body'=>$body,'url'=>$url,'image_url'=>$image,'slug'=>$slug,'meta_title'=>$mt,'meta_description'=>$md,'canonical_url'=>$canonical,'status'=>'draft','created_at'=>$now,'updated_at'=>$now,'published_at'=>null];$it['page_key']=$pageKey;$items[]=$it;$auditItem=$it;}
  cms_write($items);if(is_array($auditItem))cms_audit($auditAction,$auditItem);flock($lock,LOCK_UN);fclose($lock);cms_out(200,['ok'=>true,'message'=>'Draft সংরক্ষণ হয়েছে।']);
 }
 if($action==='publish'||$action==='delete'){
- $id=cms_text($d['id']??'',48);$items=cms_read();$found=false;$auditItem=null;
+ $id=cms_text($d['id']??'',48);$items=cms_read();cms_assert_unique_target($items,$id);$found=false;$auditItem=null;
  foreach($items as $i=>&$it){if(($it['id']??'')===$id){$found=true;$auditItem=$it;if($action==='publish'){
   if(!in_array(($it['type']??''),['course','notice','gallery','page','contact','menu'],true)||!is_string($it['title']??null)||trim($it['title'])===''||!is_string($it['body']??null)||trim($it['body'])==='')cms_out(422,['ok'=>false,'message'=>'এই পুরোনো রেকর্ডে বৈধ ধরন, শিরোনাম ও বিবরণ নেই। সম্পাদনা করে সংশোধন করুন।']);
   $coursePageKeys=['driving-training-moulvibazar','women-driving-training-moulvibazar','computer-office-application-moulvibazar','freelancing-course-moulvibazar','graphic-design-course-moulvibazar'];
