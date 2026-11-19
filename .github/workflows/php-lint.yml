@@ -1,20 +1,24 @@
-name: PHP syntax check
+name: PHP syntax and regression checks
 
 on:
   pull_request:
     branches:
+      - main
       - redesign/premium-2026
+      - release/uttc-complete-platform-2026
   push:
     branches:
+      - main
       - redesign/premium-2026
       - feature/uttc-ai-knowledge-base
+      - release/uttc-complete-platform-2026
 
 permissions:
   contents: read
 
 jobs:
-  php-lint:
-    name: PHP 8.3 syntax validation
+  php-checks:
+    name: PHP 8.3 syntax and regression checks
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
