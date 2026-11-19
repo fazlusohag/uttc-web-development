@@ -47,6 +47,10 @@ grep -q "feed('contact')" assets/js/cms-public.js
 grep -q "page_key" api/cms-public.php
 grep -q 'কোর্সের জন্য আবশ্যক' admin/cms.php
 grep -q "coursePageKeys" api/cms.php
+grep -q "publicPageKeys" api/cms.php
+grep -q "type==='page'" api/cms.php
+grep -q 'id="previewMeta"' admin/cms.php
+grep -q "previewMeta').textContent=meta.join" admin/cms.php
 grep -q "header \.nav-links,header nav ul,header nav" assets/js/cms-public.js
 grep -q "nav.matches('ul,ol')" assets/js/cms-public.js
 grep -q "li.append(a)" assets/js/cms-public.js
