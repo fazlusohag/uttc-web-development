@@ -1,8 +1,8 @@
 # UTTC Website & AI Platform — Moulvibazar
 
-Bengali-first public website and AI-assisted institutional information platform for **Upazila Technical Training Centre (UTTC), Moulvibazar**.
+Bengali-first public website and AI-assisted institutional information platform for **Upazila Technical Training Centre (UTTC), Moulvibazar, Bangladesh**.
 
-This is the integration/release workspace. Existing branches and commits are preserved. A GitHub commit or passing CI run does not mean the site is deployed or production-ready.
+This repository is maintained on an integration/release branch. A GitHub commit or passing CI run does not mean the site is deployed or production-ready.
 
 ## Institution and design
 
@@ -14,14 +14,16 @@ This is the integration/release workspace. Existing branches and commits are pre
 - Existing external admission portal: https://www.uttcoffice.edu.bd/id_create.php
 - Contact number currently present in site/AI fallback: 01727-007417. Confirm before production if it has changed.
 
-## What is in this branch now
+## Public website
 
-### Public website
 The repository contains static Bengali public pages for Home, About, Driving, Women's Driving, Computer Office Application, Freelancing, Graphic Design, Facilities, Gallery, Notices, FAQ, Contact, Privacy Policy and 404, plus sitemap and robots files.
 
-### AI Knowledge Base Dashboard
-The current /admin/ implementation is an **AI Knowledge Base Dashboard**, not yet a full website CMS. It provides:
-- Password-hash-based administrator login (requires server-side UTTC_ADMIN_PASSWORD_HASH)
+The website keeps admission on the existing external admission portal. This project does not replace that portal with a new student database or admission workflow.
+
+## AI Knowledge Base Dashboard
+
+The AI Knowledge Base Dashboard is available at `admin/index.php`. It includes:
+- Password-hash-based administrator login (requires server-side `UTTC_ADMIN_PASSWORD_HASH`)
 - CSRF token checks and session-based authorization
 - Login attempt throttling
 - Knowledge entry create/edit as Draft, publish, list and delete
@@ -29,65 +31,49 @@ The current /admin/ implementation is an **AI Knowledge Base Dashboard**, not ye
 - Knowledge update-history summaries
 - AI retrieval preview against website index and published admin knowledge
 
-### AI assistant backend
-- api/assistant.php: public AI question endpoint using OpenAI Responses API
-- api/retrieval.php: BM25 lexical retrieval
-- api/semantic-retrieval.php: optional embedding-based retrieval with BM25 fallback
-- api/sync-knowledge.php: command-line sitemap sync; do not expose as a public write endpoint
-- api/document-extract.php: extraction helpers
+## Website CMS
 
-## Not yet implemented / not yet verified
+The Website CMS is available at `admin/cms.php` and reuses the existing admin session and CSRF protection. It supports:
+- Course, Notice, Gallery, Page, Contact and Navigation Menu records
+- Draft, edit, publish and delete actions
+- SEO title, meta description and canonical HTTPS URL fields for Page records
+- HTTPS image URLs (direct file upload is not implemented)
+- A read-only public endpoint at `api/cms-public.php` that returns Published records only
 
-- A first **Website CMS** is now available at `admin/cms.php` for Course, Notice, Gallery, Page and Contact records, with Draft/Publish and a read-only public API. Published notices/gallery and course additions are rendered on the matching public pages.
-- The CMS is not yet a complete source-page editor: it does not edit every existing HTML page, SEO metadata, navigation menus or upload image files. Those remain release enhancements.
-- The AI Operations status panel is integrated into the CMS dashboard and shows non-secret configuration booleans and counts. It is not yet a full analytics/alerting dashboard.
-- No live Hostinger deployment or server-side configuration has been performed by this repository workflow.
-- Real OpenAI API calls, production upload behavior, Hostinger filesystem protections, HTTPS/session behavior, visual browser QA, accessibility, SEO crawl and live domain behavior have not been verified here.
-- The CMS uses HTTPS image URLs; direct image upload, full static-page editing, SEO-field editing, navigation editing and a full audit log are not implemented yet.
-- CI does not test a live OpenAI account, Hostinger configuration, actual browser admin workflows or end-to-end production security.
+The shared `assets/js/cms-public.js` integration is loaded by the public HTML pages. It:
+- Renders published course feeds on Driving, Women's Driving, Computer, Freelancing and Graphic Design pages
+- Renders published Notice and Gallery feeds on their respective pages
+- Applies Page SEO metadata when a Published Page record's slug matches the page's `data-page-key`
+- Adds Published Navigation Menu records to the page navigation where a header navigation element exists
+- Uses DOM text nodes rather than injecting CMS text as HTML, and only accepts HTTPS image/link URLs
 
-## Important files
+CMS records are additive: they do not rewrite or remove the existing hard-coded page content. Menu records may appear only on pages with a compatible `header nav` element. SEO metadata is applied client-side after page load; it is not a server-rendered SEO solution and should not be treated as a substitute for static HTML metadata.
 
-- Public homepage: index.html
-- Admin Knowledge Base UI: admin/index.php
-- Admin API: api/admin.php
-- AI endpoint: api/assistant.php
-- Server configuration example: api/config.example.php
-- Backend setup notes: api/README.md
-- Tests: tests/
-- CI: .github/workflows/php-lint.yml
+## AI assistant backend
 
-## Security requirements before production
+- `api/assistant.php`: public AI question endpoint using OpenAI Responses API
+- `api/retrieval.php`: BM25 lexical retrieval
+- `api/semantic-retrieval.php`: optional embedding-based retrieval with BM25 fallback
+- `api/sync-knowledge.php`: command-line sitemap sync; do not expose as a public write endpoint
+- `api/document-extract.php`: document extraction helpers
 
-- Store OPENAI_API_KEY, OPENAI_MODEL, optional OPENAI_EMBEDDING_MODEL and UTTC_ADMIN_PASSWORD_HASH only as server environment variables. Never commit credentials or password hashes.
-- Enforce HTTPS and verify secure, HttpOnly, SameSite session cookies on the actual hosting server.
-- Verify that api/data/, api/runtime/, uploaded documents, generated indexes and logs cannot be downloaded over HTTP. Do not assume Apache/LiteSpeed rules are effective until tested on Hostinger.
-- Keep admin pages out of search indexing.
-- Public AI must use only approved/published knowledge; Draft records and uploaded source files must remain private.
-- Confirm PHP extensions, upload limits, storage permissions and PDF/DOCX extraction dependencies.
-- Use only approved general institutional information. Do not upload student identity documents, passwords, payment details or sensitive personal records.
-- Verify all changing institutional facts, including fees, schedules, eligibility, notices and contact details, with UTTC before publishing.
+## Hostinger deployment requirements
+
+See [api/README.md](api/README.md) for detailed backend setup. Before production:
+1. Upload the website and `api/` directory to the intended Hostinger document root.
+2. Configure `OPENAI_API_KEY`, `OPENAI_MODEL`, `UTTC_SITE_URL`, `UTTC_ALLOWED_ORIGINS`, and `UTTC_ADMIN_PASSWORD_HASH` as server environment variables. Configure `OPENAI_EMBEDDING_MODEL` only if desired and tested.
+3. Confirm PHP version/extensions and writable data/runtime directories.
+4. Verify private JSON storage cannot be downloaded directly. Apache `.htaccess` rules must be tested on the actual Hostinger server; move private data outside the document root if access denial cannot be confirmed.
+5. Confirm HTTPS, Secure/HttpOnly/SameSite session cookies, admin login, CSRF, rate limits, upload limits and server logs.
+6. Run the CLI sitemap sync using the correct absolute path.
+7. Test the public website, CMS Draft/Publish, AI assistant and admission redirect on the live domain.
+
+Never commit API keys, password hashes, private knowledge files, session data, logs or uploaded source documents.
 
 ## CI checks
 
-The GitHub Actions workflow runs PHP syntax checks and repository regression/smoke tests for retrieval, HTTP/CORS behavior and document extraction. A successful run means only that the configured automated checks passed in GitHub's runner.
+GitHub Actions workflow `.github/workflows/php-lint.yml` runs PHP 8.3 syntax checks, retrieval regression tests, assistant HTTP/CORS tests and document extraction smoke tests. Client-side JavaScript syntax and CMS page wiring are also checked by the workflow. CI does not test a live Hostinger account, production browser session, actual OpenAI billing/API access or server filesystem protections.
 
-## Hostinger release checklist — not performed
+## Release status
 
-1. Confirm the exact target domain and document root. Do not confuse uttc.edu.bd with the separate uttcoffice.edu.bd admission portal.
-2. Review and approve the release branch.
-3. Back up the existing website and database/files as applicable.
-4. Confirm PHP version, extensions, environment-variable support and private writable storage.
-5. Deploy only after explicit deployment approval.
-6. Set server secrets and admin password hash securely.
-7. Run the sitemap sync through SSH/cron and verify private index storage.
-8. Test login, CSRF, throttling, Draft/Publish, document extraction, retrieval and AI responses with approved UTTC questions.
-9. Test all pages, links, admission redirect, phone/WhatsApp, mobile layouts, accessibility, canonical URLs, sitemap and robots.
-10. Verify HTTPS, access restrictions, logs, backups, domain routing and search indexing.
-
-## Branch safety
-
-- Existing branches are retained as history and rollback points.
-- This release branch is based on feature/uttc-ai-knowledge-base.
-- Do not delete legacy branches, force-push, or merge into main before review and approval.
-- Keep changes traceable and record unresolved risks in docs/RELEASE-STATUS.md.
+Current status is **integration candidate, not production-final**. Review [docs/RELEASE-STATUS.md](docs/RELEASE-STATUS.md) for completed work, limitations and release gates. Do not deploy to Hostinger until the production checks are completed and deployment is separately approved.
