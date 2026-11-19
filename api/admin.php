@@ -56,6 +56,24 @@ function save_entries(array $entries): void {
         }
     }
     $file = $dir . '/knowledge-base.json';
+    // Preserve the previous published/draft state before each successful change.
+    if (is_file($file)) {
+        $old = json_decode((string)file_get_contents($file), true);
+        if (is_array($old) && is_array($old['entries'] ?? null)) {
+            $historyFile = $dir . '/knowledge-history.json';
+            $historyData = is_file($historyFile) ? json_decode((string)file_get_contents($historyFile), true) : null;
+            $versions = is_array($historyData) && is_array($historyData['versions'] ?? null) ? $historyData['versions'] : [];
+            $versions[] = ['saved_at'=>gmdate('c'),'entry_count'=>count($old['entries']),'entries'=>$old['entries']];
+            $versions = array_slice($versions, -30);
+            $historyTmp = $historyFile . '.' . bin2hex(random_bytes(6)) . '.tmp';
+            $historyJson = json_encode(['versions'=>$versions], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            if ($historyJson === false || file_put_contents($historyTmp, $historyJson, LOCK_EX) === false || !rename($historyTmp, $historyFile)) {
+                @unlink($historyTmp);
+                flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
+                out(500,['ok'=>false,'message'=>'তথ্য পরিবর্তনের ইতিহাস সংরক্ষণ করা যায়নি; পরিবর্তনটি করা হয়নি।']);
+            }
+        }
+    }
     $payload = ['updated_at'=>gmdate('c'),'entries'=>array_values($entries)];
     $tmp = $file . '.' . bin2hex(random_bytes(6)) . '.tmp';
     $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
@@ -172,6 +190,19 @@ if ($action === 'login') {
 if ($action === 'logout') { require_admin(); $_SESSION=[]; session_regenerate_id(true); out(200,['ok'=>true]); }
 require_admin();
 
+if ($action === 'history') {
+    $dir = storage_dir();
+    $historyFile = $dir . '/knowledge-history.json';
+    $historyData = is_file($historyFile) ? json_decode((string)file_get_contents($historyFile), true) : null;
+    $versions = is_array($historyData) && is_array($historyData['versions'] ?? null) ? $historyData['versions'] : [];
+    $summary = [];
+    foreach (array_reverse($versions) as $version) {
+        $titles = [];
+        foreach (array_slice((array)($version['entries'] ?? []), 0, 12) as $entry) $titles[] = (string)($entry['title'] ?? '');
+        $summary[] = ['saved_at'=>(string)($version['saved_at'] ?? ''),'entry_count'=>(int)($version['entry_count'] ?? 0),'titles'=>$titles];
+    }
+    out(200,['ok'=>true,'versions'=>$summary]);
+}
 if ($action === 'test_retrieval') {
     $question = clean_text((string)($d['question'] ?? ''), 1200);
     if ($question === '') out(422,['ok'=>false,'message'=>'পরীক্ষার জন্য একটি প্রশ্ন লিখুন।']);
