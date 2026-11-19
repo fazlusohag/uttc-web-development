@@ -58,7 +58,6 @@ function plain_text(string $s): string {
 require_once __DIR__ . '/retrieval.php';
 require_once __DIR__ . '/semantic-retrieval.php';
 
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') respond(405, ['ok'=>false,'error'=>'method_not_allowed']);
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowed = array_filter(array_map('trim', explode(',', envv('UTTC_ALLOWED_ORIGINS','https://uttc.edu.bd,https://www.uttc.edu.bd'))));
 $isLocalOrigin = $origin !== '' && preg_match('#^https?://(localhost|127\\.0\\.1)(:\\d+)?$#', $origin);
