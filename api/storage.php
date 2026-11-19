@@ -2,6 +2,25 @@
 declare(strict_types=1);
 
 /**
+ * Verify that private Knowledge Base storage is a real directory protected
+ * by the repository's Apache/LiteSpeed access-denial rule.
+ */
+function uttc_private_storage_directory_is_safe(string $dir): bool
+{
+    if (is_link($dir) || !is_dir($dir)) return false;
+
+    $guard = $dir . '/.htaccess';
+    if (is_link($guard) || !is_file($guard) || !is_readable($guard)) return false;
+    $rules = @file_get_contents($guard);
+    if ($rules === false || !preg_match('/^\\s*Require\\s+all\\s+denied\\s*$/mi', $rules)) return false;
+
+    $uploads = $dir . '/uploads';
+    if (is_link($uploads) || (file_exists($uploads) && !is_dir($uploads))) return false;
+
+    return true;
+}
+
+/**
  * Write a private file through a complete, flushed temporary file and atomic rename.
  * The destination is never opened/truncated in place.
  */
