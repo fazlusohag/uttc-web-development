@@ -34,6 +34,15 @@ grep -q ' 204 ' <<<"$allowed"
 grep -qi 'Access-Control-Allow-Origin: https://uttc.edu.bd' <<<"$allowed"
 grep -qi 'Access-Control-Allow-Methods: POST, OPTIONS' <<<"$allowed"
 
+for local_origin in "http://localhost:3000" "http://127.0.0.1:3000"; do
+  local_response="$(curl --silent --show-error --include --request OPTIONS \
+    --header "Origin: ${local_origin}" \
+    --header 'Access-Control-Request-Method: POST' \
+    "http://127.0.0.1:${port}/api/assistant.php")"
+  grep -q ' 204 ' <<<"$local_response"
+  grep -qi "Access-Control-Allow-Origin: ${local_origin}" <<<"$local_response"
+done
+
 denied="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --request OPTIONS \
   --header 'Origin: https://attacker.example' \
   "http://127.0.0.1:${port}/api/assistant.php")"
