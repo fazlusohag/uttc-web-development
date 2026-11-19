@@ -27,26 +27,45 @@ function storage_dir(): string {
     if (!is_dir($upload)) @mkdir($upload, 0750, true);
     return $dir;
 }
+$entries_lock_handle = null;
 function load_entries(): array {
-    $file = storage_dir() . '/knowledge-base.json';
+    global $entries_lock_handle;
+    $dir = storage_dir();
+    if (!is_resource($entries_lock_handle)) {
+        $entries_lock_handle = @fopen($dir . '/write.lock', 'c');
+        if (!$entries_lock_handle || !flock($entries_lock_handle, LOCK_EX)) {
+            if (is_resource($entries_lock_handle)) fclose($entries_lock_handle);
+            $entries_lock_handle = null;
+            out(500, ['ok'=>false,'message'=>'তথ্যভান্ডার সাময়িকভাবে ব্যবহার করা যাচ্ছে না।']);
+        }
+    }
+    $file = $dir . '/knowledge-base.json';
     if (!is_file($file)) return [];
     $data = json_decode((string)file_get_contents($file), true);
     return is_array($data) && isset($data['entries']) && is_array($data['entries']) ? $data['entries'] : [];
 }
 function save_entries(array $entries): void {
+    global $entries_lock_handle;
     $dir = storage_dir();
-    $lock = fopen($dir . '/write.lock','c');
-    if (!$lock) out(500,['ok'=>false,'message'=>'তথ্য সংরক্ষণ করা যাচ্ছে না।']);
-    flock($lock, LOCK_EX);
+    if (!is_resource($entries_lock_handle)) {
+        $entries_lock_handle = @fopen($dir . '/write.lock', 'c');
+        if (!$entries_lock_handle || !flock($entries_lock_handle, LOCK_EX)) {
+            if (is_resource($entries_lock_handle)) fclose($entries_lock_handle);
+            $entries_lock_handle = null;
+            out(500,['ok'=>false,'message'=>'তথ্য সংরক্ষণ করা যাচ্ছে না।']);
+        }
+    }
     $file = $dir . '/knowledge-base.json';
     $payload = ['updated_at'=>gmdate('c'),'entries'=>array_values($entries)];
-    $tmp = $file . '.tmp';
-    $ok = file_put_contents($tmp, json_encode($payload,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT), LOCK_EX);
-    if ($ok === false || !rename($tmp,$file)) {
-        @unlink($tmp); flock($lock,LOCK_UN); fclose($lock);
+    $tmp = $file . '.' . bin2hex(random_bytes(6)) . '.tmp';
+    $encoded = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    $ok = $encoded !== false ? file_put_contents($tmp, $encoded, LOCK_EX) : false;
+    if ($ok === false || !rename($tmp, $file)) {
+        @unlink($tmp);
+        flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
         out(500,['ok'=>false,'message'=>'তথ্য ফাইলে সংরক্ষণ ব্যর্থ হয়েছে।']);
     }
-    flock($lock,LOCK_UN); fclose($lock);
+    flock($entries_lock_handle, LOCK_UN); fclose($entries_lock_handle); $entries_lock_handle = null;
 }
 function csrf_check(array $d): void {
     $given = (string)($d['csrf'] ?? '');
@@ -63,15 +82,26 @@ function clean_text(string $s, int $max): string {
 function login_throttled(): bool {
     $dir = storage_dir();
     $path = $dir . '/login-attempts.json';
-    $ip = hash('sha256',(string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-    $all = is_file($path) ? json_decode((string)file_get_contents($path),true) : [];
+    $ip = hash('sha256', (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    $fp = @fopen($path, 'c+');
+    if (!$fp) return true;
+    if (!flock($fp, LOCK_EX)) { fclose($fp); return true; }
+    rewind($fp);
+    $raw = stream_get_contents($fp);
+    $all = json_decode($raw ?: '{}', true);
     if (!is_array($all)) $all = [];
     $row = $all[$ip] ?? ['start'=>time(),'hits'=>0];
-    if (time() - (int)$row['start'] >= 900) $row = ['start'=>time(),'hits'=>0];
-    if ((int)$row['hits'] >= 5) return true;
-    $row['hits'] = (int)$row['hits'] + 1; $all[$ip] = $row;
-    file_put_contents($path,json_encode($all),LOCK_EX);
-    return false;
+    if (time() - (int)($row['start'] ?? 0) >= 900) $row = ['start'=>time(),'hits'=>0];
+    if ((int)($row['hits'] ?? 0) >= 5) {
+        flock($fp, LOCK_UN); fclose($fp);
+        return true;
+    }
+    $row['hits'] = (int)($row['hits'] ?? 0) + 1;
+    $all[$ip] = $row;
+    rewind($fp);
+    $written = ftruncate($fp, 0) && fwrite($fp, json_encode($all)) !== false && fflush($fp);
+    flock($fp, LOCK_UN); fclose($fp);
+    return !$written;
 }
 function extract_document(string $path, string $ext): string {
     if ($ext === 'txt' || $ext === 'md') {
