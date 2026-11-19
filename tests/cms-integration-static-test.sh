@@ -32,5 +32,9 @@ grep -q "header \.nav-links,header nav ul,header nav" assets/js/cms-public.js
 grep -q "nav.matches('ul,ol')" assets/js/cms-public.js
 grep -q "li.append(a)" assets/js/cms-public.js
 grep -q "textContent=text" assets/js/cms-public.js
+grep -q "!u.username&&!u.password" assets/js/cms-public.js
+grep -q "og:title" assets/js/cms-public.js
+grep -q "og:description" assets/js/cms-public.js
+grep -q "setMeta('meta\[name=" assets/js/cms-public.js
 
 echo "CMS static integration checks passed."
