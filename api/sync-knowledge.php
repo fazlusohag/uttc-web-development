@@ -6,6 +6,12 @@ declare(strict_types=1);
  */
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit("CLI only\n"); }
 $site = rtrim(getenv('UTTC_SITE_URL') ?: 'https://uttc.edu.bd', '/');
+$siteParts = parse_url($site);
+if (!is_array($siteParts) || strtolower((string)($siteParts['scheme'] ?? '')) !== 'https' || empty($siteParts['host']) || isset($siteParts['user']) || isset($siteParts['pass']) || (isset($siteParts['port']) && (int)$siteParts['port'] !== 443)) {
+    fwrite(STDERR, "UTTC_SITE_URL must be a valid HTTPS origin without credentials or a non-standard port.\\n");
+    exit(1);
+}
+$siteHost = strtolower((string)$siteParts['host']);
 $sitemap = $site . '/sitemap.xml';
 function fetch_url(string $url): string {
     $ch=curl_init($url);
@@ -28,12 +34,17 @@ function page_text(string $html): array {
 }
 try {
     $xml=fetch_url($sitemap);
-    $sx=simplexml_load_string($xml);
+    $sx=simplexml_load_string($xml, SimpleXMLElement::class, LIBXML_NONET|LIBXML_NOBLANKS);
     if (!$sx) throw new RuntimeException('Invalid sitemap XML');
     $urls=[];
     foreach ($sx->url as $entry) {
         $loc=trim((string)$entry->loc);
-        if ($loc && parse_url($loc,PHP_URL_HOST)===parse_url($site,PHP_URL_HOST)) $urls[]=$loc;
+        if ($loc !== '') {
+            $parts = parse_url($loc);
+            if (is_array($parts) && strtolower((string)($parts['scheme'] ?? '')) === 'https' && strtolower((string)($parts['host'] ?? '')) === $siteHost && !isset($parts['user']) && !isset($parts['pass']) && (!isset($parts['port']) || (int)$parts['port'] === 443)) {
+                $urls[] = $loc;
+            }
+        }
     }
     if (!$urls) throw new RuntimeException('No same-domain URLs found in sitemap');
     $pages=[]; $failed=[];
@@ -45,8 +56,17 @@ try {
     }
     if (!$pages) throw new RuntimeException('No pages could be indexed');
     $out=['site'=>$site,'synced_at'=>gmdate('c'),'page_count'=>count($pages),'pages'=>$pages];
-    $target=__DIR__.'/knowledge.json'; $tmp=$target.'.tmp';
-    if (file_put_contents($tmp,json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT),LOCK_EX)===false) throw new RuntimeException('Cannot write knowledge.json');
-    rename($tmp,$target);
+    $target=__DIR__.'/knowledge.json';
+    $lock=fopen(__DIR__.'/knowledge-sync.lock','c');
+    if (!$lock || !flock($lock,LOCK_EX)) throw new RuntimeException('Cannot lock knowledge index for update');
+    $tmp=$target.'.'.bin2hex(random_bytes(6)).'.tmp';
+    $encoded=json_encode($out,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+    $written=$encoded!==false?file_put_contents($tmp,$encoded,LOCK_EX):false;
+    if ($written===false || !rename($tmp,$target)) {
+        @unlink($tmp);
+        flock($lock,LOCK_UN); fclose($lock);
+        throw new RuntimeException('Cannot atomically replace knowledge.json');
+    }
+    flock($lock,LOCK_UN); fclose($lock);
     echo json_encode(['ok'=>true,'indexed'=>count($pages),'failed'=>$failed,'synced_at'=>$out['synced_at']],JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT)."\n";
 } catch (Throwable $e) { fwrite(STDERR,'Sync failed: '.$e->getMessage()."\n"); exit(1); }
