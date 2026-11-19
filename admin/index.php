@@ -69,6 +69,8 @@ $('entryList').addEventListener('click',async e=>{const b=e.target.closest('butt
 $('retrievalTestForm').addEventListener('submit',async e=>{
  e.preventDefault();const box=$('retrievalTestResult');box.innerHTML='<p class="muted">তথ্য খোঁজা হচ্ছে...</p>';
  try{const d=await request('test_retrieval',{question:$('testQuestion').value});
+ const modeLabel=d.retrieval_mode==='semantic'?'Semantic Search':(d.retrieval_mode==='bm25_fallback'?'BM25 Fallback':'BM25 Keyword Search');
+ box.innerHTML='<p class="muted">Retrieval Mode: <strong>'+modeLabel+'</strong></p>';
  if(!d.matches.length){box.innerHTML='<p class="muted">কোনো প্রাসঙ্গিক তথ্য পাওয়া যায়নি। এই প্রশ্নের উত্তর অনুমান করে দেওয়া উচিত নয়।</p>';return;}
  box.innerHTML=d.matches.map(m=>'<article class="item"><div class="itemtop"><strong>'+escapeHtml(m.title)+'</strong><span class="pill '+(m.source_type==='admin'?'live':'')+'">'+(m.source_type==='admin'?'Published Admin':'Website')+' · Score '+escapeHtml(m.score)+'</span></div>'+(m.url?'<a href="'+escapeHtml(m.url)+'" target="_blank" rel="noopener noreferrer">ওয়েবসাইট পৃষ্ঠা খুলুন</a>':'')+'<p class="muted">'+escapeHtml(m.excerpt)+'</p></article>').join('');
  }catch(err){box.innerHTML='<p class="muted">'+escapeHtml(err.message)+'</p>';}
