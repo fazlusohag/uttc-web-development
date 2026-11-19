@@ -154,4 +154,16 @@ throttled_login="$(curl --silent --show-error --output /dev/null --write-out '%{
   "http://127.0.0.1:${port}/api/admin.php")"
 [ "$throttled_login" = "429" ]
 
+# Corrupt storage must fail closed: reads and writes must not silently replace it.
+printf '{invalid-json' > "$fixture"
+list_corrupt_payload="$(php -r 'echo json_encode(["action"=>"list","csrf"=>$argv[1]]);' "$cms_csrf")"
+list_corrupt_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$list_corrupt_payload" "http://127.0.0.1:${port}/api/cms.php")"
+[ "$list_corrupt_status" = "500" ]
+corrupt_before="$(cat "$fixture")"
+corrupt_save_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"notice","title"=>"Must not overwrite corrupt store","body"=>"Preserve original bytes"]);' "$cms_csrf")"
+corrupt_save_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$corrupt_save_payload" "http://127.0.0.1:${port}/api/cms.php")"
+[ "$corrupt_save_status" = "500" ]
+[ "$(cat "$fixture")" = "$corrupt_before" ]
+
+
 echo "OK: CMS session, CSRF, body limit, course/page validation, legacy publish revalidation, required-field checks, credential URL rejection, duplicate page protection, Draft/Publish/Delete, audit and login throttling passed."
