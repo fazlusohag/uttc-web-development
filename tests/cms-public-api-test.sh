@@ -66,4 +66,8 @@ menus="$(curl --silent --show-error "http://127.0.0.1:${port}/api/cms-public.php
 grep -q '"pub-menu"' <<<"$menus"
 ! grep -q '"pub-contact"' <<<"$menus"
 ! grep -q '"pub-home-page"' <<<"$menus"
+# Corrupt public storage must return an explicit server error, not a misleading empty feed.
+printf '{invalid-json' > "$fixture"
+corrupt_public_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:${port}/api/cms-public.php")"
+[ "$corrupt_public_status" = "500" ]
 echo "OK: CMS public API exposes Published records only, filters by type, preserves Page SEO fields, and rejects unknown types."
