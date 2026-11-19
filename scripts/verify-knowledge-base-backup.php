@@ -27,6 +27,21 @@ if ($dir === false || dirname($dir) !== $base || is_link($base . '/' . $id)) {
     fwrite(STDERR, "Snapshot does not exist or is outside the backup directory.\n");
     exit(1);
 }
+$accessFile = $dir . '/.htaccess';
+$indexFile = $dir . '/index.html';
+if (is_link($accessFile) || !is_file($accessFile) || !is_readable($accessFile)) {
+    fwrite(STDERR, "Snapshot access protection is missing or unsafe.\n");
+    exit(1);
+}
+$accessRules = @file_get_contents($accessFile);
+if ($accessRules === false || !preg_match('/^\s*Require\s+all\s+denied\s*$/mi', $accessRules)) {
+    fwrite(STDERR, "Snapshot access-denial rule is missing or invalid.\n");
+    exit(1);
+}
+if (is_link($indexFile) || !is_file($indexFile) || filesize($indexFile) !== 0) {
+    fwrite(STDERR, "Snapshot index guard is missing, unsafe, or not empty.\n");
+    exit(1);
+}
 $manifestPath = $dir . '/manifest.json';
 if (is_link($manifestPath) || !is_file($manifestPath) || !is_readable($manifestPath)) {
     fwrite(STDERR, "Snapshot manifest is missing or unsafe.\n");
