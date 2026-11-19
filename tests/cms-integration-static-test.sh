@@ -107,3 +107,8 @@ grep -q 'while(\$written<\$length)' api/cms.php
 grep -q 'fflush(\$h)' api/cms.php
 grep -q 'fsync(\$h)' api/cms.php
 grep -q '!\$ok||\$written!==\$length||!@rename(\$tmp,\$p)' api/cms.php
+
+grep -q 'cms_assert_unique_target' api/cms.php
+grep -q 'একই ID-র একাধিক পুরোনো রেকর্ড' api/cms.php
+grep -q 'legacy-duplicate-id' tests/cms-authenticated-integration-test.sh
+grep -q 'duplicate_update_status' tests/cms-authenticated-integration-test.sh
