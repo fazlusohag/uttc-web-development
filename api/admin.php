@@ -123,6 +123,7 @@ function login_throttled(): bool {
 }
 require_once __DIR__ . '/document-extract.php';
 require_once __DIR__ . '/retrieval.php';
+require_once __DIR__ . '/semantic-retrieval.php';
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && ($_GET['action'] ?? '') === 'token') {
     if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
@@ -176,8 +177,16 @@ if ($action === 'test_retrieval') {
         $q = trim((string)($entry['question'] ?? ''));
         $pages[] = ['title'=>'[অনুমোদিত UTTC তথ্য] '.$title,'url'=>'','text'=>($q !== '' ? 'প্রশ্ন: '.$q.' ' : '').'উত্তর: '.$answer,'_source_type'=>'admin'];
     }
-    $matches = array_map(static fn($item) => ['score'=>$item['score'],'title'=>$item['title'],'url'=>$item['url'],'source_type'=>$item['source_type'],'excerpt'=>mb_substr($item['text'],0,700,'UTF-8')], uttc_retrieve($question, $pages));
-    out(200,['ok'=>true,'matches'=>$matches,'match_count'=>count($matches),'website_indexed'=>count($websiteData['pages'] ?? []),'published_admin_entries'=>count(array_filter(load_entries(),fn($e)=>($e['status'] ?? '')==='published'))]);
+    $embeddingModel = trim((string)getenv('OPENAI_EMBEDDING_MODEL'));
+    $retrievalMode = 'bm25';
+    $ranked = [];
+    if ($embeddingModel !== '' && trim((string)getenv('OPENAI_API_KEY')) !== '') {
+        try { $ranked = uttc_semantic_retrieve($question, $pages, trim((string)getenv('OPENAI_API_KEY')), $embeddingModel); $retrievalMode = 'semantic'; }
+        catch (Throwable $e) { error_log('UTTC admin semantic preview fallback: '.$e->getMessage()); }
+    }
+    if (!$ranked) $ranked = uttc_retrieve($question, $pages);
+    $matches = array_map(static fn($item) => ['score'=>$item['score'],'title'=>$item['title'],'url'=>$item['url'],'source_type'=>$item['source_type'],'excerpt'=>mb_substr($item['text'],0,700,'UTF-8')], $ranked);
+    out(200,['ok'=>true,'retrieval_mode'=>$retrievalMode,'matches'=>$matches,'match_count'=>count($matches),'website_indexed'=>count($websiteData['pages'] ?? []),'published_admin_entries'=>count(array_filter(load_entries(),fn($e)=>($e['status'] ?? '')==='published'))]);
 }
 if ($action === 'list') {
     $entries=load_entries();
