@@ -82,13 +82,53 @@ $apiKey = envv('OPENAI_API_KEY');
 $model = envv('OPENAI_MODEL');
 if ($apiKey === '' || $model === '') respond(503, ['ok'=>false,'error'=>'not_configured','message'=>'AI সেবা এখনো সার্ভারে কনফিগার করা হয়নি।']);
 $knowledgeFile = __DIR__ . '/knowledge.json';
-$knowledge = is_file($knowledgeFile) ? json_decode((string)file_get_contents($knowledgeFile), true) : null;
-$pages = is_array($knowledge) && is_array($knowledge['pages'] ?? null) ? $knowledge['pages'] : [];
+if (is_link($knowledgeFile) || (file_exists($knowledgeFile) && !is_file($knowledgeFile))) {
+    error_log('UTTC assistant knowledge source path is unsafe.');
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC তথ্যভান্ডার সাময়িকভাবে যাচাই করা যাচ্ছে না।']);
+}
+$knowledgeRaw = is_file($knowledgeFile) ? @file_get_contents($knowledgeFile) : false;
+$knowledge = $knowledgeRaw === false ? null : json_decode($knowledgeRaw, true);
+if ($knowledgeRaw === false || json_last_error() !== JSON_ERROR_NONE || !is_array($knowledge)
+    || !isset($knowledge['pages']) || !is_array($knowledge['pages'])) {
+    error_log('UTTC assistant website knowledge is missing, unreadable, or invalid.');
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC তথ্যভান্ডার সাময়িকভাবে যাচাই করা যাচ্ছে না।']);
+}
+$pages = $knowledge['pages'];
+foreach ($pages as $page) {
+    if (!is_array($page)) {
+        error_log('UTTC assistant website knowledge contains an invalid page record.');
+        respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC তথ্যভান্ডারের একটি রেকর্ড যাচাই করা যাচ্ছে না।']);
+    }
+}
 
-// Only administrator-approved entries are added to the public assistant context.
-$curatedFile = __DIR__ . '/data/knowledge-base.json';
-$curatedData = is_file($curatedFile) ? json_decode((string)file_get_contents($curatedFile), true) : null;
-$curatedEntries = is_array($curatedData) && is_array($curatedData['entries'] ?? null) ? $curatedData['entries'] : [];
+// Only administrator-approved entries are added from protected private storage.
+require_once __DIR__ . '/storage.php';
+$privateDir = __DIR__ . '/data';
+if (!uttc_private_storage_directory_is_safe($privateDir)) {
+    error_log('UTTC assistant private Knowledge Base directory or access guard is unsafe.');
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC অনুমোদিত তথ্যভান্ডার সাময়িকভাবে যাচাই করা যাচ্ছে না।']);
+}
+$curatedFile = $privateDir . '/knowledge-base.json';
+if (is_link($curatedFile) || (file_exists($curatedFile) && !is_file($curatedFile))) {
+    error_log('UTTC assistant private Knowledge Base file path is unsafe.');
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC অনুমোদিত তথ্যভান্ডার সাময়িকভাবে যাচাই করা যাচ্ছে না।']);
+}
+$curatedRaw = is_file($curatedFile) ? @file_get_contents($curatedFile) : false;
+if ($curatedRaw === false && is_file($curatedFile)) {
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC অনুমোদিত তথ্যভান্ডার পড়া যাচ্ছে না।']);
+}
+$curatedData = $curatedRaw === false ? ['entries'=>[]] : json_decode($curatedRaw, true);
+if (!is_array($curatedData) || !isset($curatedData['entries']) || !is_array($curatedData['entries'])) {
+    error_log('UTTC assistant private Knowledge Base JSON is invalid.');
+    respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC অনুমোদিত তথ্যভান্ডারের JSON যাচাই করা যাচ্ছে না।']);
+}
+$curatedEntries = $curatedData['entries'];
+foreach ($curatedEntries as $entry) {
+    if (!is_array($entry)) {
+        error_log('UTTC assistant private Knowledge Base contains an invalid record.');
+        respond(503, ['ok'=>false,'error'=>'knowledge_unavailable','message'=>'UTTC অনুমোদিত তথ্যভান্ডারের একটি রেকর্ড যাচাই করা যাচ্ছে না।']);
+    }
+}
 foreach ($curatedEntries as $entry) {
     if (($entry['status'] ?? '') !== 'published') continue;
     $title = trim((string)($entry['title'] ?? ''));
