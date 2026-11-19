@@ -17,12 +17,34 @@ function cms_input(): array {
 }
 function cms_admin(): void {if(empty($_SESSION['admin']))cms_out(401,['ok'=>false,'message'=>'প্রথমে Admin Dashboard-এ লগইন করুন।']);}
 function cms_csrf(array $d): void {if(empty($_SESSION['csrf'])||!hash_equals((string)$_SESSION['csrf'],(string)($d['csrf']??'')))cms_out(419,['ok'=>false,'message'=>'নিরাপত্তা যাচাই ব্যর্থ। পেজ রিফ্রেশ করে আবার চেষ্টা করুন।']);}
-function cms_dir(): string {$p=__DIR__.'/data';if(!is_dir($p)&&!mkdir($p,0750,true)&&!is_dir($p))cms_out(500,['ok'=>false,'message'=>'ডেটা ফোল্ডার তৈরি করা যায়নি।']);return $p;}
-function cms_lock(){ $h=@fopen(cms_dir().'/cms.lock','c');if(!$h||!flock($h,LOCK_EX))cms_out(500,['ok'=>false,'message'=>'ডেটা লক করা যাচ্ছে না।']);return $h;}
-function cms_read(): array {$p=cms_dir().'/cms-content.json';if(!is_file($p))return [];$raw=@file_get_contents($p);if($raw===false)cms_out(500,['ok'=>false,'message'=>'CMS ডেটা পড়া যাচ্ছে না; নিরাপত্তার জন্য পরিবর্তন বন্ধ রাখা হয়েছে।']);$d=json_decode($raw,true);if(json_last_error()!==JSON_ERROR_NONE||!is_array($d)||!isset($d['items'])||!is_array($d['items']))cms_out(500,['ok'=>false,'message'=>'CMS ডেটা নষ্ট বা অবৈধ JSON; আগের ফাইল অক্ষত রেখে ব্যাকআপ/পুনরুদ্ধার প্রয়োজন।']);return array_values(array_filter($d['items'],'is_array'));}
+function cms_dir(): string {
+ $p=__DIR__.'/data';
+ if(is_link($p)||(file_exists($p)&&!is_dir($p)))cms_out(500,['ok'=>false,'message'=>'ডেটা ফোল্ডারের পথ নিরাপদ নয়।']);
+ if(!is_dir($p)&&!mkdir($p,0750,true)&&!is_dir($p))cms_out(500,['ok'=>false,'message'=>'ডেটা ফোল্ডার তৈরি করা যায়নি।']);
+ $guard=$p.'/.htaccess';
+ if(is_link($guard)||!is_file($guard)||!is_readable($guard))cms_out(500,['ok'=>false,'message'=>'CMS ব্যক্তিগত ডেটার access protection পাওয়া যায়নি।']);
+ $rules=@file_get_contents($guard);
+ if($rules===false||!preg_match('/^\\s*Require\\s+all\\s+denied\\s*$/mi',$rules))cms_out(500,['ok'=>false,'message'=>'CMS ব্যক্তিগত ডেটার access-denial rule যাচাই করা যায়নি।']);
+ return $p;
+}
+function cms_lock(){
+ $path=cms_dir().'/cms.lock';
+ if(is_link($path)||(file_exists($path)&&!is_file($path)))cms_out(500,['ok'=>false,'message'=>'CMS lock file-এর পথ নিরাপদ নয়।']);
+ $h=@fopen($path,'c');if(!$h||!flock($h,LOCK_EX))cms_out(500,['ok'=>false,'message'=>'ডেটা লক করা যাচ্ছে না।']);return $h;
+}
+function cms_read(): array {
+ $p=cms_dir().'/cms-content.json';
+ if(is_link($p)||(file_exists($p)&&!is_file($p)))cms_out(500,['ok'=>false,'message'=>'CMS ডেটা ফাইলের পথ নিরাপদ নয়।']);
+ if(!is_file($p))return [];
+ $raw=@file_get_contents($p);if($raw===false)cms_out(500,['ok'=>false,'message'=>'CMS ডেটা পড়া যাচ্ছে না; নিরাপত্তার জন্য পরিবর্তন বন্ধ রাখা হয়েছে।']);
+ $d=json_decode($raw,true);if(json_last_error()!==JSON_ERROR_NONE||!is_array($d)||!isset($d['items'])||!is_array($d['items']))cms_out(500,['ok'=>false,'message'=>'CMS ডেটা নষ্ট বা অবৈধ JSON; আগের ফাইল অক্ষত রেখে ব্যাকআপ/পুনরুদ্ধার প্রয়োজন।']);
+ return array_values(array_filter($d['items'],'is_array'));
+}
 function cms_assert_unique_target(array $items,string $id): void {if($id==='')cms_out(422,['ok'=>false,'message'=>'রেকর্ডের ID পাওয়া যায়নি।']);$matches=0;foreach($items as $item){if(is_array($item)&&is_string($item['id']??null)&&hash_equals($item['id'],$id))$matches++;}if($matches>1)cms_out(409,['ok'=>false,'message'=>'একই ID-র একাধিক পুরোনো রেকর্ড পাওয়া গেছে। নিরাপদ সম্পাদনার জন্য আগে ডেটা সংশোধন করুন।']);}
 function cms_write(array $items): void {
- $p=cms_dir().'/cms-content.json';$tmp=$p.'.'.bin2hex(random_bytes(8)).'.tmp';$json=json_encode(['updated_at'=>gmdate('c'),'items'=>array_values($items)],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
+ $p=cms_dir().'/cms-content.json';
+ if(is_link($p)||(file_exists($p)&&!is_file($p)))cms_out(500,['ok'=>false,'message'=>'CMS ডেটা ফাইলের পথ নিরাপদ নয়।']);
+ $tmp=$p.'.'.bin2hex(random_bytes(8)).'.tmp';$json=json_encode(['updated_at'=>gmdate('c'),'items'=>array_values($items)],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT);
  if($json===false)cms_out(500,['ok'=>false,'message'=>'তথ্য প্রস্তুত করা যায়নি।']);
  $h=@fopen($tmp,'xb');if(!$h){cms_out(500,['ok'=>false,'message'=>'অস্থায়ী ফাইল তৈরি করা যায়নি।']);}
  $length=strlen($json);$written=0;$ok=true;while($written<$length){$n=fwrite($h,substr($json,$written));if($n===false||$n===0){$ok=false;break;}$written+=$n;}
