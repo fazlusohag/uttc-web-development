@@ -149,7 +149,7 @@ grep -q "verify-knowledge-base-backup.php" scripts/restore-knowledge-base-backup
 grep -q "backup-knowledge-base.php" scripts/restore-knowledge-base-backup.php
 grep -q "flock(\$lock, LOCK_EX)" scripts/restore-knowledge-base-backup.php
 grep -q "Live data changed while preparing safety backup" scripts/restore-knowledge-base-backup.php
-grep -q "rollback was attempted" scripts/restore-knowledge-base-backup.php
+grep -q "original files were rolled back" scripts/restore-knowledge-base-backup.php
 grep -q "Uploaded source documents were not changed" scripts/restore-knowledge-base-backup.php
 grep -q "knowledge-base.json" scripts/restore-knowledge-base-backup.php
 grep -q "\$replacementStarted = false" scripts/restore-knowledge-base-backup.php
