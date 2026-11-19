@@ -78,5 +78,7 @@ publish_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Co
 grep -q '"ok":true' <<<"$publish_result"
 public_after="$(curl --silent --show-error "http://127.0.0.1:${port}/api/cms-public.php?type=course")"
 grep -q 'CI CMS Contract Record' <<<"$public_after"
+grep -q '"action":"create"' "$audit"
+grep -q '"action":"publish"' "$audit"
 
 echo "OK: CMS shares the authenticated admin session, enforces CSRF, saves Drafts privately, and publishes through the public feed only after approval."
