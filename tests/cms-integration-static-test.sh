@@ -121,3 +121,7 @@ grep -q 'corrupt_public_status' tests/cms-public-api-test.sh
 grep -q 'session_write_close();\$action' api/cms.php
 grep -q 'submit.disabled=true' admin/cms.php
 grep -q 'নিরাপত্তার জন্য সম্পাদনা' admin/cms.php
+
+grep -q 'Knowledge Base ডেটা পড়া যাচ্ছে না বা JSON অবৈধ' api/admin.php
+grep -q 'Knowledge Base History নষ্ট বা পড়া যাচ্ছে না' api/admin.php
+grep -q 'json_last_error() !== JSON_ERROR_NONE' api/admin.php
