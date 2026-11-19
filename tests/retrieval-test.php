@@ -12,6 +12,7 @@ if (!function_exists('mb_substr')) {
     }
 }
 require_once __DIR__ . '/../api/retrieval.php';
+require_once __DIR__ . '/../api/semantic-retrieval.php';
 
 function check(bool $condition, string $message): void {
     if (!$condition) {
@@ -34,4 +35,6 @@ $limited = uttc_retrieve('driving', $pages, 1);
 check(count($limited) === 1, 'result limit should be respected');
 $bangla = uttc_retrieve('ড্রাইভিং প্রশিক্ষণ', [['title'=>'ড্রাইভিং প্রশিক্ষণ','url'=>'','text'=>'মৌলভীবাজারে গাড়ি চালনা শেখানো হয়']]);
 check(count($bangla) === 1, 'Unicode Bangla terms should be tokenized and retrieved');
-echo "OK: 6 retrieval assertions passed.\n";
+check(abs(uttc_cosine_similarity([1.0,0.0],[1.0,0.0])-1.0)<0.00001, 'cosine similarity for identical vectors should be one');
+check(abs(uttc_cosine_similarity([1.0,0.0],[0.0,1.0]))<0.00001, 'cosine similarity for orthogonal vectors should be zero');
+echo "OK: 8 retrieval assertions passed.\\n";
