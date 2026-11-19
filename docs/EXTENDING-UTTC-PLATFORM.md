@@ -73,3 +73,11 @@ Use explicit public-field allowlists. Never expose private types or admin-only f
 
 - Verify a completed snapshot without changing data: `php scripts/verify-knowledge-base-backup.php <snapshot-id>`. The verifier checks the manifest, file sizes, SHA-256 hashes, safe relative paths, symbolic links and the Knowledge Base/History JSON structures. It requires the Knowledge Base JSON file and never writes to the live data directory.
 - Restore is intentionally not part of this verifier. A future restore workflow must require an explicit operator action, verified snapshot, pre-restore snapshot and atomic rollback plan.
+
+## 5. Explicit Knowledge Base restore
+- Restore is never automatic. An operator must explicitly run `php scripts/restore-knowledge-base-backup.php <snapshot-id>` from the project root.
+- The selected snapshot is verified first. The script then creates and verifies a fresh pre-restore backup before acquiring the exclusive Knowledge Base lock.
+- It compares the live JSON hashes again under lock and aborts if data changed during safety-backup preparation.
+- Only `knowledge-base.json` and the optional `knowledge-history.json` are restored. Uploaded source documents are not replaced.
+- JSON files are staged with restrictive permissions and replaced using same-filesystem renames. If replacement fails, the script attempts to restore the previous files from its protected staging area.
+- After restore, verify the service and retain both the selected snapshot and the pre-restore safety snapshot. This is a guarded application-level restore, not a substitute for a full hosting/filesystem disaster-recovery backup.
