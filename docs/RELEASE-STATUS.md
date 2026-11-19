@@ -75,3 +75,5 @@ Complete authenticated browser tests, Hostinger-specific security checks, visual
 
 - Improved the primary mobile navigation: the toggle now exposes `aria-controls`, a Bengali accessible label that changes with open/closed state, Escape closes the menu and returns focus to the toggle, selecting a navigation link closes it, and clicking outside closes it. Added static regression checks for these behaviors.
 - Public CMS image cards now remove an image element if the remote image fails to load, avoiding a broken-image placeholder. Added a static regression check for the fallback handler.
+
+- Added a Bengali keyboard-accessible “মূল কনটেন্টে যান” skip link to all 14 public pages, with a visible focus state and a stable `main-content` target. Extended the static integration test to require the link, target and focus styling on every page. This improves keyboard navigation; it does not replace a full screen-reader and browser accessibility audit.
