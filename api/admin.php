@@ -184,6 +184,7 @@ if ($action === 'test_retrieval') {
         try { $ranked = uttc_semantic_retrieve($question, $pages, trim((string)getenv('OPENAI_API_KEY')), $embeddingModel); $retrievalMode = 'semantic'; }
         catch (Throwable $e) { error_log('UTTC admin semantic preview fallback: '.$e->getMessage()); }
     }
+    if ($retrievalMode === 'semantic' && (!$ranked || (float)$ranked[0]['score'] < 0.30)) { $ranked = uttc_retrieve($question, $pages); $retrievalMode = 'bm25_fallback'; }
     if (!$ranked) $ranked = uttc_retrieve($question, $pages);
     $matches = array_map(static fn($item) => ['score'=>$item['score'],'title'=>$item['title'],'url'=>$item['url'],'source_type'=>$item['source_type'],'excerpt'=>mb_substr($item['text'],0,700,'UTF-8')], $ranked);
     out(200,['ok'=>true,'retrieval_mode'=>$retrievalMode,'matches'=>$matches,'match_count'=>count($matches),'website_indexed'=>count($websiteData['pages'] ?? []),'published_admin_entries'=>count(array_filter(load_entries(),fn($e)=>($e['status'] ?? '')==='published'))]);
