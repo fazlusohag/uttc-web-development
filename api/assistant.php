@@ -45,31 +45,8 @@ function plain_text(string $s): string {
     $s = html_entity_decode(strip_tags($s), ENT_QUOTES | ENT_HTML5, 'UTF-8');
     return trim(preg_replace('/\s+/u', ' ', $s) ?? $s);
 }
-function retrieve(string $question, array $pages, int $limit = 5): array {
-    $q = mb_strtolower($question, 'UTF-8');
-    preg_match_all('/[\p{L}\p{N}]{2,}/u', $q, $m);
-    $terms = array_values(array_unique($m[0] ?? []));
-    $ranked = [];
-    foreach ($pages as $page) {
-        $title = (string)($page['title'] ?? '');
-        $url = (string)($page['url'] ?? '');
-        $text = (string)($page['text'] ?? '');
-        $hay = mb_strtolower($title . ' ' . $text, 'UTF-8');
-        $score = 0;
-        foreach ($terms as $term) {
-            if (mb_strpos(mb_strtolower($title, 'UTF-8'), $term) !== false) $score += 5;
-            $count = substr_count($hay, $term);
-            $score += min($count, 8);
-        }
-        if ($score > 0) {
-            // Approved admin entries win ties and supersede older website details on the same topic.
-            if (($page['_source_type'] ?? '') === 'admin') $score += 8;
-            $ranked[] = ['score'=>$score,'title'=>$title,'url'=>$url,'text'=>mb_substr($text,0,6500,'UTF-8'),'source_type'=>(string)($page['_source_type'] ?? 'website')];
-        }
-    }
-    usort($ranked, fn($a,$b) => $b['score'] <=> $a['score']);
-    return array_slice($ranked, 0, $limit);
-}
+require_once __DIR__ . '/retrieval.php';
+
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') respond(405, ['ok'=>false,'error'=>'method_not_allowed']);
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowed = array_filter(array_map('trim', explode(',', envv('UTTC_ALLOWED_ORIGINS','https://uttc.edu.bd,https://www.uttc.edu.bd'))));
@@ -136,7 +113,7 @@ $retrievalQuestion = $question;
 for ($i = count($history) - 1; $i >= 0; $i--) {
     if ($history[$i]['role'] === 'user') { $retrievalQuestion = $history[$i]['content'] . ' ' . $question; break; }
 }
-$matches = retrieve($retrievalQuestion, $pages);
+$matches = uttc_retrieve($retrievalQuestion, $pages);
 if (!$matches || (int)$matches[0]['score'] < 2) {
     respond(200, ['ok'=>true,'answer'=>'দুঃখিত, এই তথ্যটি বর্তমানে আমাদের ওয়েবসাইটে প্রকাশিত নেই। সঠিক তথ্যের জন্য অনুগ্রহ করে আমাদের অফিসিয়াল মোবাইল নম্বরে যোগাযোগ করুন: 01727-007417।','sources'=>[]]);
 }
