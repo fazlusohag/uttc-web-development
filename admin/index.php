@@ -23,8 +23,9 @@ declare(strict_types=1);
 <p class="muted">প্রবেশের জন্য সার্ভারে অ্যাডমিন পাসওয়ার্ড সেটআপ থাকতে হবে।</p>
 </section>
 <section id="appView" class="hidden">
-<div class="welcome"><div><h1>Knowledge Base Dashboard</h1><p>তথ্য যোগ করুন, যাচাই করুন এবং AI-এর জন্য প্রকাশ করুন।</p></div><button id="refreshBtn" class="btn secondary" type="button">তথ্য রিফ্রেশ</button></div>
+<div class="welcome"><div><h1>Knowledge Base Dashboard</h1><p>তথ্য যোগ করুন, যাচাই করুন এবং AI-এর জন্য প্রকাশ করুন।</p></div><button id="refreshBtn" class="btn secondary" type="button">তথ্য রিফ্রেশ</button><button id="historyBtn" class="btn secondary" type="button">আপডেট ইতিহাস</button></div>
 <div id="appNotice" class="notice"></div>
+<section id="historyPanel" class="panel hidden" style="margin-bottom:18px"><h2>Knowledge Base Update History</h2><div id="historyList" class="list"><p class="muted">ইতিহাস দেখতে বোতামে চাপ দিন।</p></div></section>
 <div class="stats"><div class="stat"><span>মোট তথ্য</span><b id="totalCount">০</b></div><div class="stat"><span>Draft / পর্যালোচনা</span><b id="draftCount">০</b></div><div class="stat"><span>AI-তে প্রকাশিত</span><b id="publishedCount">০</b></div></div>
 <section class="panel" style="margin-bottom:18px">
 <h2>AI Knowledge Retrieval Test</h2>
@@ -72,6 +73,7 @@ $('retrievalTestForm').addEventListener('submit',async e=>{
  box.innerHTML=d.matches.map(m=>'<article class="item"><div class="itemtop"><strong>'+escapeHtml(m.title)+'</strong><span class="pill '+(m.source_type==='admin'?'live':'')+'">'+(m.source_type==='admin'?'Published Admin':'Website')+' · Score '+escapeHtml(m.score)+'</span></div>'+(m.url?'<a href="'+escapeHtml(m.url)+'" target="_blank" rel="noopener noreferrer">ওয়েবসাইট পৃষ্ঠা খুলুন</a>':'')+'<p class="muted">'+escapeHtml(m.excerpt)+'</p></article>').join('');
  }catch(err){box.innerHTML='<p class="muted">'+escapeHtml(err.message)+'</p>';}
 });
+ $('historyBtn').addEventListener('click',async()=>{const panel=$('historyPanel');panel.classList.toggle('hidden');if(panel.classList.contains('hidden'))return;const box=$('historyList');box.innerHTML='<p class="muted">ইতিহাস লোড হচ্ছে...</p>';try{const d=await request('history');box.innerHTML=d.versions.length?d.versions.map(v=>'<article class="item"><strong>'+escapeHtml(new Date(v.saved_at).toLocaleString())+'</strong><span class="muted">আগের সংস্করণ · '+bn(v.entry_count)+'টি তথ্য</span><p class="muted">'+escapeHtml((v.titles||[]).join(' · '))+'</p></article>').join(''):'<p class="muted">এখনো কোনো পরিবর্তনের ইতিহাস নেই। পরবর্তী পরিবর্তনের আগে বর্তমান সংস্করণ থেকে ইতিহাস তৈরি হবে।</p>';}catch(err){box.innerHTML='<p class="muted">'+escapeHtml(err.message)+'</p>';}});
 $('resetBtn').addEventListener('click',resetForm);$('refreshBtn').addEventListener('click',()=>load().catch(e=>showNotice('appNotice',e.message,'error')));$('searchInput').addEventListener('input',render);
 $('logoutBtn').addEventListener('click',async()=>{try{await request('logout');}catch(e){}location.reload();});
 (async()=>{try{const t=await request('token');csrf=t.csrf;const d=await request('list');entries=d.entries||[];$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('logoutBtn').classList.remove('hidden');render();}catch(e){if(e.message.includes('লগইন')||e.message.includes('অনুমতি')){}else if(!e.message.includes('প্রবেশ'))showNotice('loginNotice',e.message,'error');}})();
