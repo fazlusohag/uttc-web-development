@@ -18,7 +18,8 @@ Branch: `release/uttc-complete-platform-2026`
 - Failed knowledge-base upload saves remove the moved upload through a shutdown cleanup guard, avoiding orphaned private documents.
 - CLI knowledge sync accepts only same-host HTTPS sitemap URLs, parses XML with network access disabled, and uses a lock plus unique temporary file for atomic index replacement. Sitemap and page downloads are capped at 2 MB each, and a single run indexes at most 300 unique pages.
 - Added CMS record types: Course, Notice, Gallery, Page, Contact and Navigation Menu.
-- Added SEO title, meta description and canonical HTTPS URL fields for Page records.
+- Added SEO title, meta description and canonical HTTPS URL fields for Page records. Only one CMS Page record can target each existing public-page slug; the API rejects duplicate targets with HTTP 409 so administrators update the existing record instead of creating ambiguous metadata/content.
+- The public CMS script memoizes in-flight and completed feed requests by content type, reducing duplicate requests when metadata and page content need the same Page feed; failed requests are evicted so a later call can retry.
 - Added `api/cms-public.php`, a read-only endpoint that returns Published records only.
 - Added `assets/js/cms-public.js`; CMS text is rendered with DOM text nodes, not raw HTML, and outbound/image URLs are restricted to HTTPS.
 - Connected Published Notice and Gallery feeds to their public pages.
@@ -38,6 +39,7 @@ Branch: `release/uttc-complete-platform-2026`
 ## Known limitations
 
 - CMS records are additive. They do not edit or replace all hard-coded content in the existing static HTML pages.
+- The single-record-per-slug rule prevents conflicting Page metadata/content, but administrators must edit the existing record to update a page rather than create a second record.
 - Page SEO metadata is applied client-side after the shared script loads. It is not server-rendered metadata and should not be considered a complete SEO implementation for crawlers that do not execute JavaScript. Existing static title/description/canonical tags remain the fallback.
 - Navigation Menu records are appended only where a compatible `header nav` element exists. Pages without that structure will not show CMS menu items.
 - Image file upload is not implemented; CMS images must be provided as HTTPS URLs.
