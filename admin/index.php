@@ -26,6 +26,12 @@ declare(strict_types=1);
 <div class="welcome"><div><h1>Knowledge Base Dashboard</h1><p>তথ্য যোগ করুন, যাচাই করুন এবং AI-এর জন্য প্রকাশ করুন।</p></div><button id="refreshBtn" class="btn secondary" type="button">তথ্য রিফ্রেশ</button></div>
 <div id="appNotice" class="notice"></div>
 <div class="stats"><div class="stat"><span>মোট তথ্য</span><b id="totalCount">০</b></div><div class="stat"><span>Draft / পর্যালোচনা</span><b id="draftCount">০</b></div><div class="stat"><span>AI-তে প্রকাশিত</span><b id="publishedCount">০</b></div></div>
+<section class="panel" style="margin-bottom:18px">
+<h2>AI Knowledge Retrieval Test</h2>
+<p class="muted">প্রশ্ন লিখে দেখুন ওয়েবসাইট ও Published Knowledge Base থেকে কোন তথ্য পাওয়া যাচ্ছে। এটি তথ্য খোঁজার পরীক্ষা; AI-এর চূড়ান্ত উত্তর পরীক্ষা নয়।</p>
+<form id="retrievalTestForm"><div class="toolbar"><input id="testQuestion" maxlength="1200" required placeholder="যেমন: ড্রাইভিং কোর্সে ভর্তির যোগ্যতা কী?"><button class="btn" type="submit">তথ্য খুঁজে পরীক্ষা করুন</button></div></form>
+<div id="retrievalTestResult" class="list"><p class="muted">এখনো কোনো পরীক্ষা চালানো হয়নি।</p></div>
+</section>
 <div class="layout">
 <section class="panel"><h2 id="formHeading">নতুন প্রশ্ন ও উত্তর যোগ করুন</h2>
 <form id="entryForm">
@@ -59,6 +65,13 @@ $('loginForm').addEventListener('submit',async e=>{e.preventDefault();try{const 
 $('entryForm').addEventListener('submit',async e=>{e.preventDefault();try{await request('save',{id:$('entryId').value,title:$('title').value,category:$('category').value,question:$('question').value,answer:$('answer').value});showNotice('appNotice','তথ্য Draft হিসেবে সংরক্ষণ করা হয়েছে। যাচাই করে Publish করুন।');resetForm();await load();}catch(err){showNotice('appNotice',err.message,'error');}});
 $('uploadForm').addEventListener('submit',async e=>{e.preventDefault();try{const file=$('document').files[0];if(!file)throw new Error('একটি ফাইল নির্বাচন করুন।');await request('upload',{},file);showNotice('appNotice','ফাইল থেকে তথ্য Draft হিসেবে তৈরি হয়েছে। Publish করার আগে যাচাই করুন।');$('uploadForm').reset();await load();}catch(err){showNotice('appNotice',err.message,'error');}});
 $('entryList').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;const id=b.dataset.edit||b.dataset.publish||b.dataset.delete;const item=entries.find(x=>x.id===id);try{if(b.dataset.edit){$('entryId').value=item.id;$('title').value=item.title;$('category').value=item.category;$('question').value=item.question||'';$('answer').value=item.answer;$('formHeading').textContent='তথ্য সম্পাদনা করুন';window.scrollTo({top:0,behavior:'smooth'});}else if(b.dataset.publish){if(!confirm('যাচাই করা হয়েছে? এই তথ্য AI-এর উত্তরে ব্যবহার হবে।'))return;await request('publish',{id});showNotice('appNotice','তথ্য AI-এর জন্য প্রকাশ করা হয়েছে।');await load();}else if(b.dataset.delete){if(!confirm('এই তথ্য স্থায়ীভাবে মুছে ফেলবেন?'))return;await request('delete',{id});showNotice('appNotice','তথ্য মুছে ফেলা হয়েছে।');await load();}}catch(err){showNotice('appNotice',err.message,'error');}});
+$('retrievalTestForm').addEventListener('submit',async e=>{
+ e.preventDefault();const box=$('retrievalTestResult');box.innerHTML='<p class="muted">তথ্য খোঁজা হচ্ছে...</p>';
+ try{const d=await request('test_retrieval',{question:$('testQuestion').value});
+ if(!d.matches.length){box.innerHTML='<p class="muted">কোনো প্রাসঙ্গিক তথ্য পাওয়া যায়নি। এই প্রশ্নের উত্তর অনুমান করে দেওয়া উচিত নয়।</p>';return;}
+ box.innerHTML=d.matches.map(m=>'<article class="item"><div class="itemtop"><strong>'+escapeHtml(m.title)+'</strong><span class="pill '+(m.source_type==='admin'?'live':'')+'">'+(m.source_type==='admin'?'Published Admin':'Website')+' · Score '+escapeHtml(m.score)+'</span></div>'+(m.url?'<a href="'+escapeHtml(m.url)+'" target="_blank" rel="noopener noreferrer">ওয়েবসাইট পৃষ্ঠা খুলুন</a>':'')+'<p class="muted">'+escapeHtml(m.excerpt)+'</p></article>').join('');
+ }catch(err){box.innerHTML='<p class="muted">'+escapeHtml(err.message)+'</p>';}
+});
 $('resetBtn').addEventListener('click',resetForm);$('refreshBtn').addEventListener('click',()=>load().catch(e=>showNotice('appNotice',e.message,'error')));$('searchInput').addEventListener('input',render);
 $('logoutBtn').addEventListener('click',async()=>{try{await request('logout');}catch(e){}location.reload();});
 (async()=>{try{const t=await request('token');csrf=t.csrf;const d=await request('list');entries=d.entries||[];$('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('logoutBtn').classList.remove('hidden');render();}catch(e){if(e.message.includes('লগইন')||e.message.includes('অনুমতি')){}else if(!e.message.includes('প্রবেশ'))showNotice('loginNotice',e.message,'error');}})();
