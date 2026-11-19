@@ -16,7 +16,8 @@ cat > "$fixture" <<'JSON'
 {"id":"draft-page","type":"page","title":"Draft SEO content","body":"Must stay hidden","slug":"about-uttc-moulvibazar","meta_title":"Draft title","status":"draft"},
 {"id":"pub-contact","type":"contact","title":"Contact desk","body":"Contact details","status":"published"},
 {"id":"pub-menu","type":"menu","title":"Admissions","body":"Menu item","url":"https://uttc.example/admission","status":"published"},
-{"id":"private-extra","type":"internal","title":"Internal record","body":"Must not be public","status":"published"}
+{"id":"private-extra","type":"internal","title":"Internal record","body":"Must not be public","status":"published"},
+{"id":["bad","id"],"type":"notice","title":{"unsafe":"shape"},"body":false,"url":null,"image_url":17,"published_at":["not","a","date"],"status":"published"}
 ]}
 JSON
 port="$(php -r '$s=stream_socket_server("tcp://127.0.0.1:0", $e, $m); if (!$s) exit(1); echo substr(strrchr(stream_socket_get_name($s, false), ":"), 1); fclose($s);')"
@@ -44,6 +45,11 @@ grep -q '"published_at":"2026-11-19T00:00:00Z"' <<<"$all"
 ! grep -q '"Draft SEO content"' <<<"$all"
 grep -q '"pub-contact"' <<<"$all"
 grep -q '"pub-menu"' <<<"$all"
+grep -q '"id":""' <<<"$all"
+grep -q '"title":""' <<<"$all"
+grep -q '"body":""' <<<"$all"
+grep -q '"image_url":"17"' <<<"$all"
+grep -q '"published_at":null' <<<"$all"
 courses="$(curl --silent --show-error "http://127.0.0.1:${port}/api/cms-public.php?type=course")"
 grep -q '"pub-course"' <<<"$courses"
 grep -q '"page_key":"computer-office-application-moulvibazar"' <<<"$courses"
