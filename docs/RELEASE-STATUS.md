@@ -3,29 +3,44 @@
 Date: 2026-11-19
 Branch: release/uttc-complete-platform-2026
 
-## Verified in repository
+## Work completed in this iteration
 
-- Public website pages, sitemap, robots file and UTTC logo assets are present.
-- admin/index.php is a Knowledge Base Dashboard. It is not a full page/content CMS.
-- api/admin.php includes password hash verification, CSRF token validation, session authorization, login throttling, Draft/Publish operations and document upload validation.
-- api/assistant.php uses server environment variables for the OpenAI API key/model, published admin knowledge only, retrieval, request limits and a fixed institutional fallback when no reliable match is found.
-- api/data/.htaccess denies direct access to the data directory on compatible Apache configurations. api/.htaccess blocks runtime and selected sensitive files on compatible Apache configurations.
-- Automated workflow completed successfully on this branch: https://github.com/fazlusohag/uttc-web-development/actions/runs/44500626230
+- Added an authenticated Website CMS at admin/cms.php using the existing admin session and CSRF token.
+- Added api/cms.php for Draft, Publish, edit, delete, listing and non-secret AI operations status.
+- Added api/cms-public.php as a read-only endpoint that returns Published records only.
+- Added assets/js/cms-public.js. It renders text using DOM text nodes, not raw HTML, and accepts only HTTPS outbound/image URLs.
+- Connected the Notices and Gallery pages to published CMS records.
+- Added published CMS course records to the Driving, Women's Driving, Computer, Freelancing and Graphic Design pages.
+- Added a link from the AI Knowledge Base dashboard to the Website CMS.
+- Updated README and API setup documentation.
 
-## Review findings / production risks
+## Current admin modules
 
-1. **Website CMS gap:** no separate interface/API currently manages public pages, course content, notices, gallery, menus or contact information. Build this before calling the requested main Website Admin Panel complete.
-2. **No separate AI operations dashboard:** current admin page manages the knowledge base and retrieval preview. It is not a separate analytics/monitoring dashboard.
-3. **HTTPS dependency:** admin session cookie Secure flag depends on the HTTPS server variable. Enforce HTTPS at the hosting layer and verify the cookie flags on the live domain.
-4. **Storage protection is server-specific:** .htaccess protections must be tested on the actual Hostinger web server. Prefer storing private data outside the public document root where the hosting plan permits.
-5. **Upload and parser dependencies:** confirm fileinfo, ZipArchive, DOM, mbstring, cURL, and pdftotext availability and limits on Hostinger.
-6. **Operational verification outstanding:** no live OpenAI API, real authenticated browser workflow, Hostinger configuration, mobile browser, accessibility or production penetration test has been completed.
-7. **Institutional content verification:** verify the current phone number, admission URL, course details, fees, schedules and notices with UTTC before public launch.
+1. AI Knowledge Base: existing knowledge-entry Draft/Publish, document extraction, history summary and retrieval preview at admin/index.php.
+2. Website CMS: Course, Notice, Gallery, Page and Contact records at admin/cms.php.
+3. AI Operations status: non-secret configured/not-configured flags, indexed-page count, published knowledge count, PHP version and CMS update time shown in the CMS dashboard.
 
-## Automated test result
+## Remaining scope / limitations
 
-The workflow run completed with conclusion success. This validates only the test steps in GitHub Actions; it is not a production security or deployment certification.
+- The CMS currently manages structured records. It does not yet edit every static HTML page, page SEO metadata, navigation menus or upload image files.
+- CMS image content must use an HTTPS image URL. Direct media upload is not implemented.
+- AI Operations is a basic status panel, not full analytics, alerting, cost reporting or request-log exploration.
+- The CMS public feed is connected to notices, gallery and the five course pages. Other page/contact fields are stored but do not automatically replace all hard-coded public content.
+- No live browser session has been exercised against an actual PHP server; CI syntax and regression tests cannot establish end-to-end login/session correctness.
+- Hostinger storage access rules, HTTPS cookies, PHP extensions, file permissions, upload parser dependencies and real OpenAI requests remain unverified.
+- Visual browser QA, mobile QA, accessibility review, SEO crawl, live links and institutional content verification remain required.
 
-## Release decision
+## Security observations
 
-**Not production-final yet.** Keep this branch as the integration candidate. Complete the missing Website CMS, verify the AI/admin flows, conduct visual and security QA, then create a reviewed pull request for the agreed target branch. Do not upload to Hostinger until the release is explicitly approved.
+- CMS endpoints reuse the existing UTTC_KB_ADMIN session and require the session admin flag and CSRF token for writes.
+- The public endpoint returns Published entries only.
+- Public rendering uses textContent/createTextNode and restricts links/images to HTTPS.
+- Private JSON data relies on api/data/.htaccess on compatible Apache configurations. On Hostinger, verify denial directly or move data outside the document root.
+- Never commit API keys or password hashes. Keep them in server environment variables.
+- Confirm the admin password hash, HTTPS and cookie Secure behavior on the actual server before production.
+
+## CI and release decision
+
+GitHub Actions is configured to lint all PHP files and run retrieval, assistant HTTP/CORS and document extraction tests. The latest workflow runs triggered by this series of commits must be checked for completion before release.
+
+**Release status: integration candidate, not production-final.** Complete remaining CMS scope, run authenticated browser tests and security/accessibility/SEO QA, then open a reviewed PR for the agreed target branch. Do not upload to Hostinger until separately approved.
