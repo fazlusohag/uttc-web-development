@@ -45,7 +45,6 @@ function uttc_retrieve(string $question, array $pages, int $limit = 5): array {
         }
         if ($score > 0) {
             $page = $doc['page'];
-            if (($page['_source_type'] ?? '') === 'admin') $score *= 1.05;
             $ranked[] = [
                 'score'=>round($score,3),
                 'title'=>(string)($page['title'] ?? ''),
@@ -55,6 +54,6 @@ function uttc_retrieve(string $question, array $pages, int $limit = 5): array {
             ];
         }
     }
-    usort($ranked, static fn($a,$b) => $b['score'] <=> $a['score']);
+    usort($ranked, static function($a,$b) {\n        $byScore = $b['score'] <=> $a['score'];\n        if ($byScore !== 0) return $byScore;\n        return (($b['source_type'] === 'admin') <=> ($a['source_type'] === 'admin'));\n    });
     return array_slice($ranked,0,max(1,min(10,$limit)));
 }
