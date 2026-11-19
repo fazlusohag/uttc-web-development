@@ -53,3 +53,5 @@ jobs:
         run: node --check assets/js/cms-public.js
       - name: Check public CMS integration
         run: bash tests/cms-integration-static-test.sh
+      - name: Test public CMS API contract
+        run: bash tests/cms-public-api-test.sh
