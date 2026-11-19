@@ -1,0 +1,37 @@
+name: PHP syntax check
+
+on:
+  pull_request:
+    branches:
+      - redesign/premium-2026
+  push:
+    branches:
+      - redesign/premium-2026
+
+permissions:
+  contents: read
+
+jobs:
+  php-lint:
+    name: PHP 8.3 syntax validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Lint all PHP files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' php_files < <(find . -type f -name '*.php' -not -path './vendor/*' -print0)
+          if [ ${#php_files[@]} -eq 0 ]; then
+            echo 'No PHP files found.'
+            exit 1
+          fi
+          for file in "${php_files[@]}"; do
+            echo "Checking $file"
+            php -l "$file"
+          done
