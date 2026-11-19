@@ -31,6 +31,8 @@ for page in driving-training-moulvibazar.html women-driving-training-moulvibazar
   grep -q 'data-cms-feed="course"' "$page" || { echo "Missing course feed: $page"; exit 1; }
 done
 grep -q 'Require all denied' api/data/.htaccess
+grep -Fq "is_link(\$lockPath)" api/admin.php
+grep -Fq "is_link(\$lockPath)" api/cms.php
 grep -q 'status.*published' api/cms-public.php
 grep -q "item.page_key===pageKey" assets/js/cms-public.js
 grep -q "const feedCache=new Map()" assets/js/cms-public.js
