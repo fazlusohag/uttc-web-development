@@ -62,3 +62,11 @@ Use explicit public-field allowlists. Never expose private types or admin-only f
 - Mobile, keyboard, accessibility, SEO and security checks are recorded.
 - README/API docs and release notes are updated.
 - Hostinger behavior remains marked unverified until tested on the actual host.
+
+## 4. Knowledge Base backups
+- Run `php scripts/backup-knowledge-base.php` from the project root using the CLI; web requests are rejected.
+- The script acquires a shared Knowledge Base lock, validates the JSON data and revision history, and snapshots those files plus uploaded source documents when present.
+- Snapshots are written under the private `api/data/backups/` directory with restrictive permissions and a SHA-256 manifest. The data directory's deny-all access rule must remain in place.
+- Retention defaults to the latest 30 snapshots. Set `UTTC_BACKUP_RETENTION` to an integer from 1 to 365 to change it.
+- The script refuses invalid source JSON, symbolic links and snapshots larger than 100 MB. It does not restore files or alter live Knowledge Base data.
+- Configure a Hostinger cron job only after validating the PHP CLI path and private storage permissions on the actual hosting account. Keep an independent off-server backup as well; this local snapshot is not disaster recovery by itself.
