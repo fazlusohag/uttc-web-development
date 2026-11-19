@@ -239,8 +239,15 @@ if ($action === 'upload') {
     $text=mb_substr($text,0,100000,'UTF-8');
     $dir=storage_dir();$stored=bin2hex(random_bytes(16)).'.'.$ext;$target=$dir.'/uploads/'.$stored;
     if(!move_uploaded_file($tmp,$target)) out(500,['ok'=>false,'message'=>'ফাইল নিরাপদে সংরক্ষণ করা যায়নি।']);
+    // save_entries() terminates the request on storage errors; clean up the moved upload on every unsuccessful exit.
+    $uploadCommitted=false;
+    register_shutdown_function(static function() use ($target, &$uploadCommitted): void {
+        if (!$uploadCommitted && is_file($target)) @unlink($target);
+    });
     $now=gmdate('c');$entries=load_entries();
     $entries[]=['id'=>bin2hex(random_bytes(12)),'title'=>clean_text(pathinfo($original,PATHINFO_FILENAME),180),'category'=>'অন্যান্য','question'=>'','answer'=>$text,'status'=>'draft','created_at'=>$now,'updated_at'=>$now,'published_at'=>null,'file_name'=>basename($original),'storage_name'=>$stored];
-    save_entries($entries);out(200,['ok'=>true,'message'=>'ফাইল থেকে Draft তৈরি হয়েছে।']);
+    save_entries($entries);
+    $uploadCommitted=true;
+    out(200,['ok'=>true,'message'=>'ফাইল থেকে Draft তৈরি হয়েছে।']);
 }
 out(400,['ok'=>false,'message'=>'অজানা অনুরোধ।']);
