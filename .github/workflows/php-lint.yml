@@ -45,6 +45,8 @@ jobs:
         run: php tests/retrieval-test.php
       - name: Run assistant rate-limit storage tests
         run: php tests/rate-limit-test.php
+      - name: Test AI assistant client history trust boundary
+        run: php tests/assistant-history-test.php
       - name: Run assistant HTTP and CORS tests
         run: bash tests/assistant-http-test.sh
       - name: Install PDF text extractor
