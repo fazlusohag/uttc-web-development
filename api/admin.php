@@ -30,9 +30,22 @@ function input_data(): array {
 }
 function storage_dir(): string {
     $dir = __DIR__ . '/data';
-    if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) out(500,['ok'=>false,'message'=>'তথ্য সংরক্ষণের ফোল্ডার তৈরি করা যায়নি।']);
+    if (is_link($dir) || (file_exists($dir) && !is_dir($dir))) {
+        out(500,['ok'=>false,'message'=>'তথ্য সংরক্ষণের ফোল্ডারের পথ নিরাপদ নয়।']);
+    }
+    if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) {
+        out(500,['ok'=>false,'message'=>'তথ্য সংরক্ষণের ফোল্ডার তৈরি করা যায়নি।']);
+    }
+    if (!uttc_private_storage_directory_is_safe($dir)) {
+        out(500,['ok'=>false,'message'=>'ব্যক্তিগত তথ্যভান্ডারের access protection যাচাই করা যায়নি।']);
+    }
     $upload = $dir . '/uploads';
-    if (!is_dir($upload)) @mkdir($upload, 0750, true);
+    if (!is_dir($upload) && !@mkdir($upload, 0750, true) && !is_dir($upload)) {
+        out(500,['ok'=>false,'message'=>'আপলোড সংরক্ষণের ফোল্ডার তৈরি করা যায়নি।']);
+    }
+    if (is_link($upload) || !is_dir($upload)) {
+        out(500,['ok'=>false,'message'=>'আপলোড সংরক্ষণের ফোল্ডারের পথ নিরাপদ নয়।']);
+    }
     return $dir;
 }
 $entries_lock_handle = null;
