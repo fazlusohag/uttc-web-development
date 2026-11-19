@@ -51,12 +51,10 @@ grep -q 'কোর্সের জন্য আবশ্যক' admin/cms.php
 grep -q "coursePageKeys" api/cms.php
 grep -q "publicPageKeys" api/cms.php
 grep -q "cms_out(409" api/cms.php
-grep -Fq "isset($parts[\x27user\x27])" api/cms.php
-grep -Fq "isset($parts[\x27pass\x27])" api/cms.php
+grep -Fq "isset(\$parts['user'])" api/cms.php
+grep -Fq "isset(\$parts['pass'])" api/cms.php
 grep -q "u.username" assets/js/cms-public.js
 grep -q "u.password" assets/js/cms-public.js
-grep -q "isset(\$parts[\x27user\x27])" api/cms.php
-grep -q "isset(\$parts[\x27pass\x27])" api/cms.php
 grep -q "type==='page'" api/cms.php
 grep -q 'id="previewMeta"' admin/cms.php
 grep -q "previewMeta').textContent=meta.join" admin/cms.php
