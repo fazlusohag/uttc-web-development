@@ -44,7 +44,18 @@ try {
     file_put_contents($file, $future);
     $assert(uttc_login_attempt_throttled($file, $ip, 2001) === true, 'future timestamps must fail closed');
 
-    echo "OK: admin login throttle threshold, expiry, successful clear, corrupt and invalid storage checks passed.\n";
+    $victim = $dir . '/victim.json';
+    $link = $dir . '/linked-attempts.json';
+    $victimBytes = '{"keep":"untouched"}';
+    file_put_contents($victim, $victimBytes);
+    if (@symlink($victim, $link)) {
+        $assert(uttc_login_attempt_throttled($link, $ip, 2002) === true, 'symlinked login counter must fail closed');
+        $assert(uttc_clear_login_attempts($link, $ip) === false, 'symlinked login counter must not be cleared');
+        $assert(file_get_contents($victim) === $victimBytes, 'symlink target must remain untouched');
+        unlink($link);
+    }
+
+    echo "OK: admin login throttle threshold, expiry, successful clear, corrupt, invalid and symlink storage checks passed.\n";
 } finally {
     if (is_file($file)) unlink($file);
     rmdir($dir);
