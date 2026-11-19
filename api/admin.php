@@ -103,6 +103,22 @@ function clean_text(string $s, int $max): string {
     if (mb_strlen($s,'UTF-8') > $max) out(422,['ok'=>false,'message'=>'লেখা নির্ধারিত সীমার চেয়ে বড়।']);
     return $s;
 }
+function clear_login_attempts(): void {
+    $path = storage_dir() . '/login-attempts.json';
+    $ip = hash('sha256', (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    $fp = @fopen($path, 'c+');
+    if (!$fp || !flock($fp, LOCK_EX)) { if (is_resource($fp)) fclose($fp); return; }
+    rewind($fp);
+    $all = json_decode(stream_get_contents($fp) ?: '{}', true);
+    if (!is_array($all)) $all = [];
+    unset($all[$ip]);
+    rewind($fp);
+    ftruncate($fp, 0);
+    fwrite($fp, json_encode($all));
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+}
 function login_throttled(): bool {
     $dir = storage_dir();
     $path = $dir . '/login-attempts.json';
@@ -154,6 +170,7 @@ if ($action === 'login') {
     if (login_throttled()) out(429,['ok'=>false,'message'=>'অনেকবার ভুল চেষ্টা হয়েছে। ১৫ মিনিট পর আবার চেষ্টা করুন।']);
     $password = (string)($d['password'] ?? '');
     if (!password_verify($password,$hash)) out(401,['ok'=>false,'message'=>'পাসওয়ার্ড সঠিক নয়।']);
+    clear_login_attempts();
     session_regenerate_id(true); $_SESSION['admin']=true;
     out(200,['ok'=>true,'message'=>'লগইন সফল।']);
 }
