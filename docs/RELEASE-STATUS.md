@@ -18,7 +18,7 @@ Branch: `release/uttc-complete-platform-2026`
 - Failed knowledge-base upload saves remove the moved upload through a shutdown cleanup guard, avoiding orphaned private documents.
 - CLI knowledge sync accepts only same-host HTTPS sitemap URLs, parses XML with network access disabled, and uses a lock plus unique temporary file for atomic index replacement. Sitemap and page downloads are capped at 2 MB each, and a single run indexes at most 300 unique pages.
 - Added CMS record types: Course, Notice, Gallery, Page, Contact and Navigation Menu.
-- Added SEO title, meta description and canonical HTTPS URL fields for Page records. Only one CMS Page record can target each existing public-page slug; the API rejects duplicate targets with HTTP 409 so administrators update the existing record instead of creating ambiguous metadata/content.
+- Added SEO title, meta description and canonical HTTPS URL fields for Page records. CMS URL validation now rejects embedded username/password credentials in HTTPS links, image URLs and canonical URLs, matching the public renderer\x27s URL policy. Only one CMS Page record can target each existing public-page slug; the API rejects duplicate targets with HTTP 409 so administrators update the existing record instead of creating ambiguous metadata/content.
 - The public CMS script memoizes in-flight and completed feed requests by content type, reducing duplicate requests when metadata and page content need the same Page feed; failed requests are evicted so a later call can retry.
 - Added `api/cms-public.php`, a read-only endpoint that returns Published records only.
 - Added `assets/js/cms-public.js`; CMS text is rendered with DOM text nodes, not raw HTML, and outbound/image URLs are restricted to HTTPS.
@@ -26,7 +26,7 @@ Branch: `release/uttc-complete-platform-2026`
 - Connected Published Course feeds to Driving, Women's Driving, Computer Office Application, Freelancing and Graphic Design pages, with explicit page-key assignment to prevent cross-course content appearing on unrelated pages.
 - Added `data-page-key` and the shared CMS integration script to all 14 public HTML pages so Published Page metadata and Navigation Menu records can be applied where compatible markup exists.
 - Prevented duplicate CMS navigation links when the same URL or label already exists in the page navigation.
-- Added CI checks for JavaScript syntax, static CMS page wiring, public CMS API behavior (Published-only visibility, public-type allowlisting, type filtering and invalid-type rejection), and authenticated CMS lifecycle (shared admin session, CSRF, Draft isolation, explicit Publish and audit events).
+- Added CI checks for JavaScript syntax, static CMS page wiring, public CMS API behavior (Published-only visibility, public-type allowlisting, type filtering, Page SEO field exposure and invalid-type rejection), and authenticated CMS lifecycle (shared admin session, CSRF, Draft isolation, explicit Publish, audit events, duplicate Page prevention and rejection of credential-bearing URLs).
 - Added `docs/EXTENDING-UTTC-PLATFORM.md` to define module boundaries, extension rules, API compatibility, storage/security rules and the definition of done for future features.
 - Updated the project README to describe the current implementation and its limitations.
 
@@ -54,7 +54,7 @@ Branch: `release/uttc-complete-platform-2026`
 
 - CMS write actions require the existing session admin flag and CSRF token.
 - Public CMS API filters to Published records and an explicit allowlist of public record types; internal/unknown record types are never exposed.
-- Public rendering avoids HTML injection and restricts external content URLs to HTTPS.
+- Public rendering avoids HTML injection and restricts external content URLs to HTTPS. CMS writes also reject embedded URL credentials, including for canonical URLs.
 - Private CMS JSON data relies on `api/data/.htaccess`. Verify direct access denial on the actual Hostinger server; if the host does not enforce it, move private data outside the document root.
 - Never commit API keys, password hashes, private knowledge files, session data, logs or uploaded source documents.
 - Confirm the admin password hash is configured, HTTPS is active, and Secure/HttpOnly/SameSite cookie behavior works on the actual server.
