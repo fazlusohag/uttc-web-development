@@ -87,6 +87,12 @@ credential_url_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$ar
 credential_url_result="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$credential_url_payload" "http://127.0.0.1:${port}/api/cms.php")"
 [ "$credential_url_result" = "422" ]
 
+for credential_field in url image_url; do
+  credential_payload="$(php -r '$d=["action"=>"save","csrf"=>$argv[1],"type"=>"notice","title"=>"CI Credential URL Rejection","body"=>"Must be rejected"];$d[$argv[2]]="https://admin:secret@example.com/resource";echo json_encode($d);' "$cms_csrf" "$credential_field")"
+  credential_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$credential_payload" "http://127.0.0.1:${port}/api/cms.php")"
+  [ "$credential_status" = "422" ]
+done
+
 valid_cms_page_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"page","title"=>"CI Valid Home SEO Page","body"=>"Temporary SEO page record","slug"=>"index"]);' "$cms_csrf")"
 valid_cms_page_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$valid_cms_page_payload" "http://127.0.0.1:${port}/api/cms.php")"
 grep -q '"ok":true' <<<"$valid_cms_page_result"
