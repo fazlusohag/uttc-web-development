@@ -146,6 +146,7 @@ foreach ($restoreFiles as $name => $source) {
 }
 /* Stage the absent-history case as an explicit removal marker. */
 $rollback = [];
+$installed = [];
 $replacementStarted = false;
 if ($ok) {
     $replacementStarted = true;
@@ -161,15 +162,16 @@ if ($ok) {
 if ($ok) {
     foreach ($restoreFiles as $name => $_source) {
         if (!@rename($stage . '/' . $name, $data . '/' . $name)) { $ok = false; break; }
+        $installed[$name] = true;
     }
 }
 if (!$ok && $replacementStarted) {
     foreach ($liveNames as $name) {
         $live = $data . '/' . $name;
         if (isset($rollback[$name])) {
-            if (is_file($live) || is_link($live)) @unlink($live);
+            if (isset($installed[$name]) && (is_file($live) || is_link($live))) @unlink($live);
             if (is_file($rollback[$name])) @rename($rollback[$name], $live);
-        } elseif ($before[$name] === null && (is_file($live) || is_link($live))) {
+        } elseif (isset($installed[$name]) && (is_file($live) || is_link($live))) {
             @unlink($live);
         }
     }
