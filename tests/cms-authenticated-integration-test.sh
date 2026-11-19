@@ -83,6 +83,13 @@ invalid_cms_page_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$
 invalid_cms_page_result="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$invalid_cms_page_payload" "http://127.0.0.1:${port}/api/cms.php")"
 [ "$invalid_cms_page_result" = "422" ]
 
+valid_cms_page_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"page","title"=>"CI Valid Home SEO Page","body"=>"Temporary SEO page record","slug"=>"index"]);' "$cms_csrf")"
+valid_cms_page_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$valid_cms_page_payload" "http://127.0.0.1:${port}/api/cms.php")"
+grep -q '"ok":true' <<<"$valid_cms_page_result"
+duplicate_cms_page_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"page","title"=>"CI Duplicate Home SEO Page","body"=>"Must be rejected","slug"=>"index"]);' "$cms_csrf")"
+duplicate_cms_page_result="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$duplicate_cms_page_payload" "http://127.0.0.1:${port}/api/cms.php")"
+[ "$duplicate_cms_page_result" = "409" ]
+
 save_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"course","title"=>"CI CMS Contract Record","body"=>"Temporary integration test record","page_key"=>"computer-office-application-moulvibazar"]);' "$cms_csrf")"
 save_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$save_payload" "http://127.0.0.1:${port}/api/cms.php")"
 grep -q '"ok":true' <<<"$save_result"
