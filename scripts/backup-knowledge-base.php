@@ -87,6 +87,10 @@ $copyFile = static function (string $source, string $relative) use ($staging, &$
     return true;
 };
 
+if (!is_file($realData . '/knowledge-base.json') || is_link($realData . '/knowledge-base.json')) {
+    $failed = true;
+    fwrite(STDERR, "Knowledge Base source file is missing or unsafe.\\n");
+}
 foreach (['knowledge-base.json', 'knowledge-history.json'] as $name) {
     $source = $realData . '/' . $name;
     if (!is_file($source)) continue;
