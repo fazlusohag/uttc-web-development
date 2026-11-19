@@ -27,29 +27,16 @@ function rate_limit(): void {
         error_log('UTTC rate limiter unavailable: runtime directory cannot be created.');
         respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
     }
+    require_once __DIR__ . '/rate-limit.php';
     $file = $dir . '/rate-' . hash('sha256', client_ip()) . '.json';
-    $now = time(); $window = 600; $limit = 18;
-    $fp = @fopen($file, 'c+');
-    if (!$fp) {
-        error_log('UTTC rate limiter unavailable: counter file cannot be opened.');
+    $result = uttc_rate_limit_attempt($file, time(), 600, 18);
+    if ($result === null) {
+        error_log('UTTC rate limiter unavailable: counter storage is invalid or could not be updated.');
         respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
     }
-    if (!flock($fp, LOCK_EX)) {
-        fclose($fp);
-        error_log('UTTC rate limiter unavailable: counter lock failed.');
-        respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
-    }
-    $raw = stream_get_contents($fp);
-    $data = json_decode($raw ?: '{}', true);
-    $hits = is_array($data) && ($now - (int)($data['start'] ?? 0) < $window) ? (int)($data['hits'] ?? 0) : 0;
-    $start = $hits ? (int)$data['start'] : $now;
-    if ($hits >= $limit) {
-        flock($fp, LOCK_UN); fclose($fp);
+    if ($result === false) {
         respond(429, ['ok'=>false,'error'=>'rate_limited','message'=>'অনেকগুলো প্রশ্ন করা হয়েছে। ১০ মিনিট পর আবার চেষ্টা করুন।']);
     }
-    ftruncate($fp, 0); rewind($fp);
-    fwrite($fp, json_encode(['start'=>$start,'hits'=>$hits+1])); fflush($fp);
-    flock($fp, LOCK_UN); fclose($fp);
 }
 function plain_text(string $s): string {
     $s = html_entity_decode(strip_tags($s), ENT_QUOTES | ENT_HTML5, 'UTF-8');
