@@ -91,3 +91,16 @@ A separate authenticated Website CMS is available at `/admin/cms.php`. It shares
 - Test that `/api/data/cms-content.json` is denied by the actual hosting server. Prefer storage outside the public document root where possible.
 - Verify that `/admin/cms.php` redirects unauthenticated users to the login page and that CSRF, publish, edit, delete and public-feed behavior work on the deployed PHP version.
 - Confirm that public pages show the new records correctly at desktop and mobile widths before launch.
+
+
+## Website CMS backend
+
+The separate Website CMS uses:
+- `/admin/cms.php` for the authenticated CMS interface.
+- `/api/cms.php?action=token` (GET) to establish a session CSRF token; all CMS write/list actions are POST requests with the token and the existing admin session.
+- `/api/cms-public.php` as a read-only public feed. It returns Published records only and supports the types `course`, `notice`, `gallery`, `page`, `contact` and `menu`.
+- `/api/data/cms-content.json` for CMS records and `cms-audit.jsonl` for a minimal action log. These files are intended to be private and are protected by `api/data/.htaccess` on compatible Apache servers.
+
+The CMS currently supports structured records, not full editing of every static HTML section. SEO metadata is applied by the browser integration script after page load, so keep valid static title, description and canonical tags in each HTML page. Navigation records are appended only where the page has a compatible `header nav` element. Images must be supplied as HTTPS URLs; direct upload is not available.
+
+Before enabling CMS on Hostinger, verify that `/api/data/cms-content.json` and `/api/data/cms-audit.jsonl` cannot be downloaded over HTTP. If the hosting server does not enforce the included access rules, move private data outside the public document root and update the application path. Never expose the CMS data directory or audit log publicly.
