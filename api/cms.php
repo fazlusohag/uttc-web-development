@@ -53,7 +53,18 @@ if($action==='save'){
 }
 if($action==='publish'||$action==='delete'){
  $id=cms_text($d['id']??'',48);$items=cms_read();$found=false;$auditItem=null;
- foreach($items as $i=>&$it){if(($it['id']??'')===$id){$found=true;$auditItem=$it;if($action==='publish'){$it['status']='published';$it['published_at']=gmdate('c');$it['updated_at']=$it['published_at'];}else{unset($items[$i]);}break;}}unset($it);
+ foreach($items as $i=>&$it){if(($it['id']??'')===$id){$found=true;$auditItem=$it;if($action==='publish'){
+  $coursePageKeys=['driving-training-moulvibazar','women-driving-training-moulvibazar','computer-office-application-moulvibazar','freelancing-course-moulvibazar','graphic-design-course-moulvibazar'];
+  $publicPageKeys=['index','about-uttc-moulvibazar','404','contact-uttc-moulvibazar','facilities-uttc-moulvibazar','faq-uttc-moulvibazar','privacy-policy','notices-uttc-moulvibazar','gallery-uttc-moulvibazar',...$coursePageKeys];
+  if(($it['type']??'')==='course'&&!in_array(($it['page_key']??''),$coursePageKeys,true))cms_out(422,['ok'=>false,'message'=>'এই পুরোনো কোর্স রেকর্ডে বৈধ Public Page নির্ধারিত নেই। সম্পাদনা করে পেজ নির্বাচন করুন।']);
+  if(($it['type']??'')==='page'){
+   $slug=is_string($it['slug']??null)?$it['slug']:'';
+   if(!in_array($slug,$publicPageKeys,true))cms_out(422,['ok'=>false,'message'=>'এই Page রেকর্ডের slug বৈধ নয়। সম্পাদনা করে সঠিক Public Page নির্বাচন করুন।']);
+   foreach($items as $otherIndex=>$other){if($otherIndex!==$i&&($other['type']??'')==='page'&&($other['slug']??'')===$slug&&($other['status']??'')==='published')cms_out(409,['ok'=>false,'message'=>'এই পেজের জন্য ইতিমধ্যে Published Page record রয়েছে।']);}
+  }
+  foreach(['url'=>'লিংক','image_url'=>'ছবির URL','canonical_url'=>'Canonical URL'] as $field=>$label){$value=$it[$field]??'';if(!is_string($value))cms_out(422,['ok'=>false,'message'=>'এই রেকর্ডে '.$label.'-এর তথ্য বৈধ নয়।']);cms_https($value,$label);}
+  $it['status']='published';$it['published_at']=gmdate('c');$it['updated_at']=$it['published_at'];
+ }else{unset($items[$i]);}break;}}unset($it);
  if(!$found)cms_out(404,['ok'=>false,'message'=>'রেকর্ড পাওয়া যায়নি।']);cms_write($items);if(is_array($auditItem))cms_audit($action,$auditItem);flock($lock,LOCK_UN);fclose($lock);cms_out(200,['ok'=>true,'message'=>$action==='publish'?'তথ্য প্রকাশিত হয়েছে।':'তথ্য মুছে ফেলা হয়েছে।']);
 }
 flock($lock,LOCK_UN);fclose($lock);cms_out(400,['ok'=>false,'message'=>'অজানা অনুরোধ।']);
