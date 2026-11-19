@@ -100,3 +100,10 @@ grep -q 'id="resultCount"' admin/cms.php
 grep -q "toLocaleLowerCase().includes(query)" admin/cms.php
 grep -q "statusFilter==='published'" admin/cms.php
 grep -q "addEventListener('input',render)" admin/cms.php
+
+# CMS storage writes must handle partial writes and replace atomically only after a complete flush.
+grep -q "fopen(\$tmp,'xb')" api/cms.php
+grep -q 'while(\$written<\$length)' api/cms.php
+grep -q 'fflush(\$h)' api/cms.php
+grep -q 'fsync(\$h)' api/cms.php
+grep -q '!\$ok||\$written!==\$length||!@rename(\$tmp,\$p)' api/cms.php
