@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+if (!function_exists('mb_check_encoding')) { function mb_check_encoding(string $value, ?string $encoding = null): bool { return preg_match('//u', $value) === 1; } }
+if (!function_exists('mb_convert_encoding')) { function mb_convert_encoding(string $value, string $to, $from = null): string { return iconv((string)($from ?: 'UTF-8'), $to.'//IGNORE', $value) ?: $value; } }
 require_once __DIR__ . '/../api/document-extract.php';
 
 function assert_same(string $expected, string $actual, string $message): void {
