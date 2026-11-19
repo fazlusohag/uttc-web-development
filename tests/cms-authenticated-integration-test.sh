@@ -93,6 +93,14 @@ for credential_field in url image_url; do
   [ "$credential_status" = "422" ]
 done
 
+# Simulate legacy Draft records that bypassed current save-time validation.
+php -r '$p=$argv[1];$d=json_decode(file_get_contents($p),true)?:[];$d["items"][]=["id"=>"legacy-invalid-course","type"=>"course","title"=>"Legacy invalid course","body"=>"Must not publish","page_key"=>"invalid-page","status"=>"draft"];$d["items"][]=["id"=>"legacy-invalid-page","type"=>"page","title"=>"Legacy invalid page","body"=>"Must not publish","slug"=>"unknown-page","status"=>"draft"];$d["items"][]=["id"=>"legacy-credential-url","type"=>"notice","title"=>"Legacy credential URL","body"=>"Must not publish","url"=>"https://user:pass@example.com/","status"=>"draft"];file_put_contents($p,json_encode($d,JSON_UNESCAPED_SLASHES));' "$fixture"
+for legacy_id in legacy-invalid-course legacy-invalid-page legacy-credential-url; do
+  legacy_publish="$(php -r 'echo json_encode(["action"=>"publish","csrf"=>$argv[1],"id"=>$argv[2]]);' "$cms_csrf" "$legacy_id")"
+  legacy_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$legacy_publish" "http://127.0.0.1:${port}/api/cms.php")"
+  [ "$legacy_status" = "422" ]
+done
+
 valid_cms_page_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"page","title"=>"CI Valid Home SEO Page","body"=>"Temporary SEO page record","slug"=>"index"]);' "$cms_csrf")"
 valid_cms_page_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$valid_cms_page_payload" "http://127.0.0.1:${port}/api/cms.php")"
 grep -q '"ok":true' <<<"$valid_cms_page_result"
@@ -135,4 +143,4 @@ throttled_login="$(curl --silent --show-error --output /dev/null --write-out '%{
   "http://127.0.0.1:${port}/api/admin.php")"
 [ "$throttled_login" = "429" ]
 
-echo "OK: CMS session, CSRF, body limit, course/page validation, credential URL rejection, duplicate page protection, Draft/Publish/Delete, audit and login throttling passed."
+echo "OK: CMS session, CSRF, body limit, course/page validation, legacy publish revalidation, credential URL rejection, duplicate page protection, Draft/Publish/Delete, audit and login throttling passed."
