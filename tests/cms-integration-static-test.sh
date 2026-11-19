@@ -185,8 +185,8 @@ grep -q 'is_link(\$path)' api/cms.php
 grep -q 'json_last_error()!==JSON_ERROR_NONE' api/cms.php
 grep -q 'Public Knowledge Index ডেটা নষ্ট বা অবৈধ JSON' api/cms.php
 grep -q 'অনুমোদিত Knowledge Base ফাইলের storage path নিরাপদ নয়' api/cms.php
-grep -q 'cms_read_status_json(__DIR__.\x27/data/knowledge-base.json\x27,\x27entries\x27' api/cms.php
-grep -q 'cms_read_status_json(__DIR__.\x27/knowledge.json\x27,\x27pages\x27' api/cms.php
+grep -Fq "cms_read_status_json(__DIR__.'/data/knowledge-base.json','entries'" api/cms.php
+grep -Fq "cms_read_status_json(__DIR__.'/knowledge.json','pages'" api/cms.php
 
 # CMS API must fail closed if its private data directory or files are symlinked
 # or if the web-server access-denial guard is absent or invalid.
