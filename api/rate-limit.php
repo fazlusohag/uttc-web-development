@@ -6,6 +6,8 @@ declare(strict_types=1);
  * Returns true when allowed, false when limited, and null on invalid storage/I/O.
  */
 function uttc_rate_limit_attempt(string $file, int $now, int $window, int $limit): ?bool {
+    // Never follow a pre-existing symlink or operate on a non-regular counter path.
+    if (is_link($file) || (file_exists($file) && !is_file($file))) return null;
     $fp = @fopen($file, 'c+');
     if (!$fp) return null;
     if (!flock($fp, LOCK_EX)) { fclose($fp); return null; }
