@@ -8,7 +8,18 @@ $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
 session_name('UTTC_KB_ADMIN');
 session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>$secure,'httponly'=>true,'samesite'=>'Strict']);
 ini_set('session.use_strict_mode','1');
+ini_set('session.use_only_cookies','1');
+ini_set('session.use_trans_sid','0');
 session_start();
+if (!empty($_SESSION['admin'])) {
+    $last = (int)($_SESSION['last_activity'] ?? 0);
+    if ($last <= 0 || time() - $last > 1800) {
+        $_SESSION = [];
+        session_regenerate_id(true);
+    } else {
+        $_SESSION['last_activity'] = time();
+    }
+}
 
 require_once __DIR__ . '/storage.php';
 
@@ -182,7 +193,7 @@ if ($action === 'login') {
     $password = (string)($d['password'] ?? '');
     if (!password_verify($password,$hash)) out(401,['ok'=>false,'message'=>'পাসওয়ার্ড সঠিক নয়।']);
     clear_login_attempts();
-    session_regenerate_id(true); $_SESSION['admin']=true;
+    session_regenerate_id(true); $_SESSION['admin']=true; $_SESSION['last_activity']=time();
     out(200,['ok'=>true,'message'=>'লগইন সফল।']);
 }
 if ($action === 'logout') { require_admin(); $_SESSION=[]; session_regenerate_id(true); out(200,['ok'=>true]); }
