@@ -23,6 +23,7 @@ for page in "${pages[@]}"; do
   grep -q 'class="skip-link" href="#main-content"' "$page" || { echo "Missing keyboard skip link: $page"; exit 1; }
   grep -q 'id="main-content"' "$page" || { echo "Missing main landmark target: $page"; exit 1; }
   grep -q '.skip-link:focus' "$page" || { echo "Missing visible skip-link focus style: $page"; exit 1; }
+  grep -q 'prefers-reduced-motion:reduce' "$page" || { echo "Missing reduced-motion support: $page"; exit 1; }
 done
 grep -q 'data-cms-feed="notice"' notices-uttc-moulvibazar.html
 grep -q 'data-cms-feed="gallery"' gallery-uttc-moulvibazar.html
