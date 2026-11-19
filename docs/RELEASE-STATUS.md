@@ -99,3 +99,5 @@ Complete authenticated browser tests, Hostinger-specific security checks, visual
 - Added an isolated end-to-end PHP fixture test for backup creation, snapshot verification, successful Knowledge Base and revision-history restoration, preservation of uploads created after the snapshot, verification of the pre-restore safety snapshot, and rejection of a tampered snapshot without changing live JSON. The test is wired into the PHP 8.3 GitHub Actions workflow.
 - Hardened rollback bookkeeping so cleanup removes only files that this restore invocation successfully installed; it does not delete an unexpected filesystem entry encountered during rollback.
 - The new end-to-end test has been added to CI but has not yet been observed running on GitHub Actions. A passing workflow is still required before considering the restore path validated.
+
+- Extended the isolated restore integration fixture to cover snapshots created when revision history is absent: a stale live history file must be removed when restoring such a snapshot. The fixture also checks that uploads remain unchanged and that a tampered snapshot is rejected without modifying the live Knowledge Base JSON.
