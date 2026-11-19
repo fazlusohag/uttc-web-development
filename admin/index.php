@@ -23,7 +23,7 @@ declare(strict_types=1);
 <p class="muted">প্রবেশের জন্য সার্ভারে অ্যাডমিন পাসওয়ার্ড সেটআপ থাকতে হবে।</p>
 </section>
 <section id="appView" class="hidden">
-<div class="welcome"><div><h1>Knowledge Base Dashboard</h1><p>তথ্য যোগ করুন, যাচাই করুন এবং AI-এর জন্য প্রকাশ করুন।</p></div><button id="refreshBtn" class="btn secondary" type="button">তথ্য রিফ্রেশ</button><button id="historyBtn" class="btn secondary" type="button">আপডেট ইতিহাস</button></div>
+<div class="welcome"><div><h1>Knowledge Base Dashboard</h1><p>তথ্য যোগ করুন, যাচাই করুন এবং AI-এর জন্য প্রকাশ করুন।</p></div><a class="btn secondary" href="cms.php" style="text-decoration:none">Website CMS ও AI Operations</a><button id="refreshBtn" class="btn secondary" type="button">তথ্য রিফ্রেশ</button><button id="historyBtn" class="btn secondary" type="button">আপডেট ইতিহাস</button></div>
 <div id="appNotice" class="notice"></div>
 <section id="historyPanel" class="panel hidden" style="margin-bottom:18px"><h2>Knowledge Base Update History</h2><div id="historyList" class="list"><p class="muted">ইতিহাস দেখতে বোতামে চাপ দিন।</p></div></section>
 <div class="stats"><div class="stat"><span>মোট তথ্য</span><b id="totalCount">০</b></div><div class="stat"><span>Draft / পর্যালোচনা</span><b id="draftCount">০</b></div><div class="stat"><span>AI-তে প্রকাশিত</span><b id="publishedCount">০</b></div></div>
