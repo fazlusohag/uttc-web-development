@@ -125,6 +125,11 @@ if ($semanticEnabled) {
         error_log('UTTC semantic retrieval fallback: '.$e->getMessage());
     }
 }
+$topScore = (float)($matches[0]['score'] ?? 0);
+if ($retrievalMode === 'semantic' && (!$matches || $topScore < 0.30)) {
+    $matches = uttc_retrieve($retrievalQuestion, $pages);
+    $retrievalMode = 'bm25_fallback';
+}
 if (!$matches) $matches = uttc_retrieve($retrievalQuestion, $pages);
 $topScore = (float)($matches[0]['score'] ?? 0);
 $noReliableMatch = !$matches || ($retrievalMode === 'semantic' ? $topScore < 0.30 : $topScore < 2);
