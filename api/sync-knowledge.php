@@ -15,10 +15,23 @@ $siteHost = strtolower((string)$siteParts['host']);
 $sitemap = $site . '/sitemap.xml';
 function fetch_url(string $url): string {
     $ch=curl_init($url);
-    curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_FOLLOWLOCATION=>false,CURLOPT_CONNECTTIMEOUT=>10,CURLOPT_TIMEOUT=>25,CURLOPT_USERAGENT=>'UTTC-Knowledge-Sync/1.0']);
-    $body=curl_exec($ch); $code=(int)curl_getinfo($ch,CURLINFO_HTTP_CODE); curl_close($ch);
-    if ($body===false || $code<200 || $code>=300) throw new RuntimeException("Fetch failed: ".$url." HTTP ".$code);
-    return (string)$body;
+    $body='';
+    $maxBytes=2*1024*1024;
+    curl_setopt_array($ch,[
+        CURLOPT_RETURNTRANSFER=>false,
+        CURLOPT_FOLLOWLOCATION=>false,
+        CURLOPT_CONNECTTIMEOUT=>10,
+        CURLOPT_TIMEOUT=>25,
+        CURLOPT_USERAGENT=>'UTTC-Knowledge-Sync/1.0',
+        CURLOPT_WRITEFUNCTION=>static function($handle,string $chunk) use (&$body,$maxBytes): int {
+            if (strlen($body)+strlen($chunk)>$maxBytes) return 0;
+            $body.=$chunk;
+            return strlen($chunk);
+        }
+    ]);
+    $ok=curl_exec($ch); $code=(int)curl_getinfo($ch,CURLINFO_HTTP_CODE); $error=curl_error($ch); curl_close($ch);
+    if ($ok===false || $code<200 || $code>=300) throw new RuntimeException("Fetch failed: ".$url." HTTP ".$code." ".$error);
+    return $body;
 }
 function page_text(string $html): array {
     libxml_use_internal_errors(true);
@@ -47,8 +60,9 @@ try {
         }
     }
     if (!$urls) throw new RuntimeException('No same-domain URLs found in sitemap');
+    $urls=array_slice(array_values(array_unique($urls)),0,300);
     $pages=[]; $failed=[];
-    foreach (array_unique($urls) as $url) {
+    foreach ($urls as $url) {
         try {
             $html=fetch_url($url); [$title,$text]=page_text($html);
             if ($text!=='') $pages[]=['url'=>$url,'title'=>$title ?: $url,'text'=>mb_substr($text,0,18000,'UTF-8')];
