@@ -67,7 +67,7 @@ try {
     $must(!is_file($historyPath), 'fixture snapshot should omit absent history');
     file_put_contents($temp . '/api/data/knowledge-history.json', json_encode(['versions'=>[['id'=>'stale']]]));
     [$status,$out,$err] = $run('restore-knowledge-base-backup.php', [$noHistoryId]);
-    $must($status === 0 && !is_file($temp . '/api/data/knowledge-history.json'], 'restore must remove stale history absent from snapshot: ' . $err . $out);
+    $must($status === 0 && !is_file($temp . '/api/data/knowledge-history.json'), 'restore must remove stale history absent from snapshot: ' . $err . $out);
 
     /* A tampered selected snapshot must be rejected before any live data changes. */
     [$status,$out,$err] = $run('backup-knowledge-base.php');
