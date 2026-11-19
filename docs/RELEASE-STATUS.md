@@ -22,7 +22,7 @@ Branch: `release/uttc-complete-platform-2026`
 - Added `api/cms-public.php`, a read-only endpoint that returns Published records only.
 - Added `assets/js/cms-public.js`; CMS text is rendered with DOM text nodes, not raw HTML, and outbound/image URLs are restricted to HTTPS.
 - Connected Published Notice and Gallery feeds to their public pages.
-- Connected Published Course feeds to Driving, Women's Driving, Computer Office Application, Freelancing and Graphic Design pages.
+- Connected Published Course feeds to Driving, Women's Driving, Computer Office Application, Freelancing and Graphic Design pages, with explicit page-key assignment to prevent cross-course content appearing on unrelated pages.
 - Added `data-page-key` and the shared CMS integration script to all 14 public HTML pages so Published Page metadata and Navigation Menu records can be applied where compatible markup exists.
 - Prevented duplicate CMS navigation links when the same URL or label already exists in the page navigation.
 - Added CI checks for JavaScript syntax, static CMS page wiring, public CMS API behavior (Published-only visibility, public-type allowlisting, type filtering and invalid-type rejection), and authenticated CMS lifecycle (shared admin session, CSRF, Draft isolation, explicit Publish and audit events).
@@ -79,3 +79,5 @@ Complete authenticated browser tests, Hostinger-specific security checks, visual
 - Added a Bengali keyboard-accessible “মূল কনটেন্টে যান” skip link to all 14 public pages, with a visible focus state and a stable `main-content` target. Extended the static integration test to require the link, target and focus styling on every page. This improves keyboard navigation; it does not replace a full screen-reader and browser accessibility audit.
 
 - All public pages now respect the operating-system `prefers-reduced-motion` setting by disabling smooth scrolling and minimizing CSS animation/transition duration for visitors who request reduced motion. The CMS static integration test now checks this support on every listed public page.
+
+- Added a required public-page assignment for CMS Course records. The CMS editor offers only the five existing course-page keys, the write API validates the assignment, and the public renderer filters by the current page key. Legacy course records without a valid assignment are intentionally not shown until an administrator edits and assigns them; this prevents accidental cross-page content leakage.
