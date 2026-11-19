@@ -43,6 +43,8 @@ jobs:
           done
       - name: Run retrieval regression tests
         run: php tests/retrieval-test.php
+      - name: Run assistant rate-limit storage tests
+        run: php tests/rate-limit-test.php
       - name: Run assistant HTTP and CORS tests
         run: bash tests/assistant-http-test.sh
       - name: Install PDF text extractor
