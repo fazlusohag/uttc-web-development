@@ -183,8 +183,8 @@ grep -q 'fsync(\$handle)' api/semantic-retrieval.php
 grep -q 'function cms_read_status_json' api/cms.php
 grep -q 'is_link(\$path)' api/cms.php
 grep -q 'json_last_error()!==JSON_ERROR_NONE' api/cms.php
-grep -q 'Public Knowledge Index ডেটা নষ্ট বা অবৈধ JSON' api/cms.php
-grep -q 'অনুমোদিত Knowledge Base ফাইলের storage path নিরাপদ নয়' api/cms.php
+grep -q 'ডেটা নষ্ট বা অবৈধ JSON; আগের তথ্য অক্ষত রাখা হয়েছে' api/cms.php
+grep -q 'ফাইলের storage path নিরাপদ নয়' api/cms.php
 grep -Fq "cms_read_status_json(__DIR__.'/data/knowledge-base.json','entries'" api/cms.php
 grep -Fq "cms_read_status_json(__DIR__.'/knowledge.json','pages'" api/cms.php
 
