@@ -2,7 +2,7 @@
 
 ## Features
 - PHP JSON endpoint using the OpenAI Responses API.
-- Local retrieval from the published pages in the UTTC sitemap.
+- Local BM25-style retrieval from published pages in the UTTC sitemap and Published admin knowledge (lexical RAG; no vector embeddings yet).
 - Bangla/English answers, source links, refusal to invent missing institutional facts.
 - Server-side API key only, origin allowlist, input validation, per-IP rate limit.
 - CLI sitemap sync to refresh the local knowledge base.
@@ -59,7 +59,10 @@ The feature branch also contains a private admin interface at `/admin/` and its 
 - Editing an entry returns it to Draft, requiring a fresh review and Publish.
 - Supported uploads: PDF (requires an executable `pdftotext`), DOCX (requires PHP `ZipArchive`), TXT, and Markdown. Maximum upload size is 8 MB; extracted text is capped at 100,000 characters.
 - If the server lacks the PDF/DOCX extraction dependency, the upload is rejected with a clear message; it is not silently indexed as empty text.
-- The dashboard currently uses the existing lightweight keyword retrieval, not vector/semantic search. Relevance and conflicting facts should be checked using the built-in AI test process before public launch.
+- Assistant and admin preview share a BM25-style lexical retriever with term-frequency, inverse-document-frequency and title weighting. This is stronger than raw keyword counts but is not vector/embedding semantic search. Relevance and conflicting facts should be checked using the built-in AI test process before public launch.
+- The browser retains up to 10 recent user/assistant messages in `sessionStorage` for the current tab session and sends them as dialogue context. The API validates and caps the history; only the latest prior user question is added to the retrieval query. Conversation history is never added to the approved institutional knowledge corpus and must not be treated as a source of institutional facts.
+- Each successful Knowledge Base change preserves the previous version in `api/data/knowledge-history.json` (up to 30 versions). The admin dashboard can display timestamps, entry counts and titles. This history is private under `api/data/.htaccess`; it is not a full audit log of who made each change.
+- CI runs `tests/retrieval-test.php` after PHP syntax checks. These are regression tests for the ranking helper, not end-to-end tests of the OpenAI API or Hostinger deployment.
 
 ### Important deployment checks
 - This repository change is only a code change. It does not configure Hostinger, create the admin password, upload files, or activate the dashboard.
