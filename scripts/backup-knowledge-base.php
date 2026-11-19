@@ -161,7 +161,7 @@ if ($failed) {
 
 $retention = filter_var(getenv('UTTC_BACKUP_RETENTION') ?: '30', FILTER_VALIDATE_INT, ['options'=>['min_range'=>1,'max_range'=>365]]);
 if ($retention === false) $retention = 30;
-$completed = glob($backupRoot . '/20[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-*', GLOB_ONLYDIR) ?: [];
+$completed = glob($backupRoot . '/20[0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]-*', GLOB_ONLYDIR) ?: [];
 usort($completed, static fn(string $a, string $b): int => strcmp(basename($b), basename($a)));
 foreach (array_slice($completed, $retention) as $old) {
     if (is_link($old)) continue;
