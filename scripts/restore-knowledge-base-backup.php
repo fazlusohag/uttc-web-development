@@ -165,27 +165,39 @@ if ($ok) {
         $installed[$name] = true;
     }
 }
+$rollbackComplete = true;
 if (!$ok && $replacementStarted) {
     foreach ($liveNames as $name) {
         $live = $data . '/' . $name;
         if (isset($rollback[$name])) {
-            if (isset($installed[$name]) && (is_file($live) || is_link($live))) @unlink($live);
-            if (is_file($rollback[$name])) @rename($rollback[$name], $live);
-        } elseif (isset($installed[$name]) && (is_file($live) || is_link($live))) {
-            @unlink($live);
+            if (isset($installed[$name]) && (is_file($live) || is_link($live)) && !@unlink($live)) {
+                $rollbackComplete = false;
+                continue;
+            }
+            if (is_file($rollback[$name]) && !@rename($rollback[$name], $live)) {
+                $rollbackComplete = false;
+            }
+        } elseif (isset($installed[$name]) && (is_file($live) || is_link($live)) && !@unlink($live)) {
+            $rollbackComplete = false;
         }
     }
 }
 flock($lock, LOCK_UN);
 fclose($lock);
 
-/* Remove the private staging directory and its rollback copies. */
-foreach (new FilesystemIterator($stage) as $item) {
-    if ($item->isFile() || $item->isLink()) @unlink($item->getPathname());
+/* Preserve the only remaining originals if automatic rollback was incomplete. */
+if ($ok || $rollbackComplete) {
+    foreach (new FilesystemIterator($stage) as $item) {
+        if ($item->isFile() || $item->isLink()) @unlink($item->getPathname());
+    }
+    @rmdir($stage);
 }
-@rmdir($stage);
 if (!$ok) {
-    fwrite(STDERR, "Restore failed; rollback was attempted. Verify the pre-restore snapshot {$preRestoreId} before any retry.\n");
+    if (!$rollbackComplete) {
+        fwrite(STDERR, "Restore failed and automatic rollback was incomplete. Original recovery files are preserved at {$stage}. Pre-restore snapshot: {$preRestoreId}.\n");
+    } else {
+        fwrite(STDERR, "Restore failed; original files were rolled back. Pre-restore snapshot: {$preRestoreId}.\n");
+    }
     exit(1);
 }
 echo "Restore completed.\nSnapshot restored: {$id}\nPre-restore safety snapshot: {$preRestoreId}\n";
