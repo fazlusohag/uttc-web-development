@@ -28,4 +28,9 @@ for page in driving-training-moulvibazar.html women-driving-training-moulvibazar
 done
 grep -q 'Require all denied' api/data/.htaccess
 grep -q 'status.*published' api/cms-public.php
+grep -q "header \.nav-links,header nav ul,header nav" assets/js/cms-public.js
+grep -q "nav.matches('ul,ol')" assets/js/cms-public.js
+grep -q "li.append(a)" assets/js/cms-public.js
+grep -q "textContent=text" assets/js/cms-public.js
+
 echo "CMS static integration checks passed."
