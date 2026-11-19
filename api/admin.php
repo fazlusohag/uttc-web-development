@@ -217,10 +217,13 @@ if ($action === 'publish') {
     save_entries($entries);out(200,['ok'=>true]);
 }
 if ($action === 'delete') {
-    $id=(string)($d['id']??'');$entries=load_entries();$found=false;
-    foreach($entries as $i=>$entry) if(($entry['id']??'')===$id){$found=true;if(!empty($entry['storage_name'])) @unlink(storage_dir().'/uploads/'.$entry['storage_name']);unset($entries[$i]);break;}
+    $id=(string)($d['id']??'');$entries=load_entries();$found=false;$deletedStorageName=null;
+    foreach($entries as $i=>$entry) if(($entry['id']??'')===$id){$found=true;if(!empty($entry['storage_name']))$deletedStorageName=basename((string)$entry['storage_name']);unset($entries[$i]);break;}
     if(!$found) out(404,['ok'=>false,'message'=>'তথ্যটি পাওয়া যায়নি।']);
-    save_entries($entries);out(200,['ok'=>true]);
+    save_entries($entries);
+    // Remove the private upload only after the knowledge-base update succeeds.
+    if($deletedStorageName!==null&&$deletedStorageName!==''&&$deletedStorageName!=='.'&&$deletedStorageName!=='..') @unlink(storage_dir().'/uploads/'.$deletedStorageName);
+    out(200,['ok'=>true]);
 }
 if ($action === 'upload') {
     if (empty($_FILES['document']) || ($_FILES['document']['error']??UPLOAD_ERR_NO_FILE)!==UPLOAD_ERR_OK) out(422,['ok'=>false,'message'=>'ফাইল আপলোড করা যায়নি। আবার চেষ্টা করুন।']);
