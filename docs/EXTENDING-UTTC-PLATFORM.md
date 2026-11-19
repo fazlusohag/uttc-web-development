@@ -70,3 +70,6 @@ Use explicit public-field allowlists. Never expose private types or admin-only f
 - Retention defaults to the latest 30 snapshots. Set `UTTC_BACKUP_RETENTION` to an integer from 1 to 365 to change it.
 - The script refuses invalid source JSON, symbolic links and snapshots larger than 100 MB. It does not restore files or alter live Knowledge Base data.
 - Configure a Hostinger cron job only after validating the PHP CLI path and private storage permissions on the actual hosting account. Keep an independent off-server backup as well; this local snapshot is not disaster recovery by itself.
+
+- Verify a completed snapshot without changing data: `php scripts/verify-knowledge-base-backup.php <snapshot-id>`. The verifier checks the manifest, file sizes, SHA-256 hashes, safe relative paths, symbolic links and the Knowledge Base/History JSON structures. It requires the Knowledge Base JSON file and never writes to the live data directory.
+- Restore is intentionally not part of this verifier. A future restore workflow must require an explicit operator action, verified snapshot, pre-restore snapshot and atomic rollback plan.
