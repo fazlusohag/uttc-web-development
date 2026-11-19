@@ -14,8 +14,16 @@ function cms_public_response(int $status, array $payload): never {
 }
 
 $path = __DIR__ . '/data/cms-content.json';
-$data = is_file($path) ? json_decode((string)file_get_contents($path), true) : [];
-$items = is_array($data) && is_array($data['items'] ?? null) ? $data['items'] : [];
+if (!is_file($path)) {
+    $items = [];
+} else {
+    $raw = @file_get_contents($path);
+    $data = $raw === false ? null : json_decode($raw, true);
+    if ($raw === false || json_last_error() !== JSON_ERROR_NONE || !is_array($data) || !isset($data['items']) || !is_array($data['items'])) {
+        cms_public_response(500, ['ok' => false, 'message' => 'CMS content is temporarily unavailable']);
+    }
+    $items = $data['items'];
+}
 $type = trim((string)($_GET['type'] ?? ''));
 $allowed = ['course', 'notice', 'gallery', 'page', 'contact', 'menu'];
 
