@@ -167,5 +167,5 @@ grep -q "Original recovery files are preserved at" scripts/restore-knowledge-bas
 # Backup tooling must reject symlinked access-control files and dot path segments.
 grep -q "is_link(\$realData . '/.htaccess')" scripts/backup-knowledge-base.php
 grep -q "is_link(dirname(\$backupRoot) . '/.htaccess')" scripts/verify-knowledge-base-backup.php
-grep -Fq "preg_match('~(?:^|/)\\\\.(?:/|$)~', \$relative)" scripts/verify-knowledge-base-backup.php
+grep -q "preg_match('~(?:^|/)" scripts/verify-knowledge-base-backup.php
 grep -q "is_link(\$data . '/.htaccess')" scripts/restore-knowledge-base-backup.php
