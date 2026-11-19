@@ -158,3 +158,8 @@ grep -q "if (isset(\$rollback\[\$name\]))" scripts/restore-knowledge-base-backup
 grep -q "\$installed = \[\]" scripts/restore-knowledge-base-backup.php
 grep -q "\$installed\[\$name\] = true" scripts/restore-knowledge-base-backup.php
 grep -q "isset(\$installed\[\$name\])" scripts/restore-knowledge-base-backup.php
+
+# Incomplete automatic rollback must preserve the only remaining original copies.
+grep -q "\$rollbackComplete = true" scripts/restore-knowledge-base-backup.php
+grep -q "if (\$ok || \$rollbackComplete)" scripts/restore-knowledge-base-backup.php
+grep -q "Original recovery files are preserved at" scripts/restore-knowledge-base-backup.php
