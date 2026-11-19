@@ -43,7 +43,7 @@ grep -q "x.slug===key" assets/js/cms-public.js
 grep -q "main.append(section)" assets/js/cms-public.js
 grep -q "async function mountContact()" assets/js/cms-public.js
 grep -q "contact-uttc-moulvibazar" assets/js/cms-public.js
-grep -q "feed(\x27contact\x27)" assets/js/cms-public.js
+grep -q "feed('contact')" assets/js/cms-public.js
 grep -q "page_key" api/cms-public.php
 grep -q 'কোর্সের জন্য আবশ্যক' admin/cms.php
 grep -q "coursePageKeys" api/cms.php
