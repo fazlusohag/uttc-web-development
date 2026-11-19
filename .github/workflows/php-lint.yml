@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - redesign/premium-2026
+      - feature/uttc-ai-knowledge-base
 
 permissions:
   contents: read
