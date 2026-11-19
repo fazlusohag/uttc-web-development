@@ -6,7 +6,8 @@ Branch: release/uttc-complete-platform-2026
 ## Work completed in this iteration
 
 - Added an authenticated Website CMS at admin/cms.php using the existing admin session and CSRF token.
-- Added api/cms.php for Draft, Publish, edit, delete, listing and non-secret AI operations status.
+- Added api/cms.php for Draft, Publish, edit, delete, listing and non-secret AI operations status; record writes use file locking and atomic replacement, and text length validation has an mbstring fallback.
+- Extended Website CMS controls for Navigation Menu records and SEO title, description and canonical HTTPS URL fields.
 - Added api/cms-public.php as a read-only endpoint that returns Published records only.
 - Added assets/js/cms-public.js. It renders text using DOM text nodes, not raw HTML, and accepts only HTTPS outbound/image URLs.
 - Connected the Notices and Gallery pages to published CMS records.
@@ -22,7 +23,7 @@ Branch: release/uttc-complete-platform-2026
 
 ## Remaining scope / limitations
 
-- The CMS currently manages structured records. It does not yet edit every static HTML page, page SEO metadata, navigation menus or upload image files.
+- The CMS manages structured records and now includes fields for page SEO metadata and Navigation Menu records. Public metadata/menu rendering is implemented in the shared feed script, but page-by-page activation and end-to-end verification remain required. Image file upload is not implemented; use HTTPS image URLs only.
 - CMS image content must use an HTTPS image URL. Direct media upload is not implemented.
 - AI Operations is a basic status panel, not full analytics, alerting, cost reporting or request-log exploration.
 - The CMS public feed is connected to notices, gallery and the five course pages. Other page/contact fields are stored but do not automatically replace all hard-coded public content.
