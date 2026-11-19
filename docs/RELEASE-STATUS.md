@@ -11,7 +11,8 @@ Branch: `release/uttc-complete-platform-2026`
 - CMS audit events are appended only after the corresponding content write succeeds; the authenticated lifecycle test checks Create and Publish audit entries.
 - Knowledge-base source uploads are deleted only after the knowledge-base record deletion is saved successfully; stored filenames are reduced to basenames before filesystem deletion.
 - AI Assistant, CMS and Knowledge Base admin JSON endpoints reject request bodies larger than 64 KB before JSON decoding; assistant and CMS integration tests assert the 413 response.
-- CMS authenticated lifecycle coverage includes session/CSRF enforcement, Draft isolation, Publish visibility, Delete removal from the public feed, and audit events.
+- CMS authenticated lifecycle coverage includes session/CSRF enforcement, Draft isolation, Publish visibility, Delete removal from the public feed, audit events, and the five-failure login throttle.
+- Admin login throttling clears the caller's failure bucket after successful authentication, expires old IP buckets, and caps stored buckets at 1,000 to prevent unbounded growth.
 - PDF text extraction caps parser output at 2 MB and limits captured parser diagnostics.
 - Failed knowledge-base upload saves remove the moved upload through a shutdown cleanup guard, avoiding orphaned private documents.
 - CLI knowledge sync accepts only same-host HTTPS sitemap URLs, parses XML with network access disabled, and uses a lock plus unique temporary file for atomic index replacement. Sitemap and page downloads are capped at 2 MB each, and a single run indexes at most 300 unique pages.
