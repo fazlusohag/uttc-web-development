@@ -33,15 +33,15 @@ if($action==='save'){
  if(!in_array($type,['course','notice','gallery','page','contact','menu'],true)||$title===''||$body==='')cms_out(422,['ok'=>false,'message'=>'ধরন, শিরোনাম ও বিবরণ অবশ্যই দিতে হবে।']);
  cms_https($url,'লিংক');cms_https($image,'ছবির URL');cms_https($canonical,'Canonical URL');
  if($slug!==''&&!preg_match('/^[a-z0-9][a-z0-9-]{0,178}$/',$slug))cms_out(422,['ok'=>false,'message'=>'Slug ইংরেজি ছোট হাতের অক্ষর, সংখ্যা ও hyphen দিয়ে লিখুন।']);
- $items=cms_read();$now=gmdate('c');$found=false;
- foreach($items as &$it){if($id!==''&&($it['id']??'')===$id){$it=array_merge($it,['type'=>$type,'title'=>$title,'body'=>$body,'url'=>$url,'image_url'=>$image,'slug'=>$slug,'meta_title'=>$mt,'meta_description'=>$md,'canonical_url'=>$canonical,'status'=>'draft','updated_at'=>$now,'published_at'=>null]);$found=true;cms_audit('update',$it);break;}}unset($it);
+ $items=cms_read();$now=gmdate('c');$found=false;$auditAction='create';$auditItem=null;
+ foreach($items as &$it){if($id!==''&&($it['id']??'')===$id){$it=array_merge($it,['type'=>$type,'title'=>$title,'body'=>$body,'url'=>$url,'image_url'=>$image,'slug'=>$slug,'meta_title'=>$mt,'meta_description'=>$md,'canonical_url'=>$canonical,'status'=>'draft','updated_at'=>$now,'published_at'=>null]);$found=true;$auditAction='update';$auditItem=$it;break;}}unset($it);
  if($id!==''&&!$found)cms_out(404,['ok'=>false,'message'=>'সম্পাদনার রেকর্ড পাওয়া যায়নি।']);
- if(!$found){$it=['id'=>bin2hex(random_bytes(12)),'type'=>$type,'title'=>$title,'body'=>$body,'url'=>$url,'image_url'=>$image,'slug'=>$slug,'meta_title'=>$mt,'meta_description'=>$md,'canonical_url'=>$canonical,'status'=>'draft','created_at'=>$now,'updated_at'=>$now,'published_at'=>null];$items[]=$it;cms_audit('create',$it);}
- cms_write($items);flock($lock,LOCK_UN);fclose($lock);cms_out(200,['ok'=>true,'message'=>'Draft সংরক্ষণ হয়েছে।']);
+ if(!$found){$it=['id'=>bin2hex(random_bytes(12)),'type'=>$type,'title'=>$title,'body'=>$body,'url'=>$url,'image_url'=>$image,'slug'=>$slug,'meta_title'=>$mt,'meta_description'=>$md,'canonical_url'=>$canonical,'status'=>'draft','created_at'=>$now,'updated_at'=>$now,'published_at'=>null];$items[]=$it;$auditItem=$it;}
+ cms_write($items);if(is_array($auditItem))cms_audit($auditAction,$auditItem);flock($lock,LOCK_UN);fclose($lock);cms_out(200,['ok'=>true,'message'=>'Draft সংরক্ষণ হয়েছে।']);
 }
 if($action==='publish'||$action==='delete'){
- $id=cms_text($d['id']??'',48);$items=cms_read();$found=false;
- foreach($items as $i=>&$it){if(($it['id']??'')===$id){$found=true;if($action==='publish'){$it['status']='published';$it['published_at']=gmdate('c');$it['updated_at']=$it['published_at'];cms_audit('publish',$it);}else{cms_audit('delete',$it);unset($items[$i]);}break;}}unset($it);
- if(!$found)cms_out(404,['ok'=>false,'message'=>'রেকর্ড পাওয়া যায়নি।']);cms_write($items);flock($lock,LOCK_UN);fclose($lock);cms_out(200,['ok'=>true,'message'=>$action==='publish'?'তথ্য প্রকাশিত হয়েছে।':'তথ্য মুছে ফেলা হয়েছে।']);
+ $id=cms_text($d['id']??'',48);$items=cms_read();$found=false;$auditItem=null;
+ foreach($items as $i=>&$it){if(($it['id']??'')===$id){$found=true;$auditItem=$it;if($action==='publish'){$it['status']='published';$it['published_at']=gmdate('c');$it['updated_at']=$it['published_at'];}else{unset($items[$i]);}break;}}unset($it);
+ if(!$found)cms_out(404,['ok'=>false,'message'=>'রেকর্ড পাওয়া যায়নি।']);cms_write($items);if(is_array($auditItem))cms_audit($action,$auditItem);flock($lock,LOCK_UN);fclose($lock);cms_out(200,['ok'=>true,'message'=>$action==='publish'?'তথ্য প্রকাশিত হয়েছে।':'তথ্য মুছে ফেলা হয়েছে।']);
 }
 flock($lock,LOCK_UN);fclose($lock);cms_out(400,['ok'=>false,'message'=>'অজানা অনুরোধ।']);
