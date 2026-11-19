@@ -39,10 +39,13 @@ if($action==='save'){
  if(!in_array($type,['course','notice','gallery','page','contact','menu'],true)||$title===''||$body==='')cms_out(422,['ok'=>false,'message'=>'ধরন, শিরোনাম ও বিবরণ অবশ্যই দিতে হবে।']);
  cms_https($url,'লিংক');cms_https($image,'ছবির URL');cms_https($canonical,'Canonical URL');
  if($slug!==''&&!preg_match('/^[a-z0-9][a-z0-9-]{0,178}$/',$slug))cms_out(422,['ok'=>false,'message'=>'Slug ইংরেজি ছোট হাতের অক্ষর, সংখ্যা ও hyphen দিয়ে লিখুন।']);
+ $coursePageKeys=['driving-training-moulvibazar','women-driving-training-moulvibazar','computer-office-application-moulvibazar','freelancing-course-moulvibazar','graphic-design-course-moulvibazar'];
+ if($type==='course'&&!in_array($pageKey,$coursePageKeys,true))cms_out(422,['ok'=>false,'message'=>'কোর্সের জন্য নির্দিষ্ট Public Page নির্বাচন করুন।']);
+ if($type!=='course')$pageKey='';
  $items=cms_read();$now=gmdate('c');$found=false;$auditAction='create';$auditItem=null;
  foreach($items as &$it){if($id!==''&&($it['id']??'')===$id){$it=array_merge($it,['type'=>$type,'title'=>$title,'body'=>$body,'url'=>$url,'image_url'=>$image,'slug'=>$slug,'page_key'=>$pageKey,'meta_title'=>$mt,'meta_description'=>$md,'canonical_url'=>$canonical,'status'=>'draft','updated_at'=>$now,'published_at'=>null]);$found=true;$auditAction='update';$auditItem=$it;break;}}unset($it);
  if($id!==''&&!$found)cms_out(404,['ok'=>false,'message'=>'সম্পাদনার রেকর্ড পাওয়া যায়নি।']);
- if(!$found){$it=['id'=>bin2hex(random_bytes(12)),'type'=>$type,'title'=>$title,'body'=>$body,'url'=>$url,'image_url'=>$image,'slug'=>$slug,'meta_title'=>$mt,'meta_description'=>$md,'canonical_url'=>$canonical,'status'=>'draft','created_at'=>$now,'updated_at'=>$now,'published_at'=>null];$items[]=$it;$auditItem=$it;}
+ if(!$found){$it=['id'=>bin2hex(random_bytes(12)),'type'=>$type,'title'=>$title,'body'=>$body,'url'=>$url,'image_url'=>$image,'slug'=>$slug,'meta_title'=>$mt,'meta_description'=>$md,'canonical_url'=>$canonical,'status'=>'draft','created_at'=>$now,'updated_at'=>$now,'published_at'=>null];$it['page_key']=$pageKey;$items[]=$it;$auditItem=$it;}
  cms_write($items);if(is_array($auditItem))cms_audit($auditAction,$auditItem);flock($lock,LOCK_UN);fclose($lock);cms_out(200,['ok'=>true,'message'=>'Draft সংরক্ষণ হয়েছে।']);
 }
 if($action==='publish'||$action==='delete'){
