@@ -17,7 +17,7 @@ if (!preg_match('/^20[0-9]{6}-[0-9]{6}-[a-f0-9]{8}$/D', $id)) {
 }
 $root = dirname(__DIR__);
 $backupRoot = $root . '/api/data/backups';
-if (!is_dir($backupRoot) || is_link($backupRoot) || !is_file(dirname($backupRoot) . '/.htaccess')) {
+if (!is_dir($backupRoot) || is_link($backupRoot) || is_link(dirname($backupRoot) . '/.htaccess') || !is_file(dirname($backupRoot) . '/.htaccess')) {
     fwrite(STDERR, "Private backup storage could not be verified.\n");
     exit(1);
 }
@@ -57,7 +57,8 @@ foreach ($manifest['files'] as $entry) {
     }
     $relative = $entry['path'];
     if (isset($seen[$relative]) || !preg_match('~^(?:knowledge-base\.json|knowledge-history\.json|uploads/[A-Za-z0-9._/-]+)$~D', $relative)
-        || str_contains($relative, '..') || str_contains($relative, '//') || str_ends_with($relative, '/')) {
+        || str_contains($relative, '..') || str_contains($relative, '//') || str_ends_with($relative, '/')
+        || preg_match('~(?:^|/)\\.(?:/|$)~', $relative)) {
         fwrite(STDERR, "Manifest contains a duplicate or unsafe path.\n");
         exit(1);
     }
