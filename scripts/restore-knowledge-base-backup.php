@@ -20,7 +20,7 @@ $root = dirname(__DIR__);
 require_once $root . '/api/storage.php';
 $data = $root . '/api/data';
 $backupRoot = $data . '/backups';
-if (!is_dir($data) || is_link($data) || !uttc_private_storage_directory_is_safe($data)
+if (!is_dir($data) || is_link($data) || is_link($data . '/.htaccess') || !is_file($data . '/.htaccess') || !uttc_private_storage_directory_is_safe($data)
     || !is_dir($backupRoot) || is_link($backupRoot)) {
     fwrite(STDERR, "Private Knowledge Base storage could not be verified.\n");
     exit(1);
