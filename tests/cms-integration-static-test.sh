@@ -32,7 +32,7 @@ for page in driving-training-moulvibazar.html women-driving-training-moulvibazar
 done
 grep -q 'Require all denied' api/data/.htaccess
 grep -Fq "is_link(\$lockPath)" api/admin.php
-grep -Fq "is_link(\$lockPath)" api/cms.php
+grep -Fq 'CMS lock file-এর পথ নিরাপদ নয়' api/cms.php
 grep -q 'status.*published' api/cms-public.php
 grep -q "item.page_key===pageKey" assets/js/cms-public.js
 grep -q "const feedCache=new Map()" assets/js/cms-public.js
