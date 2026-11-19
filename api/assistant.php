@@ -23,12 +23,22 @@ function client_ip(): string {
 }
 function rate_limit(): void {
     $dir = __DIR__ . '/runtime';
-    if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) return;
+    if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) {
+        error_log('UTTC rate limiter unavailable: runtime directory cannot be created.');
+        respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
+    }
     $file = $dir . '/rate-' . hash('sha256', client_ip()) . '.json';
     $now = time(); $window = 600; $limit = 18;
     $fp = @fopen($file, 'c+');
-    if (!$fp) return;
-    flock($fp, LOCK_EX);
+    if (!$fp) {
+        error_log('UTTC rate limiter unavailable: counter file cannot be opened.');
+        respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
+    }
+    if (!flock($fp, LOCK_EX)) {
+        fclose($fp);
+        error_log('UTTC rate limiter unavailable: counter lock failed.');
+        respond(503, ['ok'=>false,'error'=>'temporarily_unavailable','message'=>'সেবাটি সাময়িকভাবে ব্যস্ত। কিছুক্ষণ পর আবার চেষ্টা করুন।']);
+    }
     $raw = stream_get_contents($fp);
     $data = json_decode($raw ?: '{}', true);
     $hits = is_array($data) && ($now - (int)($data['start'] ?? 0) < $window) ? (int)($data['hits'] ?? 0) : 0;
@@ -51,11 +61,22 @@ require_once __DIR__ . '/semantic-retrieval.php';
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') respond(405, ['ok'=>false,'error'=>'method_not_allowed']);
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowed = array_filter(array_map('trim', explode(',', envv('UTTC_ALLOWED_ORIGINS','https://uttc.edu.bd,https://www.uttc.edu.bd'))));
-if ($origin !== '' && !in_array($origin, $allowed, true) && !preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#', $origin)) {
+$isLocalOrigin = $origin !== '' && preg_match('#^https?://(localhost|127\\.0\\.1)(:\\d+)?$#', $origin);
+if ($origin !== '' && !in_array($origin, $allowed, true) && !$isLocalOrigin) {
     respond(403, ['ok'=>false,'error'=>'origin_not_allowed']);
 }
-if ($origin !== '') header('Access-Control-Allow-Origin: ' . $origin);
-header('Vary: Origin');
+if ($origin !== '') {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Vary: Origin');
+}
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
+    header('Access-Control-Allow-Methods: POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type');
+    header('Access-Control-Max-Age: 600');
+    http_response_code(204);
+    exit;
+}
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') respond(405, ['ok'=>false,'error'=>'method_not_allowed']);
 $input = json_decode(file_get_contents('php://input') ?: '', true);
 if (!is_array($input)) respond(400, ['ok'=>false,'error'=>'invalid_json']);
 $question = trim((string)($input['message'] ?? ''));
