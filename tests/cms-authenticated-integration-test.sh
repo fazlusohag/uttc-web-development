@@ -96,4 +96,15 @@ public_after_delete="$(curl --silent --show-error "http://127.0.0.1:${port}/api/
 ! grep -q 'CI CMS Contract Record' <<<"$public_after_delete"
 grep -q '"action":"delete"' "$audit"
 
-echo "OK: CMS session, CSRF, oversized-body rejection, Draft isolation, Publish, public-feed removal and audit lifecycle passed."
+for attempt in 1 2 3 4 5; do
+  wrong_login="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" \
+    --header 'Content-Type: application/json' --data "$(php -r 'echo json_encode(["action"=>"login","csrf"=>$argv[1],"password"=>"wrong-password"]);' "$csrf")" \
+    "http://127.0.0.1:${port}/api/admin.php")"
+  [ "$wrong_login" = "401" ]
+done
+throttled_login="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" \
+  --header 'Content-Type: application/json' --data "$(php -r 'echo json_encode(["action"=>"login","csrf"=>$argv[1],"password"=>"wrong-password"]);' "$csrf")" \
+  "http://127.0.0.1:${port}/api/admin.php")"
+[ "$throttled_login" = "429" ]
+
+echo "OK: CMS session, CSRF, body limit, Draft/Publish/Delete, audit and login throttling passed."
