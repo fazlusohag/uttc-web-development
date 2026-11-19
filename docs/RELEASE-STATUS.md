@@ -42,7 +42,7 @@ Branch: `release/uttc-complete-platform-2026`
 - CMS records are additive. They do not edit or replace all hard-coded content in the existing static HTML pages.
 - The single-record-per-slug rule prevents conflicting Page metadata/content, but administrators must edit the existing record to update a page rather than create a second record.
 - Page SEO metadata is applied client-side after the shared script loads. It is not server-rendered metadata and should not be considered a complete SEO implementation for crawlers that do not execute JavaScript. Existing static title/description/canonical tags remain the fallback.
-- Navigation Menu records are appended only where a compatible `header nav` element exists. Pages without that structure will not show CMS menu items.
+- Navigation Menu records are appended to the supported navigation list (`header .nav-links`, with compatible `header nav ul`/`header nav` fallbacks); duplicate links are skipped. Pages without a supported navigation structure will not show CMS menu items.
 - Image file upload is not implemented; CMS images must be provided as HTTPS URLs.
 - Contact records are stored but do not automatically replace the hard-coded contact details throughout the website.
 - AI Operations does not provide usage analytics, request logs, cost reporting, alerts or live health checks.
