@@ -101,6 +101,17 @@ for legacy_id in legacy-invalid-course legacy-invalid-page legacy-credential-url
   [ "$legacy_status" = "422" ]
 done
 
+# Duplicate legacy IDs must never make edit, publish or delete target an arbitrary record.
+php -r '$p=$argv[1];$d=json_decode(file_get_contents($p),true)?:[];$d["items"][]=["id"=>"legacy-duplicate-id","type"=>"notice","title"=>"Duplicate ID first","body"=>"First row","status"=>"draft"];$d["items"][]=["id"=>"legacy-duplicate-id","type"=>"notice","title"=>"Duplicate ID second","body"=>"Second row","status"=>"draft"];file_put_contents($p,json_encode($d,JSON_UNESCAPED_SLASHES));' "$fixture"
+for duplicate_action in publish delete; do
+  duplicate_payload="$(php -r 'echo json_encode(["action"=>$argv[1],"csrf"=>$argv[2],"id"=>"legacy-duplicate-id"]);' "$duplicate_action" "$cms_csrf")"
+  duplicate_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$duplicate_payload" "http://127.0.0.1:${port}/api/cms.php")"
+  [ "$duplicate_status" = "409" ]
+done
+duplicate_update_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"id"=>"legacy-duplicate-id","type"=>"notice","title"=>"Ambiguous update","body"=>"Must be rejected"]);' "$cms_csrf")"
+duplicate_update_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$duplicate_update_payload" "http://127.0.0.1:${port}/api/cms.php")"
+[ "$duplicate_update_status" = "409" ]
+
 valid_cms_page_payload="$(php -r 'echo json_encode(["action"=>"save","csrf"=>$argv[1],"type"=>"page","title"=>"CI Valid Home SEO Page","body"=>"Temporary SEO page record","slug"=>"index"]);' "$cms_csrf")"
 valid_cms_page_result="$(curl --silent --show-error --cookie "$cookie_jar" --header 'Content-Type: application/json' --data "$valid_cms_page_payload" "http://127.0.0.1:${port}/api/cms.php")"
 grep -q '"ok":true' <<<"$valid_cms_page_result"
