@@ -163,3 +163,9 @@ grep -q "isset(\$installed\[\$name\])" scripts/restore-knowledge-base-backup.php
 grep -q "\$rollbackComplete = true" scripts/restore-knowledge-base-backup.php
 grep -q "if (\$ok || \$rollbackComplete)" scripts/restore-knowledge-base-backup.php
 grep -q "Original recovery files are preserved at" scripts/restore-knowledge-base-backup.php
+
+# Backup tooling must reject symlinked access-control files and dot path segments.
+grep -q "is_link(\$realData . '/.htaccess')" scripts/backup-knowledge-base.php
+grep -q "is_link(dirname(\$backupRoot) . '/.htaccess')" scripts/verify-knowledge-base-backup.php
+grep -q "preg_match('~(?:\^|/)\\\\.(?:/|\$)~', \$relative)" scripts/verify-knowledge-base-backup.php
+grep -q "is_link(\$data . '/.htaccess')" scripts/restore-knowledge-base-backup.php
