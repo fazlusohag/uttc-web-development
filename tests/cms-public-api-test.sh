@@ -9,7 +9,7 @@ cleanup_fixture() { if [ -n "$backup" ]; then cp "$backup" "$fixture"; rm -f "$b
 trap cleanup_fixture EXIT
 cat > "$fixture" <<'JSON'
 {"updated_at":"2026-11-19T00:00:00Z","items":[
-{"id":"pub-course","type":"course","title":"Published course","body":"Visible","status":"published"},
+{"id":"pub-course","type":"course","title":"Published course","body":"Visible","page_key":"computer-office-application-moulvibazar","status":"published"},
 {"id":"draft-course","type":"course","title":"Draft course","body":"Hidden","status":"draft"},
 {"id":"pub-notice","type":"notice","title":"Published notice","body":"Notice body","status":"published"},
 {"id":"private-extra","type":"internal","title":"Internal record","body":"Must not be public","status":"published"}
