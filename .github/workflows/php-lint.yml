@@ -57,5 +57,7 @@ jobs:
         run: bash tests/cms-public-api-test.sh
       - name: Test authenticated CMS lifecycle
         run: bash tests/cms-authenticated-integration-test.sh
+      - name: Test admin login throttle storage
+        run: php tests/login-throttle-test.php
       - name: Test Knowledge Base backup and restore in an isolated fixture
         run: php tests/knowledge-backup-restore-test.php
