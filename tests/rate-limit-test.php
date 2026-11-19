@@ -26,7 +26,17 @@ try {
     $assert(uttc_rate_limit_attempt($file, 1602, 600, 2) === null, 'invalid counter types must fail closed');
     $assert(file_get_contents($file) === $invalidShape, 'invalid counter data must remain untouched');
 
-    echo "OK: rate-limit increment, threshold, expiry and fail-closed storage checks passed.\n";
+    $victim = $dir . '/victim.json';
+    $link = $dir . '/linked-counter.json';
+    $victimBytes = '{"keep":"untouched"}';
+    file_put_contents($victim, $victimBytes);
+    if (@symlink($victim, $link)) {
+        $assert(uttc_rate_limit_attempt($link, 1603, 600, 2) === null, 'symlinked counter path must fail closed');
+        $assert(file_get_contents($victim) === $victimBytes, 'symlink target must remain untouched');
+        unlink($link);
+    }
+
+    echo "OK: rate-limit increment, threshold, expiry, corrupt, invalid and symlink storage checks passed.\n";
 } finally {
     if (is_file($file)) unlink($file);
     rmdir($dir);
