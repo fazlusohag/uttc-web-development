@@ -29,6 +29,9 @@ try {
             throw new RuntimeException('Could not create fixture directory');
         }
     }
+    if (!copy($sourceRoot . '/api/storage.php', $temp . '/api/storage.php')) {
+        throw new RuntimeException('Could not copy shared private-storage guard');
+    }
     foreach (['backup-knowledge-base.php','verify-knowledge-base-backup.php','restore-knowledge-base-backup.php'] as $file) {
         if (!copy($sourceRoot . '/scripts/' . $file, $temp . '/scripts/' . $file)) {
             throw new RuntimeException('Could not copy ' . $file);
